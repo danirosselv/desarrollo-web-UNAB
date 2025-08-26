@@ -1,10 +1,81 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CSS Selector + Cards + Font Awesome</title>
+  <!-- Font Awesome (CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-4oVYF3F7g9v0H8s9s3tV6v3l8yqG2H0Yy0lqf6gqH3nqT6xq1yQ4d8e0y4nPq9o9U6j7n3Y8l5k" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    /* SELECTOR UNIVERSAL: reset básico */
+    * { box-sizing: border-box; }
+
+    /* SELECTOR POR ETIQUETA */
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#0b1220; color:#e9eefc; margin:0; }
+
+    /* SELECTOR POR ID */
+    #app { max-width: 1000px; margin: 40px auto; padding: 16px; }
+
+    /* SELECTOR POR CLASE */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+
+    .card { background: #111a2b; border: 1px solid #24314c; border-radius: 14px; padding: 18px; transition: transform .15s ease, box-shadow .15s ease; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+
+    /* DESCENDIENTE */
+    .card .title { font-weight: 700; margin: 10px 0 6px; }
+
+    /* HIJO DIRECTO */
+    .card > .icon { font-size: 32px; }
+
+    /* PSEUDOCLASE + ATRIBUTO */
+    .badge { font-size: 12px; border:1px solid #3a4d78; padding:2px 8px; border-radius: 999px; }
+    .badge[data-level="pro"] { background:#15386a; }
+
+    /* PSEUDOELEMENTO */
+    .card .desc::before { content: "• "; opacity: .6; }
+
+    /* GRUPO DE SELECTORES */
+    .title, .desc { color:#cfe0ff; }
+
+    a.btn { display:inline-block; margin-top:10px; padding:8px 12px; border-radius:10px; background:#1b3b77; color:white; text-decoration:none; }
+    a.btn:hover { filter: brightness(1.1); }
+
+    /* REGLA @MEDIA */
+    @media (prefers-color-scheme: light) {
+      body { background:#f6f8ff; color:#0b1220; }
+      .card { background:#ffffff; border-color:#e6ecff; }
+    }
+  </style>
 </head>
 <body>
-    Niggerman
+  <div id="app">
+    <h1>Cards con CSS Selectors <span class="badge" data-level="pro">PRO</span></h1>
+
+    <div class="grid">
+      <article class="card">
+        <div class="icon"><i class="fa-solid fa-bolt"></i></div>
+        <h2 class="title">Rápido</h2>
+        <p class="desc">Crea tarjetas con muy poco código.</p>
+        <a class="btn" href="#">Ver más</a>
+      </article>
+
+      <article class="card">
+        <div class="icon"><i class="fa-solid fa-shield"></i></div>
+        <h2 class="title">Seguro</h2>
+        <p class="desc">Usa selectores claros para mantener orden.</p>
+        <a class="btn" href="#">Ver más</a>
+      </article>
+
+      <article class="card" data-type="highlight">
+        <div class="icon"><i class="fa-solid fa-star"></i></div>
+        <h2 class="title">Simple</h2>
+        <p class="desc">Ideal para la tarea: HTML + CSS + FA.</p>
+        <a class="btn" href="#">Ver más</a>
+      </article>
+    </div>
+
+    <p style="margin-top:22px;opacity:.7">Si Font Awesome no carga, los iconos podrían no verse. Puedes reemplazarlos por emojis ⚡🛡️⭐.</p>
+  </div>
 </body>
 </html>
