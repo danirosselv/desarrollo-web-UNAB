@@ -1,0 +1,125 @@
+<!-- ====================== -->
+<!-- US-13: Crear Producto (queso) -->
+<section id="us-13">
+  <h2>Panel de administración — Crear producto</h2>
+
+  <!-- B1: creación -->
+  <div>
+    <h3>Nuevo producto</h3>
+    <p>[Campo] Nombre</p>
+    <p>[Campo] Precio</p>
+    <p>[Campo] Stock</p>
+    <p>[Área] Descripción</p>
+    <p>[Área] Imagen</p>
+    <button>Guardar</button>
+
+    <h4>Catálogo (vista posterior a guardar)</h4>
+    <ul>
+      <li>[Producto creado] Nombre — Precio — Stock — Imagen</li>
+      <li>[Producto 2]</li>
+      <li>[Producto 3]</li>
+    </ul>
+  </div>
+
+  <!-- B2: campo obligatorio faltante -->
+  <div>
+    <h3>Nuevo producto</h3>
+    <p>[Campo] Nombre (obligatorio)</p>
+    <p>[Campo] Precio</p>
+    <p>[Campo] Stock</p>
+    <p>[Área] Descripción</p>
+    <p>[Área] Imagen</p>
+    <button>Guardar</button>
+    <p>[Mensaje] Complete los campos obligatorios</p>
+  </div>
+</section>
+
+<!-- ====================== -->
+<!-- US-14: Editar stock de un queso -->
+<section id="us-14">
+  <h2>Panel de administración — Editar stock</h2>
+
+  <!-- B1: actualización exitosa -->
+  <div>
+    <h3>Productos</h3>
+    <ul>
+      <li>
+        [Imagen] Gouda artesanal — Stock: 6 — Precio: $5.900
+        [Botón] Editar
+      </li>
+      <li>
+        [Imagen] Queso 2 — Stock: 12 — Precio: $5.200
+        [Botón] Editar
+      </li>
+    </ul>
+
+    <h4>Edición de stock</h4>
+    <p>[Campo] Stock (ej: 12)</p>
+    <button>Guardar</button>
+
+    <h4>Resultado</h4>
+    <p>[Producto] Gouda artesanal — Stock: 12 — Precio: $5.900</p>
+    <p>Actualizado con éxito</p>
+  </div>
+
+  <!-- B2: error por valor inválido -->
+  <div>
+    <h3>Productos</h3>
+    <ul>
+      <li>
+        [Imagen] Gouda artesanal — Stock: 6 — Precio: $5.900
+        [Botón] Editar
+      </li>
+    </ul>
+
+    <h4>Edición de stock</h4>
+    <p>[Campo] Stock (valor inválido)</p>
+    <button>Guardar</button>
+
+    <p>[Pop-up] Error: Stock inválido. Ajuste el stock a un valor válido.</p>
+  </div>
+</section>
+
+<!-- ====================== -->
+<!-- US-15: Cambiar precio y foto de un queso -->
+<section id="us-15">
+  <h2>Panel de administración — Cambiar precio y foto</h2>
+
+  <!-- B1: actualización exitosa -->
+  <div>
+    <h3>Productos</h3>
+    <ul>
+      <li>
+        [Imagen] Queso chanco — Stock: 6 — Precio: $6.900
+        [Botón] Editar
+      </li>
+    </ul>
+
+    <h4>Edición</h4>
+    <p>[Campo] Precio (ej: $6.490)</p>
+    <p>[Selector] Imagen (Imagen 2)</p>
+    <button>Guardar</button>
+
+    <h4>Resultado</h4>
+    <p>[Imagen 2] Queso chanco — Stock: 5 — Precio: $6.490</p>
+    <p>Actualizado con éxito</p>
+  </div>
+
+  <!-- B2: error (por ejemplo, precio inválido) -->
+  <div>
+    <h3>Productos</h3>
+    <ul>
+      <li>
+        [Imagen] Queso chanco — Stock: 6 — Precio: $6.900
+        [Botón] Editar
+      </li>
+    </ul>
+
+    <h4>Edición</h4>
+    <p>[Campo] Precio (valor inválido)</p>
+    <p>[Selector] Imagen</p>
+    <button>Guardar</button>
+
+    <p>[Pop-up] Error: Valor inválido. Ajuste el precio a un valor válido.</p>
+  </div>
+</section>
