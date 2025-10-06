@@ -7,7 +7,7 @@
 
 <style>
   /* =========================================================
-     EPICA 2 — ESTILOS BASE (comparten US-05/US-06)
+     EPICA 2 — ESTILOS BASE (US-05/US-06)
      ========================================================= */
   :root{
     --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
@@ -17,7 +17,7 @@
   body{margin:0; font-family:system-ui, Segoe UI, Roboto, Arial; color:var(--text); background:var(--bg); line-height:1.45}
   .container{width:min(960px,94vw); margin:18px auto}
 
-  /* ===== Header con carrito (igual a Épica 1) ===== */
+  /* ===== Header (igual a index) ===== */
   header{
     background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
     padding:10px 14px; display:flex; align-items:center; justify-content:space-between;
@@ -70,9 +70,7 @@
   .empty{ text-align:center; color:var(--muted); padding:24px 8px }
   .empty .cart-draw{ font-size:64px; line-height:1; margin-bottom:8px }
 
-  /* Accesibilidad visual */
-  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0 }
-    /* === EPICA 3 – Datos comprador (US-07) === */
+  /* ===== EPICA 3 — Datos comprador (US-07) ===== */
   .buyer { margin:10px 0 6px }
   .buyer h3 { margin:0 0 8px; font-size:16px; color:var(--muted) }
   .buyer .grid { display:grid; grid-template-columns:1fr 1fr; gap:8px }
@@ -83,13 +81,17 @@
   .buyer .error { color:#b91c1c; font-size:14px; margin-top:6px }
   button.primary:disabled{ opacity:.55; cursor:not-allowed }
   @media (max-width:640px){ .buyer .grid{ grid-template-columns:1fr } }
+
+  /* ===== EPICA 4 — método de envío (US-11/12) ===== */
+  .ship-group{ display:flex; gap:10px; flex-wrap:wrap }
+  .ship-group label{ display:flex; gap:6px; align-items:center }
 </style>
 </head>
 <body>
 
 <div class="container">
   <!-- =========================================================
-       EPICA 2 — HEADER COMÚN
+       HEADER
        ========================================================= -->
   <header>
     <a class="link" href="index.html">← Volver a la tienda</a>
@@ -106,74 +108,82 @@
   </header>
 
   <!-- =========================================================
-       EPICA 2 — US-06: RESUMEN DEL PEDIDO
-       (incluye lista de ítems de US-05 para edición en línea)
+       US-06: RESUMEN DEL PEDIDO (incluye US-05)
        ========================================================= -->
-  <<section>
-  <h2>Resumen del pedido</h2>
+  <section>
+    <h2>Resumen del pedido</h2>
 
-  <!-- B2: Carrito vacío -->
-  <div id="empty" class="empty" hidden>
-    <div class="cart-draw">🛒</div>
-    <p>Tu carrito está vacío</p>
-    <a class="link" href="index.html">Ir a la tienda</a>
-  </div>
-
-  <!-- B1: Con ítems -->
-  <ul id="items" class="items"></ul>
-
-  <!-- Resumen de totales (ÚNICO) -->
-  <div id="totals" class="totals" hidden>
-    <h3 class="muted" style="margin:0 0 8px">Resumen de totales</h3>
-
-    <div class="row">
-      <span class="muted">Subtotal</span>
-      <strong id="t-subtotal">$0</strong>
+    <!-- B2: Carrito vacío -->
+    <div id="empty" class="empty" hidden>
+      <div class="cart-draw">🛒</div>
+      <p>Tu carrito está vacío</p>
+      <a class="link" href="index.html">Ir a la tienda</a>
     </div>
 
-    <div class="row">
-      <label class="muted" for="shipping">Envío</label>
-      <select id="shipping">
-        <option value="retira|0">Retiro en tienda — $0</option>
-        <option value="santiago|1990">Santiago Centro — $1.990</option>
-        <option value="providencia|2490">Providencia — $2.490</option>
-        <option value="nunoa|2490">Ñuñoa — $2.490</option>
-        <option value="lascondes|2990">Las Condes — $2.990</option>
-      </select>
-    </div>
+    <!-- B1: Con ítems -->
+    <ul id="items" class="items"></ul>
 
-    <div class="row"><span class="muted">Costo de envío</span><strong id="t-shipping">$0</strong></div>
+    <!-- ===== Resumen de totales (US-11/US-12 + US-07) ===== -->
+    <div id="totals" class="totals" hidden>
+      <h3 class="muted" style="margin:0 0 8px">Resumen de totales</h3>
 
-    <div class="row" style="font-size:18px">
-      <span><strong>Total</strong></span>
-      <strong id="t-total">$0</strong>
-    </div>
-
-    <!-- EPICA 3 — US-07: Datos de envío/contacto -->
-    <div id="buyer" class="buyer">
-      <h3>Datos de envío / contacto</h3>
-      <div class="grid">
-        <input id="b-nombre" placeholder="Nombre y apellido" autocomplete="name" required>
-        <input id="b-email" type="email" placeholder="Email" autocomplete="email" required>
-        <input id="b-dire" placeholder="Dirección" style="grid-column:1/-1" required>
+      <div class="row">
+        <span class="muted">Subtotal</span>
+        <strong id="t-subtotal">$0</strong>
       </div>
-      <p id="buyer-error" class="error" hidden>Completa nombre, email y dirección para continuar.</p>
-    </div>
 
-    <div class="actions">
-      <button id="btn-checkout" class="primary">Continuar con el pago</button>
-      <button id="btn-clear" class="primary" title="Vaciar carrito">Vaciar carrito</button>
+      <!-- Método de envío -->
+      <div class="row">
+        <span class="muted">Método</span>
+        <div class="ship-group" role="radiogroup" aria-label="Método de envío">
+          <label><input type="radio" name="shipmethod" id="m-despacho" value="despacho"> Despacho a domicilio</label>
+          <label><input type="radio" name="shipmethod" id="m-retiro" value="retiro"> Retiro en tienda</label>
+        </div>
+      </div>
+
+      <!-- Si despacho: comuna -->
+      <div id="row-comuna" class="row">
+        <label class="muted" for="ship-comuna">Comuna</label>
+        <select id="ship-comuna"></select>
+      </div>
+
+      <!-- Si retiro: sucursal -->
+      <div id="row-sucursal" class="row" hidden>
+        <label class="muted" for="ship-sucursal">Sucursal</label>
+        <select id="ship-sucursal"></select>
+      </div>
+
+      <div class="row"><span class="muted">Costo de envío</span><strong id="t-shipping">$0</strong></div>
+      <div class="row" style="font-size:18px">
+        <span><strong>Total</strong></span>
+        <strong id="t-total">$0</strong>
+      </div>
+
+      <!-- Datos comprador (US-07) -->
+      <div id="buyer" class="buyer">
+        <h3>Datos de envío / contacto</h3>
+        <div class="grid">
+          <input id="b-nombre" placeholder="Nombre y apellido" autocomplete="name" required>
+          <input id="b-email" type="email" placeholder="Email" autocomplete="email" required>
+          <input id="b-dire" placeholder="Dirección (solo si es despacho)" style="grid-column:1/-1">
+        </div>
+        <p id="buyer-error" class="error" hidden>Completa los datos requeridos para continuar.</p>
+      </div>
+
+      <div class="actions">
+        <button id="btn-checkout" class="primary">Continuar con el pago</button>
+        <button id="btn-clear" class="primary" title="Vaciar carrito">Vaciar carrito</button>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 </div>
 
 <!-- =========================================================
-     EPICA 2 — JS
+     JS
      ========================================================= -->
 <script>
   /* =========================================================
-     MÓDULO DE CARRITO (COMPATIBLE CON ÉPICA 1)
+     MÓDULO DE CARRITO (COMPATIBLE CON INDEX)
      ========================================================= */
   const CART_KEY = "qs_cart_v1";
   const Cart = {
@@ -182,25 +192,17 @@
     save(){ localStorage.setItem(CART_KEY, JSON.stringify(this.items)); },
     count(){ return Object.values(this.items).reduce((n,it)=>n+it.qty,0); },
     subtotal(){ return Object.values(this.items).reduce((s,it)=>s + it.qty*it.precio, 0); },
-    updateQty(id, delta){                // delta: +1 o -1
+    updateQty(id, delta){
       if(!this.items[id]) return;
       this.items[id].qty += delta;
       if(this.items[id].qty <= 0) delete this.items[id];
-      this.save();
-    },
-    setQty(id, qty){
-      if(qty <= 0){ delete this.items[id]; }
-      else{
-        if(!this.items[id]) return;
-        this.items[id].qty = qty;
-      }
       this.save();
     },
     remove(id){ delete this.items[id]; this.save(); },
     clear(){ this.items = {}; this.save(); }
   };
 
-  // ===== Badge del header
+  // Badge header
   function updateBadge(){ document.getElementById("cart-badge").textContent = Cart.count(); }
 
   // ===== Referencias UI
@@ -210,62 +212,115 @@
   const $tSubtotal = document.getElementById("t-subtotal");
   const $tShipping = document.getElementById("t-shipping");
   const $tTotal = document.getElementById("t-total");
-  const $shippingSel = document.getElementById("shipping");
 
-  // === EPICA 3 – referencias a inputs del comprador
-const $bn   = document.getElementById("b-nombre");
-const $be   = document.getElementById("b-email");
-const $bd   = document.getElementById("b-dire");
-const $err  = document.getElementById("buyer-error");
-const $btnPay = document.getElementById("btn-checkout");
+  // Envío
+  const $mDespacho   = document.getElementById("m-despacho");
+  const $mRetiro     = document.getElementById("m-retiro");
+  const $rowComuna   = document.getElementById("row-comuna");
+  const $rowSucursal = document.getElementById("row-sucursal");
+  const $selComuna   = document.getElementById("ship-comuna");
+  const $selSucursal = document.getElementById("ship-sucursal");
 
-// Valida datos del comprador (nombre, email, dirección)
-function buyerOk(){
-  const emailOk = /\S+@\S+\.\S+/.test(($be?.value || "").trim());
-  return ($bn?.value || "").trim() && ($bd?.value || "").trim() && emailOk;
-}
-function syncPayBtn(){
-  // Si el bloque aún no existe (carrito vacío), ignora
-  if (!$btnPay) return;
-  $btnPay.disabled = !buyerOk();
-  $err.hidden = true; // solo mostramos el error al hacer click
-}
-// Validación en tiempo real
-[$bn, $be, $bd].forEach($i => $i && $i.addEventListener("input", syncPayBtn));
+  // Comprador
+  const $bn = document.getElementById("b-nombre");
+  const $be = document.getElementById("b-email");
+  const $bd = document.getElementById("b-dire");
+  const $err = document.getElementById("buyer-error");
+  const $btnPay = document.getElementById("btn-checkout");
 
-  // ===== Persistencia del método de envío
-  const SHIP_KEY = "qs_ship_v1";
-  function loadShip(){ return localStorage.getItem(SHIP_KEY) || "retira|0"; }
-  function saveShip(v){ localStorage.setItem(SHIP_KEY, v); }
+  /* ===== EPICA 4 — Envío (US-11/12) ===== */
+  const COSTO_POR_COMUNA = {
+    "Santiago Centro":1990,
+    "Providencia":2490,
+    "Ñuñoa":2490,
+    "Las Condes":2990
+  };
+  const SUCURSALES = ["Providencia","Ñuñoa","Las Condes"];
 
-  // ===== Util
+  const SHIP_METHOD_KEY   = "qs_ship_method_v1";   // "despacho" | "retiro"
+  const SHIP_COMUNA_KEY   = "qs_ship_comuna_v1";
+  const SHIP_SUCURSAL_KEY = "qs_ship_sucursal_v1";
+
+  function getSavedMethod(){ return localStorage.getItem(SHIP_METHOD_KEY) || "retiro"; }
+  function setSavedMethod(v){ localStorage.setItem(SHIP_METHOD_KEY, v); }
+  function getSavedComuna(){ return localStorage.getItem(SHIP_COMUNA_KEY) || "Santiago Centro"; }
+  function setSavedComuna(v){ localStorage.setItem(SHIP_COMUNA_KEY, v); }
+  function getSavedSucursal(){ return localStorage.getItem(SHIP_SUCURSAL_KEY) || "Providencia"; }
+  function setSavedSucursal(v){ localStorage.setItem(SHIP_SUCURSAL_KEY, v); }
+
+  /* ===== Util ===== */
   function money(n){ return `$${n.toLocaleString("es-CL")}`; }
+  function getShipMethod(){
+    return document.querySelector('input[name="shipmethod"]:checked')?.value || "retiro";
+  }
+  function getShipCost(){
+    return getShipMethod()==="despacho" ? (COSTO_POR_COMUNA[$selComuna.value] || 0) : 0;
+  }
 
-  // ===== Totales
+  /* ===== Validación comprador (US-07) ===== */
+  function buyerOk(){
+    const nameOk  = ($bn?.value || "").trim();
+    const emailOk = /\S+@\S+\.\S+/.test(($be?.value || "").trim());
+    const direOk  = getShipMethod()==="despacho" ? (($bd?.value || "").trim()) : true;
+    return nameOk && emailOk && direOk;
+  }
+  function syncPayBtn(){
+    if (!$btnPay) return;
+    $btnPay.disabled = !buyerOk();
+    $err.hidden = true;
+  }
+  [$bn,$be,$bd].forEach($i => $i && $i.addEventListener("input", syncPayBtn));
+
+  /* ===== UI de envío ===== */
+  function initShippingUI(){
+    // llenar selects
+    $selComuna.innerHTML   = Object.keys(COSTO_POR_COMUNA).map(c=>`<option>${c}</option>`).join("");
+    $selSucursal.innerHTML = SUCURSALES.map(s=>`<option>${s}</option>`).join("");
+
+    // cargar guardados
+    (getSavedMethod()==="despacho" ? $mDespacho : $mRetiro).checked = true;
+    $selComuna.value   = getSavedComuna();
+    $selSucursal.value = getSavedSucursal();
+
+    applyShipUI();
+
+    // listeners
+    [$mDespacho, $mRetiro].forEach(r => r.addEventListener("change", ()=>{
+      setSavedMethod(getShipMethod());
+      applyShipUI(); calcTotals();
+    }));
+    $selComuna.addEventListener("change", ()=>{ setSavedComuna($selComuna.value); calcTotals(); });
+    $selSucursal.addEventListener("change", ()=>{ setSavedSucursal($selSucursal.value); calcTotals(); });
+  }
+
+  function applyShipUI(){
+    const isDespacho = getShipMethod()==="despacho";
+    $rowComuna.hidden   = !isDespacho;
+    $rowSucursal.hidden =  isDespacho;
+  }
+
+  /* ===== Totales ===== */
   function calcTotals(){
-    const [method, costStr] = $shippingSel.value.split("|");
-    const shipping = Number(costStr);
+    const shipping = getShipCost();
     const subtotal = Cart.subtotal();
     const total = subtotal + shipping;
     $tSubtotal.textContent = money(subtotal);
     $tShipping.textContent = money(shipping);
-    $tTotal.textContent = money(total);
+    $tTotal.textContent    = money(total);
     syncPayBtn();
   }
 
-  // ===== Render principal (US-05 + US-06)
+  /* ===== Render principal (US-05 + US-06) ===== */
   function render(){
     const ids = Object.keys(Cart.items);
     const isEmpty = ids.length === 0;
 
-    // Estado vacío / con ítems
     $empty.hidden = !isEmpty;
     $totals.hidden = isEmpty;
     updateBadge();
 
     if(isEmpty){ $items.innerHTML = ""; return; }
 
-    // Lista de ítems
     $items.innerHTML = ids.map(id => {
       const it = Cart.items[id];
       const subtotalItem = it.precio * it.qty;
@@ -290,7 +345,7 @@ function syncPayBtn(){
       `;
     }).join("");
 
-    // Eventos de la lista
+    // Eventos por item
     $items.querySelectorAll(".item").forEach($li => {
       const id = $li.dataset.id;
       $li.querySelector(".btn-inc").addEventListener("click", () => { Cart.updateQty(id, +1); render(); });
@@ -298,48 +353,52 @@ function syncPayBtn(){
       $li.querySelector(".remove").addEventListener("click", () => { Cart.remove(id); render(); });
     });
 
-    // Totales
     calcTotals();
   }
 
-  // ===== Init
+  /* ===== Init ===== */
   Cart.load();
-  document.getElementById("shipping").value = loadShip();
+  initShippingUI();
   render();
   syncPayBtn();
 
-  // ===== Eventos globales
-  $shippingSel.addEventListener("change", () => { saveShip($shippingSel.value); calcTotals(); });
+  /* ===== Acciones ===== */
   document.getElementById("btn-clear").addEventListener("click", () => {
     if(confirm("¿Vaciar carrito?")){ Cart.clear(); render(); }
   });
+
   document.getElementById("btn-checkout").addEventListener("click", () => {
-  if (!buyerOk()){
-    $err.hidden = false;
-    return;
-  }
+    if (!buyerOk()){
+      $err.hidden = false;
+      return;
+    }
 
-  // Construir orden pendiente y guardarla
-  const [ , shipCostStr ] = $shippingSel.value.split("|");
-  const order = {
-    id: `ORD-${Date.now()}`,
-    buyer: {
-      nombre: $bn.value.trim(),
-      email:  $be.value.trim(),
-      dire:   $bd.value.trim(),
-    },
-    items: Cart.items,
-    subtotal: Cart.subtotal(),
-    shipping: Number(shipCostStr)
-  };
-  order.total = order.subtotal + order.shipping;
+    const method   = getShipMethod();
+    const shipping = getShipCost();
+    const shippingDetail = method==="despacho"
+      ? { comuna: $selComuna.value }
+      : { sucursal: $selSucursal.value };
 
-  localStorage.setItem("qs_pending_order", JSON.stringify(order));
+    const order = {
+      id: `ORD-${Date.now()}`,
+      buyer: {
+        nombre: $bn.value.trim(),
+        email:  $be.value.trim(),
+        dire:   $bd.value.trim(),
+      },
+      items: Cart.items,
+      subtotal: Cart.subtotal(),
+      shipping,
+      shippingMethod: method,
+      shippingDetail
+    };
+    order.total = order.subtotal + order.shipping;
 
-  // Redirige a la “pasarela” simulada
-  const params = new URLSearchParams({ orderId: order.id, amount: order.total });
-  window.location.href = `webpaysim.html?${params.toString()}`;
-});
+    localStorage.setItem("qs_pending_order", JSON.stringify(order));
+
+    const params = new URLSearchParams({ orderId: order.id, amount: order.total });
+    window.location.href = `webpaysim.html?${params.toString()}`;
+  });
 </script>
 </body>
 </html>

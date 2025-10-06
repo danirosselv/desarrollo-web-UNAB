@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mis pedidos — Queso & Sabor</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --accent:#fbbf24; --radius:10px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:system-ui, Segoe UI, Roboto, Arial; color:var(--text); background:var(--bg); line-height:1.45}
+  .container{width:min(960px,94vw); margin:18px auto}
+
+  /* Header igual al index */
+  #app-header{
+    background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:10px 14px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand{font-weight:700}
+  .nav{ display:flex; gap:8px; align-items:center }
+  .btn{
+    color:var(--text); text-decoration:none; border:1px solid var(--line);
+    border-radius:8px; padding:8px 12px; background:#fff;
+  }
+  .btn:hover{ background:#f9fafb }
+  .cart{ position:relative; display:inline-flex; align-items:center; justify-content:center;
+         width:40px; height:36px; border:1px solid var(--line); border-radius:8px; background:#fff; text-decoration:none }
+  .badge{ position:absolute; top:-8px; right:-8px; background:#111827; color:#fff; font-size:12px;
+          border-radius:999px; padding:2px 6px; min-width:20px; text-align:center }
+
+  /* Card */
+  section{
+    background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px; margin-top:12px;
+  }
+  h2{ margin:0 0 12px; font-size:20px }
+
+  /* Lista de pedidos */
+  .orders{ list-style:none; padding:0; margin:0; display:grid; gap:10px }
+  .order{
+    border:1px solid var(--line); border-radius:8px; padding:12px; background:#fff;
+    display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center;
+  }
+  .order .meta{ color:var(--muted); font-size:14px }
+  .order .right{ text-align:right; display:grid; gap:6px; justify-items:end }
+  .empty{ text-align:center; color:var(--muted); padding:24px 8px }
+</style>
+</head>
+<body>
+<div class="container">
+  <header id="app-header">
+    <div class="brand">Queso &amp; Sabor</div>
+    <nav class="nav">
+      <a class="btn" href="index.html">Tienda</a>
+      <a class="cart" href="carrito.html" title="Tu carrito">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 3h2l2.2 9.2A2 2 0 0 0 9.1 14h7.8a2 2 0 0 0 1.9-1.5L21 8H7"
+                stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="10" cy="19" r="1.5" fill="#374151"/>
+          <circle cx="17" cy="19" r="1.5" fill="#374151"/>
+        </svg>
+        <span id="cart-badge" class="badge">0</span>
+      </a>
+    </nav>
+  </header>
+
+  <section>
+    <h2>Mis pedidos</h2>
+
+    <div id="empty" class="empty" hidden>
+      <p>Aún no tienes pedidos.</p>
+      <a class="btn" href="index.html">Ir a la tienda</a>
+    </div>
+
+    <ul id="lista" class="orders"></ul>
+  </section>
+</div>
+
+<script>
+  // Badge del carrito (mismo núcleo que index/carrito)
+  const CART_KEY = "qs_cart_v1";
+  function cartCount(){
+    try { return Object.values(JSON.parse(localStorage.getItem(CART_KEY))||{}).reduce((n,it)=>n+it.qty,0); }
+    catch { return 0; }
+  }
+  document.getElementById("cart-badge").textContent = cartCount();
+
+  // Cargar pedidos
+  const ORDERS_KEY = "qs_orders"; // usamos este nombre para la lista consolidada
+  function loadOrders(){
+    try{ return JSON.parse(localStorage.getItem(ORDERS_KEY)) || []; }catch{ return []; }
+  }
+
+  function parseCreatedAt(o){
+    if (o.createdAt) return o.createdAt;
+    // fallback desde id tipo "ORD-<timestamp>"
+    const ts = Number((o.id||"").split("ORD-")[1]);
+    return isNaN(ts) ? Date.now() : ts;
+  }
+  function fmtMoney(n){ return `$${Number(n||0).toLocaleString("es-CL")}`; }
+  function fmtDate(ms){
+    const d = new Date(ms);
+    return d.toLocaleDateString("es-CL", {year:"numeric", month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"});
+  }
+
+  const $lista = document.getElementById("lista");
+  const $empty = document.getElementById("empty");
+
+  const orders = loadOrders()
+    .map(o => ({...o, createdAt: parseCreatedAt(o)}))
+    .sort((a,b)=> b.createdAt - a.createdAt);
+
+  if (!orders.length){
+    $empty.hidden = false;
+  } else {
+    $lista.innerHTML = orders.map(o => {
+      const estado = (o.status && o.status.current) || (o.statusHistory?.slice(-1)[0]?.label) || "Pago confirmado";
+      return `
+        <li class="order">
+          <div>
+            <div><strong>Pedido #${o.id || "—"}</strong></div>
+            <div class="meta">${fmtDate(o.createdAt)}</div>
+            <div class="meta">${o.shipping?.method === "retiro"
+                ? `Retiro en ${o.shipping?.sucursal || "Sucursal"}`
+                : (o.shipping?.comuna ? `Despacho: ${o.shipping.comuna}` : "Método de envío: —")}</div>
+          </div>
+          <div class="right">
+            <div><strong>Total: ${fmtMoney(o.total)}</strong></div>
+            <div class="meta">Estado: ${estado}</div>
+            <a class="btn" href="pedido.html?id=${encodeURIComponent(o.id)}">Ver detalle</a>
+          </div>
+        </li>
+      `;
+    }).join("");
+  }
+</script>
+</body>
+</html>

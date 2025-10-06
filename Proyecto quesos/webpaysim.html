@@ -3,50 +3,137 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Webpay — Simulación</title>
+<title>WebPay Sim — Queso & Sabor</title>
 <style>
-  :root{ --line:#e5e7eb; --muted:#6b7280; }
+  :root{ --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --radius:10px; }
   *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#f6f7f9;color:#1f2937}
-  .card{width:min(520px,92vw);margin:40px auto;background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px}
-  h1{font-size:20px;margin:0 0 8px}
-  p{margin:6px 0 12px}
-  .row{display:flex;gap:10px;flex-wrap:wrap}
-  button,a{padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;text-decoration:none;color:#1f2937}
-  button:hover,a:hover{background:#f9fafb}
-  .muted{color:var(--muted)}
+  body{margin:0; font-family:system-ui, Segoe UI, Roboto, Arial; color:var(--text); background:var(--bg); line-height:1.45}
+  .container{width:min(960px,94vw); margin:18px auto}
+  header{ background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+          padding:10px 14px; display:flex; align-items:center; justify-content:space-between; }
+  .brand{font-weight:700}
+  .btn{ color:var(--text); text-decoration:none; border:1px solid var(--line);
+        border-radius:8px; padding:8px 12px; background:#fff }
+  .btn:hover{ background:#f9fafb }
+  section{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-top:12px; }
+  h2{ margin:0 0 12px; font-size:20px }
+  .muted{ color:var(--muted) }
+  form{ display:grid; gap:10px; max-width:420px }
+  input{ font:inherit; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff }
+  .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:6px }
+  button{ font:inherit; padding:10px 14px; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:pointer }
+  button:hover{ background:#f9fafb }
+  .amount{ font-size:18px }
+  #msg{ margin:8px 0 0; padding:10px; border-radius:8px; display:none }
+  .err{ color:#b91c1c; background:#fee2e2; border:1px solid #fecaca }
 </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Webpay (simulado)</h1>
-    <p class="muted" id="detalle"></p>
-    <div class="row">
-      <button id="ok">Simular pago aprobado</button>
-      <button id="fail">Simular pago rechazado</button>
-      <button id="err">Simular error del sistema</button>
-      <a href="carrito.html">← Volver al carrito</a>
-    </div>
-  </div>
+<div class="container">
+  <header>
+    <div class="brand">Queso &amp; Sabor — WebPay (Sim)</div>
+    <nav style="display:flex; gap:8px">
+      <a class="btn" href="carrito.html">← Carrito</a>
+      <a class="btn" href="index.html">Tienda</a>
+      <a class="btn" href="mispedidos.html">Mis pedidos</a>
+    </nav>
+  </header>
+
+  <section>
+    <h2>Pagar</h2>
+    <p class="amount"><strong>Total: <span id="monto">$0</span></strong></p>
+    <p class="muted" style="margin-top:4px">
+      Reglas del simulador: si el número termina en <b>0000</b> ⇒ <u>Error del sistema</u>. <br>
+      Si faltan datos o el número termina en <b>1111</b> ⇒ <u>Pago rechazado</u>. <br>
+      En cualquier otro caso ⇒ <u>Pago aprobado</u>.
+    </p>
+
+    <div id="msg" class="err"></div>
+
+    <form id="payform">
+      <input id="card-name" placeholder="Titular (nombre y apellido)" autocomplete="off">
+      <input id="card-number" placeholder="Número de tarjeta (solo números)" autocomplete="off">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+        <input id="card-exp" placeholder="Vencimiento (MM/AA)" autocomplete="off">
+        <input id="card-cvv" placeholder="CVV" autocomplete="off">
+      </div>
+
+      <div class="actions">
+        <button id="btn-pay" type="submit">Pagar</button>
+        <a class="btn" href="carrito.html">Cancelar</a>
+      </div>
+    </form>
+  </section>
+</div>
 
 <script>
-  // Lee orderId y monto desde la URL
-  const qs = new URLSearchParams(location.search);
-  const orderId = qs.get("orderId") || "(sin id)";
-  const amount  = Number(qs.get("amount") || 0);
+  // ===== Claves de storage
+  const PENDING_KEY = "qs_pending_order";
+  const ORDERS_KEY  = "qs_orders";
 
-  document.getElementById("detalle").textContent =
-    `Orden ${orderId} — Monto a pagar: $${amount.toLocaleString("es-CL")}`;
+  // ===== Helpers
+  function loadPending(){ try{ return JSON.parse(localStorage.getItem(PENDING_KEY)) }catch{ return null } }
+  function loadOrders(){ try{ return JSON.parse(localStorage.getItem(ORDERS_KEY)) || [] }catch{ return [] } }
+  function saveOrders(list){ localStorage.setItem(ORDERS_KEY, JSON.stringify(list)); }
+  function money(n){ return `$${Number(n||0).toLocaleString("es-CL")}`; }
+  function showErr(t){ const m=document.getElementById("msg"); m.textContent=t; m.style.display="block"; }
 
-  // Navega al resultado (lo construiremos en el siguiente paso)
-  function go(status){
-    const params = new URLSearchParams({ orderId, status });
-    location.href = `PagoResultado.html?${params.toString()}`;
+  // ===== Mostrar monto
+  const pending = loadPending();
+  const monto = pending ? (pending.total || ((pending.subtotal||0)+(pending.shipping||0))) : 0;
+  document.getElementById("monto").textContent = money(monto);
+
+  // Si no hay orden, avisar
+  if (!pending){
+    showErr("No hay una orden pendiente. Vuelve al carrito.");
+    document.getElementById("btn-pay").disabled = true;
   }
 
-  document.getElementById("ok").onclick   = () => go("approved");
-  document.getElementById("fail").onclick = () => go("rejected");
-  document.getElementById("err").onclick  = () => go("error");
+  // ===== Lógica simple de resultado
+  document.getElementById("payform").addEventListener("submit", (e)=>{
+    e.preventDefault();
+    if (!pending) return;
+
+    const name = document.getElementById("card-name").value.trim();
+    const num  = (document.getElementById("card-number").value||"").replace(/\D+/g,"");
+    const exp  = document.getElementById("card-exp").value.trim();
+    const cvv  = document.getElementById("card-cvv").value.trim();
+    const last4 = num.slice(-4);
+
+    let outcome = "ok"; // por defecto
+
+    if (last4 === "0000"){
+      outcome = "error";
+    } else if (!name || !num || !exp || !cvv || last4 === "1111"){
+      outcome = "rechazo";
+    }
+
+    if (outcome === "ok"){
+      // guardar pedido en Mis pedidos
+      const now = Date.now();
+      const order = {
+        ...pending,
+        createdAt: now,
+        status: { current:"Pago confirmado" },
+        statusHistory: [{ label:"Pago confirmado", at: now }]
+      };
+      const list = loadOrders();
+      list.push(order);
+      saveOrders(list);
+      localStorage.removeItem(PENDING_KEY);
+
+      location.href = `pagoresultado.html?status=ok&orderId=${encodeURIComponent(order.id)}&amount=${encodeURIComponent(order.total)}`;
+      return;
+    }
+
+    if (outcome === "rechazo"){
+      location.href = `pagoresultado.html?status=rechazo&orderId=${encodeURIComponent(pending.id)}&amount=${encodeURIComponent(pending.total)}`;
+      return;
+    }
+
+    // error de sistema
+    location.href = `pagoresultado.html?status=error&orderId=${encodeURIComponent(pending.id)}&amount=${encodeURIComponent(pending.total)}`;
+  });
 </script>
 </body>
 </html>
