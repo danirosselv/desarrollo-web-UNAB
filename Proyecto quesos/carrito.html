@@ -72,6 +72,17 @@
 
   /* Accesibilidad visual */
   .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0 }
+    /* === EPICA 3 – Datos comprador (US-07) === */
+  .buyer { margin:10px 0 6px }
+  .buyer h3 { margin:0 0 8px; font-size:16px; color:var(--muted) }
+  .buyer .grid { display:grid; grid-template-columns:1fr 1fr; gap:8px }
+  .buyer input {
+    font:inherit; padding:10px 12px; border:1px solid var(--line);
+    border-radius:8px; background:#fff; color:var(--text);
+  }
+  .buyer .error { color:#b91c1c; font-size:14px; margin-top:6px }
+  button.primary:disabled{ opacity:.55; cursor:not-allowed }
+  @media (max-width:640px){ .buyer .grid{ grid-template-columns:1fr } }
 </style>
 </head>
 <body>
@@ -81,9 +92,9 @@
        EPICA 2 — HEADER COMÚN
        ========================================================= -->
   <header>
-    <a class="link" href="Epica 1.html">← Volver a la tienda</a>
+    <a class="link" href="index.html">← Volver a la tienda</a>
     <div class="brand">Queso & Sabor</div>
-    <a class="cart" href="Epica 2.html" title="Tu carrito">
+    <a class="cart" href="carrito.html" title="Tu carrito">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M3 3h2l2.2 9.2A2 2 0 0 0 9.1 14h7.8a2 2 0 0 0 1.9-1.5L21 8H7"
               stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -98,47 +109,63 @@
        EPICA 2 — US-06: RESUMEN DEL PEDIDO
        (incluye lista de ítems de US-05 para edición en línea)
        ========================================================= -->
-  <section>
-    <h2>Resumen del pedido</h2>
+  <<section>
+  <h2>Resumen del pedido</h2>
 
-    <!-- ===== Escenario B2: Carrito vacío ===== -->
-    <div id="empty" class="empty" hidden>
-      <div class="cart-draw">🛒</div>
-      <p>Tu carrito está vacío</p>
-      <a class="link" href="Epica 1.html">Ir a la tienda</a>
+  <!-- B2: Carrito vacío -->
+  <div id="empty" class="empty" hidden>
+    <div class="cart-draw">🛒</div>
+    <p>Tu carrito está vacío</p>
+    <a class="link" href="index.html">Ir a la tienda</a>
+  </div>
+
+  <!-- B1: Con ítems -->
+  <ul id="items" class="items"></ul>
+
+  <!-- Resumen de totales (ÚNICO) -->
+  <div id="totals" class="totals" hidden>
+    <h3 class="muted" style="margin:0 0 8px">Resumen de totales</h3>
+
+    <div class="row">
+      <span class="muted">Subtotal</span>
+      <strong id="t-subtotal">$0</strong>
     </div>
 
-    <!-- ===== Escenario B1: Con ítems ===== -->
-    <ul id="items" class="items"></ul>
-
-    <!-- ===== Resumen de totales ===== -->
-    <div id="totals" class="totals" hidden>
-      <h3 class="muted" style="margin:0 0 8px">Resumen de totales</h3>
-      <div class="row"><span class="muted">Subtotal</span><strong id="t-subtotal">$0</strong></div>
-
-      <div class="row">
-        <label class="muted" for="shipping">Envío</label>
-        <select id="shipping">
-          <option value="retira|0">Retiro en tienda — $0</option>
-          <option value="santiago|1990">Santiago Centro — $1.990</option>
-          <option value="providencia|2490">Providencia — $2.490</option>
-          <option value="nunoa|2490">Ñuñoa — $2.490</option>
-          <option value="lascondes|2990">Las Condes — $2.990</option>
-        </select>
-      </div>
-
-      <div class="row"><span class="muted">Costo de envío</span><strong id="t-shipping">$0</strong></div>
-      <div class="row" style="font-size:18px">
-        <span><strong>Total</strong></span>
-        <strong id="t-total">$0</strong>
-      </div>
-
-      <div class="actions">
-        <button id="btn-checkout" class="primary">Continuar con el pago</button>
-        <button id="btn-clear" class="primary" title="Vaciar carrito">Vaciar carrito</button>
-      </div>
+    <div class="row">
+      <label class="muted" for="shipping">Envío</label>
+      <select id="shipping">
+        <option value="retira|0">Retiro en tienda — $0</option>
+        <option value="santiago|1990">Santiago Centro — $1.990</option>
+        <option value="providencia|2490">Providencia — $2.490</option>
+        <option value="nunoa|2490">Ñuñoa — $2.490</option>
+        <option value="lascondes|2990">Las Condes — $2.990</option>
+      </select>
     </div>
-  </section>
+
+    <div class="row"><span class="muted">Costo de envío</span><strong id="t-shipping">$0</strong></div>
+
+    <div class="row" style="font-size:18px">
+      <span><strong>Total</strong></span>
+      <strong id="t-total">$0</strong>
+    </div>
+
+    <!-- EPICA 3 — US-07: Datos de envío/contacto -->
+    <div id="buyer" class="buyer">
+      <h3>Datos de envío / contacto</h3>
+      <div class="grid">
+        <input id="b-nombre" placeholder="Nombre y apellido" autocomplete="name" required>
+        <input id="b-email" type="email" placeholder="Email" autocomplete="email" required>
+        <input id="b-dire" placeholder="Dirección" style="grid-column:1/-1" required>
+      </div>
+      <p id="buyer-error" class="error" hidden>Completa nombre, email y dirección para continuar.</p>
+    </div>
+
+    <div class="actions">
+      <button id="btn-checkout" class="primary">Continuar con el pago</button>
+      <button id="btn-clear" class="primary" title="Vaciar carrito">Vaciar carrito</button>
+    </div>
+  </div>
+</section>
 </div>
 
 <!-- =========================================================
@@ -185,6 +212,27 @@
   const $tTotal = document.getElementById("t-total");
   const $shippingSel = document.getElementById("shipping");
 
+  // === EPICA 3 – referencias a inputs del comprador
+const $bn   = document.getElementById("b-nombre");
+const $be   = document.getElementById("b-email");
+const $bd   = document.getElementById("b-dire");
+const $err  = document.getElementById("buyer-error");
+const $btnPay = document.getElementById("btn-checkout");
+
+// Valida datos del comprador (nombre, email, dirección)
+function buyerOk(){
+  const emailOk = /\S+@\S+\.\S+/.test(($be?.value || "").trim());
+  return ($bn?.value || "").trim() && ($bd?.value || "").trim() && emailOk;
+}
+function syncPayBtn(){
+  // Si el bloque aún no existe (carrito vacío), ignora
+  if (!$btnPay) return;
+  $btnPay.disabled = !buyerOk();
+  $err.hidden = true; // solo mostramos el error al hacer click
+}
+// Validación en tiempo real
+[$bn, $be, $bd].forEach($i => $i && $i.addEventListener("input", syncPayBtn));
+
   // ===== Persistencia del método de envío
   const SHIP_KEY = "qs_ship_v1";
   function loadShip(){ return localStorage.getItem(SHIP_KEY) || "retira|0"; }
@@ -202,6 +250,7 @@
     $tSubtotal.textContent = money(subtotal);
     $tShipping.textContent = money(shipping);
     $tTotal.textContent = money(total);
+    syncPayBtn();
   }
 
   // ===== Render principal (US-05 + US-06)
@@ -257,6 +306,7 @@
   Cart.load();
   document.getElementById("shipping").value = loadShip();
   render();
+  syncPayBtn();
 
   // ===== Eventos globales
   $shippingSel.addEventListener("change", () => { saveShip($shippingSel.value); calcTotals(); });
@@ -264,8 +314,32 @@
     if(confirm("¿Vaciar carrito?")){ Cart.clear(); render(); }
   });
   document.getElementById("btn-checkout").addEventListener("click", () => {
-    alert("✅ Continuar a pago (stub). Aquí conectarías con tu flujo de checkout.");
-  });
+  if (!buyerOk()){
+    $err.hidden = false;
+    return;
+  }
+
+  // Construir orden pendiente y guardarla
+  const [ , shipCostStr ] = $shippingSel.value.split("|");
+  const order = {
+    id: `ORD-${Date.now()}`,
+    buyer: {
+      nombre: $bn.value.trim(),
+      email:  $be.value.trim(),
+      dire:   $bd.value.trim(),
+    },
+    items: Cart.items,
+    subtotal: Cart.subtotal(),
+    shipping: Number(shipCostStr)
+  };
+  order.total = order.subtotal + order.shipping;
+
+  localStorage.setItem("qs_pending_order", JSON.stringify(order));
+
+  // Redirige a la “pasarela” simulada
+  const params = new URLSearchParams({ orderId: order.id, amount: order.total });
+  window.location.href = `webpaysim.html?${params.toString()}`;
+});
 </script>
 </body>
 </html>

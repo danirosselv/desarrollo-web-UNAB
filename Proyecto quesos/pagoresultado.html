@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Resultado del pago</title>
+<style>
+  :root{ --line:#e5e7eb; --muted:#6b7280; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#f6f7f9;color:#1f2937}
+  .wrap{width:min(720px,94vw);margin:24px auto}
+  .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px}
+  h1{font-size:20px;margin:0 0 8px}
+  .box{display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;padding:24px;margin:10px 0;background:#fafafa}
+  .ok{font-size:56px} .err{font-size:56px}
+  .muted{color:var(--muted)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  a,button{padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;text-decoration:none;color:#1f2937}
+  a:hover,button:hover{background:#f9fafb}
+  ul.items{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+  ul.items li{display:flex;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1 id="title">Resultado del pago</h1>
+    <div id="box" class="box"></div>
+
+    <div id="order" class="muted"></div>
+    <ul id="items" class="items"></ul>
+
+    <div class="row" id="actions"></div>
+  </div>
+</div>
+
+<script>
+  const qs = new URLSearchParams(location.search);
+  const status = qs.get("status"); // "approved" | "rejected" | "error"
+  const pending = JSON.parse(localStorage.getItem("qs_pending_order") || "null");
+
+  const $title = document.getElementById("title");
+  const $box = document.getElementById("box");
+  const $info = document.getElementById("order");
+  const $items = document.getElementById("items");
+  const $actions = document.getElementById("actions");
+
+  function money(n){ return `$${Number(n||0).toLocaleString("es-CL")}`; }
+
+  function renderItems(order){
+    if(!order || !order.items) return;
+    const entries = Object.values(order.items);
+    if(!entries.length) return;
+    $items.innerHTML = entries.map(it => {
+      const subtotal = it.qty * it.precio;
+      return `<li><span>${it.nombre} (x${it.qty})</span><strong>${money(subtotal)}</strong></li>`;
+    }).join("");
+  }
+
+  if(!pending){
+    // No hay orden pendiente guardada
+    $title.textContent = "No hay orden pendiente";
+    $box.innerHTML = `<div class="err">⚠️</div><p style="margin:8px 0 0">Vuelve al carrito para iniciar el pago.</p>`;
+    $actions.innerHTML = `<a href="carrito.html">Ir al carrito</a>`;
+  } else if(status === "approved"){
+    // Guardar última orden y limpiar carrito + orden pendiente
+    localStorage.setItem("qs_last_order", JSON.stringify({ ...pending, paidAt: Date.now() }));
+    localStorage.removeItem("qs_cart_v1");
+    localStorage.removeItem("qs_pending_order");
+
+    $title.textContent = "Pago realizado con éxito";
+    $box.innerHTML = `<div class="ok">✅</div>`;
+    $info.innerHTML =
+      `Orden <strong>${pending.id}</strong> por <strong>${money(pending.total)}</strong>. ` +
+      `Se enviará confirmación a <strong>${pending.buyer.email}</strong>.`;
+
+    renderItems(pending);
+    $actions.innerHTML = `<a href="index.html">Volver a la tienda</a><a href="carrito.html">Ver carrito</a>`;
+  } else if(status === "rejected" || status === "error"){
+    const msg = status === "rejected"
+      ? "Transacción rechazada. Verifica los datos e inténtalo de nuevo."
+      : "El pago no pudo procesarse. Inténtalo nuevamente más tarde.";
+
+    $title.textContent = "Pago no realizado";
+    $box.innerHTML = `<div class="err">⚠️</div><p style="margin:8px 0 0">${msg}</p>`;
+    $info.innerHTML = `Orden <strong>${pending.id}</strong> — Total ${money(pending.total)}.`;
+    renderItems(pending);
+
+    const retryParams = new URLSearchParams({ orderId: pending.id, amount: pending.total });
+    $actions.innerHTML = `<a href="webpaywim.html?${retryParams}">Reintentar</a><a href="carrito.html">Volver al carrito</a>`;
+  } else {
+    // Estado desconocido
+    $title.textContent = "Estado de pago desconocido";
+    $box.innerHTML = `<div class="err">❓</div><p style="margin:8px 0 0">No se reconoce el estado recibido.</p>`;
+    $actions.innerHTML = `<a href="carrito.html">Volver al carrito</a>`;
+  }
+</script>
+</body>
+</html>

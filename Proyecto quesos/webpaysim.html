@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Webpay — Simulación</title>
+<style>
+  :root{ --line:#e5e7eb; --muted:#6b7280; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#f6f7f9;color:#1f2937}
+  .card{width:min(520px,92vw);margin:40px auto;background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px}
+  h1{font-size:20px;margin:0 0 8px}
+  p{margin:6px 0 12px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  button,a{padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;text-decoration:none;color:#1f2937}
+  button:hover,a:hover{background:#f9fafb}
+  .muted{color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Webpay (simulado)</h1>
+    <p class="muted" id="detalle"></p>
+    <div class="row">
+      <button id="ok">Simular pago aprobado</button>
+      <button id="fail">Simular pago rechazado</button>
+      <button id="err">Simular error del sistema</button>
+      <a href="carrito.html">← Volver al carrito</a>
+    </div>
+  </div>
+
+<script>
+  // Lee orderId y monto desde la URL
+  const qs = new URLSearchParams(location.search);
+  const orderId = qs.get("orderId") || "(sin id)";
+  const amount  = Number(qs.get("amount") || 0);
+
+  document.getElementById("detalle").textContent =
+    `Orden ${orderId} — Monto a pagar: $${amount.toLocaleString("es-CL")}`;
+
+  // Navega al resultado (lo construiremos en el siguiente paso)
+  function go(status){
+    const params = new URLSearchParams({ orderId, status });
+    location.href = `PagoResultado.html?${params.toString()}`;
+  }
+
+  document.getElementById("ok").onclick   = () => go("approved");
+  document.getElementById("fail").onclick = () => go("rejected");
+  document.getElementById("err").onclick  = () => go("error");
+</script>
+</body>
+</html>
