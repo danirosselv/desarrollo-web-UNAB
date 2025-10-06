@@ -1,35 +1,151 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Queso y Sabor — MVP</title>
+  <style>
+  /* ======== Diseño básico, sencillo y legible (unificado) ======== */
+
+  :root{
+    --bg:#f6f7f9;
+    --card:#ffffff;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --accent:#fbbf24;
+    --radius:10px;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue";
+    color:var(--text);
+    background:var(--bg);
+    line-height:1.45;
+  }
+
+  /* Secciones como cards */
+  section{
+    width:min(960px, 94vw);
+    margin:20px auto;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+  }
+
+  /* Cabecera del catálogo: título a la izquierda, filtro a la derecha */
+  .row{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-bottom:10px;
+  }
+  h2{ margin:0; font-size:20px }
+  .controls{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+
+  label{ color:var(--muted); font-size:14px }
+
+  /* Inputs básicos */
+  input[type="search"], select{
+    font:inherit;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    color:var(--text);
+    outline:none;
+  }
+  input[type="search"]{ width:100%; margin-top:8px }
+  input[type="search"]::placeholder{ color:#9ca3af }
+
+  /* Botón simple */
+  button{
+    font:inherit; padding:10px 14px; border:1px solid var(--line);
+    border-radius:8px; background:#fff; cursor:pointer;
+  }
+  button:hover{ background:#f9fafb }
+  button:disabled{ background:#f3f4f6; color:#9ca3af; cursor:not-allowed }
+
+  /* Chip de filtro */
+  #filtro-activo[hidden]{ display:none }
+  #filtro-activo{
+    padding:6px 10px; border-radius:999px; border:1px solid var(--line);
+    background:#fff7ed; color:#92400e; font-size:14px;
+  }
+  #btn-limpiar[hidden]{ display:none }
+
+  /* Lista de resultados */
+  ul[role="list"]{
+    list-style:none; padding:0; margin:12px 0 0;
+    display:grid; gap:8px;
+  }
+  li[data-id]{
+    display:flex; align-items:center; justify-content:space-between;
+    border:1px solid var(--line); border-radius:8px;
+    padding:10px 12px; background:#fff; cursor:pointer;
+  }
+  li[data-id]:hover{ background:#f9fafb }
+  li[data-id] strong{ font-weight:600 }
+  li[data-id] small{ color:var(--muted) }
+
+  /* Mensaje vacío unificado */
+  #estado-vacio[hidden]{ display:none }
+  #estado-vacio{
+    margin:10px 0 0; border:1px dashed var(--line); background:#fafafa;
+    border-radius:8px; padding:10px 12px; color:var(--muted);
+  }
+
+  /* US-03: ficha simple */
+  #detalle-queso .imagen{
+    border:1px solid var(--line); border-radius:8px; background:#fafafa;
+    height:220px; display:grid; place-items:center; color:#9ca3af;
+    margin:8px 0 12px;
+  }
+  #detalle-queso img{ width:100%; height:100%; object-fit:cover; border-radius:8px }
+  #detalle-queso a{ color:#111827; text-decoration:none; margin-bottom:8px; display:inline-block }
+  #detalle-queso a:hover{ text-decoration:underline }
+  #detalle-queso p{ margin:6px 0 }
+
+  /* Accesibilidad */
+  .sr-only {
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+  </style>
+</head>
 <body>
 
-  <!-- US-01: Buscar quesos -->
-  <section id="buscar-queso">
-    <h2>Catálogo</h2>
-    <input type="text" placeholder="Ej. Gouda">
-    <ul>
-      <li>Resultado 1</li>
-      <li>Resultado 2</li>
-      <li>Resultado 3</li>
-    </ul>
-    <!-- Mensaje alternativo -->
-    <p>No hay productos que coincidan con tu búsqueda</p>
+  <!-- =========================================================
+       CATÁLOGO (US-01 + US-02 unificados)
+       ========================================================= -->
+  <section id="buscar-queso" aria-labelledby="titulo-catalogo">
+    <div class="row">
+      <h2 id="titulo-catalogo">Catálogo</h2>
+
+      <div class="controls" aria-label="Controles de filtro">
+        <label for="tipo-leche">Tipo de leche:</label>
+        <select id="tipo-leche">
+          <option value="todas">Todas</option>
+          <option value="vaca">Vaca</option>
+          <option value="cabra">Cabra</option>
+          <option value="oveja">Oveja</option>
+        </select>
+        <button id="btn-limpiar" hidden>Limpiar filtro</button>
+        <span id="filtro-activo" hidden aria-live="polite"></span>
+      </div>
+    </div>
+
+    <label for="buscador" class="sr-only">Buscar queso por nombre</label>
+    <input id="buscador" type="search" placeholder="Ej. Gouda" autocomplete="off" />
+
+    <ul id="resultados" role="list"></ul>
+    <p id="estado-vacio" hidden>—</p>
   </section>
 
-  <!-- US-02: Filtrar quesos -->
-  <section id="filtrar-queso">
-    <h2>Catálogo con Filtros</h2>
-    <label for="tipo-leche">Tipo de leche:</label>
-    <select id="tipo-leche">
-      <option>Vaca</option>
-      <option>Cabra</option>
-      <option>Oveja</option>
-    </select>
-    <button>Quitar filtro</button>
-    <ul>
-      <li>Resultado filtrado 1</li>
-      <li>Resultado filtrado 2L</li>
-    </ul>
-  </section>
-
-  <!-- US-03: Ver detalle -->
+  <!-- =========================================================
+       US-03: Ver detalle (lógica ya conectada por JS)
+       ========================================================= -->
   <section id="detalle-queso">
     <a href="#buscar-queso">← Volver al catálogo</a>
     <h2>Queso y Sabor</h2>
@@ -46,4 +162,145 @@
     <p>"Otros quesos que te podrían gustar"</p>
   </section>
 
+  <!-- =========================================================
+       JS GLOBAL (datos y helpers)
+       ========================================================= -->
+  <script>
+    const productos = [
+      { id: "gouda-1",       nombre: "Gouda clásico",       precio: 5990, leche: "vaca" },
+      { id: "manchego-1",    nombre: "Manchego curado",     precio: 7990, leche: "oveja" },
+      { id: "cabra-1",       nombre: "Queso de cabra",      precio: 6990, leche: "cabra" },
+      { id: "gouda-reserva", nombre: "Gouda gran reserva",  precio: 9990, leche: "vaca" },
+    ];
+    function capitalizar(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+  </script>
+
+  <!-- =========================================================
+       JS UNIFICADO (búsqueda + filtro en UNA lista)
+       ========================================================= -->
+  <script>
+    // Estado
+    let term = "";
+    let filtroLeche = "todas";
+
+    // Referencias
+    const $qBusqueda       = document.getElementById("buscador");
+    const $selectLeche     = document.getElementById("tipo-leche");
+    const $btnLimpiar      = document.getElementById("btn-limpiar");
+    const $chipFiltro      = document.getElementById("filtro-activo");
+    const $lista           = document.getElementById("resultados");
+    const $estado          = document.getElementById("estado-vacio");
+
+    // Eventos
+    $qBusqueda.addEventListener("input", () => { term = $qBusqueda.value.trim().toLowerCase(); render(); });
+    $selectLeche.addEventListener("change", () => { filtroLeche = $selectLeche.value; render(); });
+    $btnLimpiar.addEventListener("click", () => { filtroLeche = "todas"; $selectLeche.value = "todas"; render(); });
+
+    // Render inicial
+    render();
+
+    function render(){
+      let items = productos;
+
+      if (term) items = items.filter(p => p.nombre.toLowerCase().includes(term));
+      if (filtroLeche !== "todas") items = items.filter(p => p.leche === filtroLeche);
+
+      // Chip + botón
+      const hayFiltro = filtroLeche !== "todas";
+      $chipFiltro.hidden = !hayFiltro;
+      $btnLimpiar.hidden = !hayFiltro;
+      if (hayFiltro) $chipFiltro.textContent = `Filtro activo: ${capitalizar(filtroLeche)}`;
+
+      // Lista o estado vacío con mensaje correcto
+      if (!items.length) {
+        $lista.innerHTML = "";
+        $estado.hidden = false;
+        $estado.textContent = term
+          ? "No hay productos que coincidan con tu búsqueda"
+          : "No hay productos disponibles para este filtro";
+        return;
+      }
+      $estado.hidden = true;
+      $lista.innerHTML = items.map(p => `
+        <li data-id="${p.id}">
+          <strong>${p.nombre}</strong>
+          <span>— $${p.precio.toLocaleString("es-CL")} <small>(Leche: ${capitalizar(p.leche)})</small></span>
+        </li>
+      `).join("");
+    }
+  </script>
+
+  <!-- =========================================================
+       JS US-03 (detalle)
+       ========================================================= -->
+  <script>
+  const $detalle = document.getElementById("detalle-queso");
+  const $detalleImg = $detalle.querySelector(".imagen");
+  const $detalleNombre = $detalle.querySelector("h3");
+  const $detallePrecio = $detalle.querySelector("p:nth-of-type(1)");
+  const $detalleStock = $detalle.querySelector("p:nth-of-type(2)");
+  const $detalleDesc = $detalle.querySelector("p:nth-of-type(3)");
+  const $detalleNotas = $detalle.querySelector("p:nth-of-type(4)");
+  const $detalleRecom = $detalle.querySelector("p:nth-of-type(5)");
+  const $btnCarrito = $detalle.querySelector("button");
+  const $volver = $detalle.querySelector("a");
+
+  // Datos extendidos de ejemplo
+  productos.forEach(p => {
+    if (p.id === "gouda-1") {
+      Object.assign(p, { imagen:"https://via.placeholder.com/400x250?text=Gouda", stock:10,
+        descripcion:"Queso holandés de sabor suave y textura cremosa.",
+        notas:"Notas mantecosas, con leve dulzura.", recomendaciones:"Ideal con vino blanco seco." });
+    } else if (p.id === "manchego-1") {
+      Object.assign(p, { imagen:"https://via.placeholder.com/400x250?text=Manchego", stock:5,
+        descripcion:"Queso español elaborado con leche de oveja.", notas:"Sabor intenso y ligeramente salado.",
+        recomendaciones:"Perfecto con pan rústico y vino tinto." });
+    } else if (p.id === "cabra-1") {
+      Object.assign(p, { imagen:"https://via.placeholder.com/400x250?text=Cabra", stock:0,
+        descripcion:"Queso curado de cabra, sabor fuerte y persistente.",
+        notas:"Aromas lácticos y toque picante.", recomendaciones:"Acompáñalo con miel o frutos secos." });
+    } else {
+      Object.assign(p, { imagen:"https://via.placeholder.com/400x250?text=Gouda+Reserva", stock:8,
+        descripcion:"Madurado, sabor profundo y textura firme.",
+        notas:"Toques de nuez y caramelo.", recomendaciones:"Excelente con cerveza ámbar." });
+    }
+  });
+
+  // Clic en cualquier <li> del catálogo
+  document.addEventListener("click", e => {
+    const item = e.target.closest("li[data-id]");
+    if (!item) return;
+    const queso = productos.find(p => p.id === item.dataset.id);
+    if (queso) mostrarDetalle(queso);
+  });
+
+  // Volver
+  $volver.addEventListener("click", e => {
+    e.preventDefault();
+    $detalle.hidden = true;
+    document.getElementById("buscar-queso").scrollIntoView({ behavior: "smooth" });
+  });
+
+  function mostrarDetalle(p){
+    $detalle.querySelector("h2").textContent = "Queso y Sabor";
+    $detalleImg.innerHTML = `<img src="${p.imagen}" alt="${p.nombre}">`;
+    $detalleNombre.textContent = p.nombre;
+    $detallePrecio.textContent = `Precio: $${p.precio.toLocaleString("es-CL")}`;
+    $detalleStock.textContent = `Stock: ${p.stock > 0 ? "En stock" : "Sin stock"}`;
+    $detalleDesc.textContent = p.descripcion;
+    $detalleNotas.textContent = p.notas;
+    $detalleRecom.textContent = p.recomendaciones;
+
+    $btnCarrito.disabled = p.stock <= 0;
+    $btnCarrito.textContent = p.stock <= 0 ? "Sin stock" : "Agregar al carrito";
+    $btnCarrito.onclick = () => { if (p.stock > 0) alert(`✅ ${p.nombre} se ha agregado al carrito.`); };
+
+    $detalle.hidden = false;
+    $detalle.scrollIntoView({ behavior: "smooth" });
+  }
+
+  $detalle.hidden = true;
+  </script>
+
 </body>
+</html>
