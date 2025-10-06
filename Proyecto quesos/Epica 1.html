@@ -5,6 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Queso y Sabor — MVP</title>
   <style>
+    /* Header con carrito US-04*/
+#app-header{
+  width:min(960px,94vw);
+  margin:12px auto 0;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:10px 14px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+#app-header .brand{ font-weight:700 }
+
+#cart-link{
+  position:relative;
+  display:inline-flex; align-items:center; justify-content:center;
+  width:40px; height:36px; border:1px solid var(--line);
+  border-radius:8px; background:#fff; text-decoration:none;
+}
+#cart-badge{
+  position:absolute; top:-8px; right:-8px;
+  background:#111827; color:#fff; font-size:12px;
+  border-radius:999px; padding:2px 6px; min-width:20px; text-align:center;
+}
+
   /* ======== Diseño ======== */
 
   :root{
@@ -122,6 +146,20 @@
   </style>
 </head>
 <body>
+  <header id="app-header">
+  <div class="brand">Queso &amp; Sabor</div>
+  <!-- Lleva al carrito (Epica 2) -->
+  <a id="cart-link" href="Epica 2.html" title="Ir al carrito">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M3 3h2l2.2 9.2A2 2 0 0 0 9.1 14h7.8a2 2 0 0 0 1.9-1.5L21 8H7"
+            stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="10" cy="19" r="1.5" fill="#374151"/>
+      <circle cx="17" cy="19" r="1.5" fill="#374151"/>
+    </svg>
+    <span id="cart-badge">0</span>
+  </a>
+</header>
+
 
   <!-- =========================================================
        CATÁLOGO
@@ -172,6 +210,36 @@
   <!-- =========================================================
        JS GLOBAL (datos y helpers)
        ========================================================= -->
+       <script>
+  // ===== Núcleo de carrito (compartido con Epica 2) =====
+  const CART_KEY = "qs_cart_v1";
+  const Cart = {
+    items: {},
+    load() {
+      try { this.items = JSON.parse(localStorage.getItem(CART_KEY)) || {}; }
+      catch { this.items = {}; }
+    },
+    save() { localStorage.setItem(CART_KEY, JSON.stringify(this.items)); },
+    count() { return Object.values(this.items).reduce((n, it) => n + it.qty, 0); },
+    add(product, qty = 1) {
+      const id = product.id;
+      if (!this.items[id]) {
+        this.items[id] = { id, nombre: product.nombre, precio: product.precio, imagen: product.imagen, qty: 0 };
+      }
+      this.items[id].qty += qty;
+      this.save();
+    }
+  };
+
+  function updateBadge() {
+    const badge = document.getElementById("cart-badge");
+    if (badge) badge.textContent = Cart.count();
+  }
+
+  Cart.load();
+  updateBadge();
+</script>
+
   <script>
     const productos = [
       { id: "gouda-1",       nombre: "Gouda clásico",       precio: 5990, leche: "vaca" },
@@ -297,10 +365,17 @@
     $detalleDesc.textContent = p.descripcion;
     $detalleNotas.textContent = p.notas;
     $detalleRecom.textContent = p.recomendaciones;
-
+// US-04
     $btnCarrito.disabled = p.stock <= 0;
     $btnCarrito.textContent = p.stock <= 0 ? "Sin stock" : "Agregar al carrito";
-    $btnCarrito.onclick = () => { if (p.stock > 0) alert(`✅ ${p.nombre} se ha agregado al carrito.`); };
+    $btnCarrito.onclick = () => {
+  if (p.stock > 0) {
+    Cart.add(p, 1);
+    updateBadge();
+    alert(`✅ ${p.nombre} se ha agregado al carrito.`);
+  }
+};
+
 
     $detalle.hidden = false;
     $detalle.scrollIntoView({ behavior: "smooth" });

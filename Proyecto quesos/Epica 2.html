@@ -1,76 +1,271 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Épica 2 - Carrito</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Épica 2 — Carrito</title>
+
+<style>
+  /* =========================================================
+     EPICA 2 — ESTILOS BASE (comparten US-05/US-06)
+     ========================================================= */
+  :root{
+    --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --accent:#fbbf24; --radius:10px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:system-ui, Segoe UI, Roboto, Arial; color:var(--text); background:var(--bg); line-height:1.45}
+  .container{width:min(960px,94vw); margin:18px auto}
+
+  /* ===== Header con carrito (igual a Épica 1) ===== */
+  header{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:10px 14px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand{font-weight:700}
+  .cart{ position:relative; display:inline-flex; align-items:center; justify-content:center;
+         width:40px; height:36px; border:1px solid var(--line); border-radius:8px; background:#fff; text-decoration:none }
+  .badge{ position:absolute; top:-8px; right:-8px; background:#111827; color:#fff; font-size:12px;
+          border-radius:999px; padding:2px 6px; min-width:20px; text-align:center }
+
+  /* ===== Card principal ===== */
+  section{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px; margin-top:12px;
+  }
+  h2{ margin:0 0 12px; font-size:20px }
+
+  /* =========================================================
+     US-05 — LISTA DE ÍTEMS + CONTROLES
+     ========================================================= */
+  .items{ list-style:none; padding:0; margin:0; display:grid; gap:10px }
+  .item{
+    border:1px solid var(--line); border-radius:8px; padding:12px;
+    display:grid; grid-template-columns: 56px 1fr auto; gap:12px; align-items:center; background:#fff;
+  }
+  .thumb{ width:56px; height:56px; border-radius:8px; object-fit:cover; display:block; background:#f3f4f6; }
+  .name{ font-weight:600 }
+  .unit{ color:var(--muted); font-size:14px }
+  .right{ display:flex; align-items:center; gap:8px }
+  .qtybox{ display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:8px; overflow:hidden }
+  .qtybox button{ width:28px; height:28px; border:0; background:#fff; cursor:pointer }
+  .qtybox span{ width:32px; text-align:center; font-variant-numeric:tabular-nums }
+  .remove{ border:1px solid var(--line); background:#fff; border-radius:8px; width:34px; height:34px; cursor:pointer }
+
+  /* =========================================================
+     US-06 — RESUMEN DE TOTALES
+     ========================================================= */
+  .totals{ border-top:1px dashed var(--line); margin-top:12px; padding-top:12px; display:grid; gap:8px; }
+  .row{ display:flex; justify-content:space-between; align-items:center; gap:10px }
+  .muted{ color:var(--muted) }
+  select{ font:inherit; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--text) }
+
+  .actions{ margin-top:10px; display:flex; gap:10px; flex-wrap:wrap }
+  button.primary{ background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px 14px; cursor:pointer }
+  button.primary:hover{ background:#f9fafb }
+  a.link{ color:#1f2937; text-decoration:none; border:1px solid var(--line); border-radius:8px; padding:8px 12px; background:#fff }
+  a.link:hover{ background:#f9fafb }
+
+  /* ===== Estado vacío ===== */
+  .empty{ text-align:center; color:var(--muted); padding:24px 8px }
+  .empty .cart-draw{ font-size:64px; line-height:1; margin-bottom:8px }
+
+  /* Accesibilidad visual */
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0 }
+</style>
 </head>
 <body>
 
-  <!-- US-04: Agregar queso al carrito -->
-  <section id="us-04">
-    <h2>Queso & Sabor (logo)</h2>
-    <div>Icono carrito (0)</div>
+<div class="container">
+  <!-- =========================================================
+       EPICA 2 — HEADER COMÚN
+       ========================================================= -->
+  <header>
+    <a class="link" href="Epica 1.html">← Volver a la tienda</a>
+    <div class="brand">Queso & Sabor</div>
+    <a class="cart" href="Epica 2.html" title="Tu carrito">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M3 3h2l2.2 9.2A2 2 0 0 0 9.1 14h7.8a2 2 0 0 0 1.9-1.5L21 8H7"
+              stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="10" cy="19" r="1.5" fill="#374151"/>
+        <circle cx="17" cy="19" r="1.5" fill="#374151"/>
+      </svg>
+      <span id="cart-badge" class="badge">0</span>
+    </a>
+  </header>
 
-    <p>Estado inicial → después de agregar</p>
+  <!-- =========================================================
+       EPICA 2 — US-06: RESUMEN DEL PEDIDO
+       (incluye lista de ítems de US-05 para edición en línea)
+       ========================================================= -->
+  <section>
+    <h2>Resumen del pedido</h2>
 
-    <div>[Foto del queso]</div>
-
-    <h3>Nombre del Queso</h3>
-    <p>Precio: $X.XX</p>
-
-    <button>Agregar al Carrito</button>
-  </section>
-
-  <!-- US-05: Modificar cantidad en el carrito -->
-  <section id="us-05">
-    <h2>Queso & Sabor (logo)</h2>
-    <div>Icono carrito (2)</div>
-
-    <h3>Tu carrito de compras</h3>
-
-    <ul>
-      <li>
-        [Imagen] Nombre queso - Precio: $X.XX
-        [ - ] [ 1 ] [ + ] [Eliminar]
-      </li>
-      <li>
-        [Imagen] Nombre queso - Precio: $X.XX
-        [ - ] [ 3 ] [ + ] [Eliminar]
-      </li>
-    </ul>
-
-    <p>Subtotal: $XXX.XX</p>
-    <p>Costo de envío: $XX.XX</p>
-    <p>Total: $XXX.XX</p>
-
-    <button>Continuar compra</button>
-    <p><a href="#">Vaciar carrito</a></p>
-  </section>
-
-  <!-- US-06: Revisar resumen del carrito -->
-  <section id="us-06">
-    <h3>Resumen del Pedido</h3>
-
-    <!-- B1: Con items -->
-    <div>
-      <ul>
-        <li>[Imagen] Queso - Precio: $X.XX (x2) - Total: $X.XX</li>
-        <li>[Imagen] Queso - Precio: $X.XX (x1) - Total: $X.XX</li>
-      </ul>
-      <p>Subtotal: $XX.XX</p>
-      <p>Costo de envío: $XX.XX</p>
-      <p>Total final: $XXX.XX</p>
-      <button>Continuar con el pago</button>
-    </div>
-
-    <!-- B2: Carrito vacío -->
-    <div>
-      [Dibujo carrito vacío]
+    <!-- ===== Escenario B2: Carrito vacío ===== -->
+    <div id="empty" class="empty" hidden>
+      <div class="cart-draw">🛒</div>
       <p>Tu carrito está vacío</p>
-      <button>Ir a la tienda</button>
+      <a class="link" href="Epica 1.html">Ir a la tienda</a>
+    </div>
+
+    <!-- ===== Escenario B1: Con ítems ===== -->
+    <ul id="items" class="items"></ul>
+
+    <!-- ===== Resumen de totales ===== -->
+    <div id="totals" class="totals" hidden>
+      <h3 class="muted" style="margin:0 0 8px">Resumen de totales</h3>
+      <div class="row"><span class="muted">Subtotal</span><strong id="t-subtotal">$0</strong></div>
+
+      <div class="row">
+        <label class="muted" for="shipping">Envío</label>
+        <select id="shipping">
+          <option value="retira|0">Retiro en tienda — $0</option>
+          <option value="santiago|1990">Santiago Centro — $1.990</option>
+          <option value="providencia|2490">Providencia — $2.490</option>
+          <option value="nunoa|2490">Ñuñoa — $2.490</option>
+          <option value="lascondes|2990">Las Condes — $2.990</option>
+        </select>
+      </div>
+
+      <div class="row"><span class="muted">Costo de envío</span><strong id="t-shipping">$0</strong></div>
+      <div class="row" style="font-size:18px">
+        <span><strong>Total</strong></span>
+        <strong id="t-total">$0</strong>
+      </div>
+
+      <div class="actions">
+        <button id="btn-checkout" class="primary">Continuar con el pago</button>
+        <button id="btn-clear" class="primary" title="Vaciar carrito">Vaciar carrito</button>
+      </div>
     </div>
   </section>
+</div>
 
+<!-- =========================================================
+     EPICA 2 — JS
+     ========================================================= -->
+<script>
+  /* =========================================================
+     MÓDULO DE CARRITO (COMPATIBLE CON ÉPICA 1)
+     ========================================================= */
+  const CART_KEY = "qs_cart_v1";
+  const Cart = {
+    items:{},
+    load(){ try{ this.items = JSON.parse(localStorage.getItem(CART_KEY)) || {}; } catch{ this.items = {}; } },
+    save(){ localStorage.setItem(CART_KEY, JSON.stringify(this.items)); },
+    count(){ return Object.values(this.items).reduce((n,it)=>n+it.qty,0); },
+    subtotal(){ return Object.values(this.items).reduce((s,it)=>s + it.qty*it.precio, 0); },
+    updateQty(id, delta){                // delta: +1 o -1
+      if(!this.items[id]) return;
+      this.items[id].qty += delta;
+      if(this.items[id].qty <= 0) delete this.items[id];
+      this.save();
+    },
+    setQty(id, qty){
+      if(qty <= 0){ delete this.items[id]; }
+      else{
+        if(!this.items[id]) return;
+        this.items[id].qty = qty;
+      }
+      this.save();
+    },
+    remove(id){ delete this.items[id]; this.save(); },
+    clear(){ this.items = {}; this.save(); }
+  };
+
+  // ===== Badge del header
+  function updateBadge(){ document.getElementById("cart-badge").textContent = Cart.count(); }
+
+  // ===== Referencias UI
+  const $items = document.getElementById("items");
+  const $empty = document.getElementById("empty");
+  const $totals = document.getElementById("totals");
+  const $tSubtotal = document.getElementById("t-subtotal");
+  const $tShipping = document.getElementById("t-shipping");
+  const $tTotal = document.getElementById("t-total");
+  const $shippingSel = document.getElementById("shipping");
+
+  // ===== Persistencia del método de envío
+  const SHIP_KEY = "qs_ship_v1";
+  function loadShip(){ return localStorage.getItem(SHIP_KEY) || "retira|0"; }
+  function saveShip(v){ localStorage.setItem(SHIP_KEY, v); }
+
+  // ===== Util
+  function money(n){ return `$${n.toLocaleString("es-CL")}`; }
+
+  // ===== Totales
+  function calcTotals(){
+    const [method, costStr] = $shippingSel.value.split("|");
+    const shipping = Number(costStr);
+    const subtotal = Cart.subtotal();
+    const total = subtotal + shipping;
+    $tSubtotal.textContent = money(subtotal);
+    $tShipping.textContent = money(shipping);
+    $tTotal.textContent = money(total);
+  }
+
+  // ===== Render principal (US-05 + US-06)
+  function render(){
+    const ids = Object.keys(Cart.items);
+    const isEmpty = ids.length === 0;
+
+    // Estado vacío / con ítems
+    $empty.hidden = !isEmpty;
+    $totals.hidden = isEmpty;
+    updateBadge();
+
+    if(isEmpty){ $items.innerHTML = ""; return; }
+
+    // Lista de ítems
+    $items.innerHTML = ids.map(id => {
+      const it = Cart.items[id];
+      const subtotalItem = it.precio * it.qty;
+      const img = it.imagen || "";
+      return `
+        <li class="item" data-id="${id}">
+          <img class="thumb" src="${img}" alt="" onerror="this.style.display='none'">
+          <div>
+            <div class="name">${it.nombre}</div>
+            <div class="unit">Precio: $${it.precio.toLocaleString("es-CL")} c/u (x${it.qty})</div>
+          </div>
+          <div class="right">
+            <div class="qtybox" role="group" aria-label="Control de cantidad">
+              <button class="btn-dec" aria-label="Restar uno">−</button>
+              <span class="qty">${it.qty}</span>
+              <button class="btn-inc" aria-label="Sumar uno">＋</button>
+            </div>
+            <div class="unit"><strong>Total: $${subtotalItem.toLocaleString("es-CL")}</strong></div>
+            <button class="remove" title="Eliminar">🗑️</button>
+          </div>
+        </li>
+      `;
+    }).join("");
+
+    // Eventos de la lista
+    $items.querySelectorAll(".item").forEach($li => {
+      const id = $li.dataset.id;
+      $li.querySelector(".btn-inc").addEventListener("click", () => { Cart.updateQty(id, +1); render(); });
+      $li.querySelector(".btn-dec").addEventListener("click", () => { Cart.updateQty(id, -1); render(); });
+      $li.querySelector(".remove").addEventListener("click", () => { Cart.remove(id); render(); });
+    });
+
+    // Totales
+    calcTotals();
+  }
+
+  // ===== Init
+  Cart.load();
+  document.getElementById("shipping").value = loadShip();
+  render();
+
+  // ===== Eventos globales
+  $shippingSel.addEventListener("change", () => { saveShip($shippingSel.value); calcTotals(); });
+  document.getElementById("btn-clear").addEventListener("click", () => {
+    if(confirm("¿Vaciar carrito?")){ Cart.clear(); render(); }
+  });
+  document.getElementById("btn-checkout").addEventListener("click", () => {
+    alert("✅ Continuar a pago (stub). Aquí conectarías con tu flujo de checkout.");
+  });
+</script>
 </body>
 </html>
