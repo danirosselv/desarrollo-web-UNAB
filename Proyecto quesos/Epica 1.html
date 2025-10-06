@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Queso y Sabor — MVP</title>
   <style>
-  /* ======== Diseño básico, sencillo y legible (unificado) ======== */
+  /* ======== Diseño ======== */
 
   :root{
     --bg:#f6f7f9;
@@ -26,7 +26,7 @@
     line-height:1.45;
   }
 
-  /* Secciones como cards */
+  /* Secciones */
   section{
     width:min(960px, 94vw);
     margin:20px auto;
@@ -36,7 +36,7 @@
     padding:16px;
   }
 
-  /* Cabecera del catálogo: título a la izquierda, filtro a la derecha */
+  /* Cabecera del catálogo */
   .row{
     display:flex; align-items:center; justify-content:space-between; gap:12px;
     margin-bottom:10px;
@@ -46,7 +46,7 @@
 
   label{ color:var(--muted); font-size:14px }
 
-  /* Inputs básicos */
+  /* Inputs */
   input[type="search"], select{
     font:inherit;
     padding:10px 12px;
@@ -59,7 +59,7 @@
   input[type="search"]{ width:100%; margin-top:8px }
   input[type="search"]::placeholder{ color:#9ca3af }
 
-  /* Botón simple */
+  /* Botón */
   button{
     font:inherit; padding:10px 14px; border:1px solid var(--line);
     border-radius:8px; background:#fff; cursor:pointer;
@@ -89,7 +89,7 @@
   li[data-id] strong{ font-weight:600 }
   li[data-id] small{ color:var(--muted) }
 
-  /* Mensaje vacío unificado */
+  /* Mensaje vacío */
   #estado-vacio[hidden]{ display:none }
   #estado-vacio{
     margin:10px 0 0; border:1px dashed var(--line); background:#fafafa;
@@ -98,11 +98,18 @@
 
   /* US-03: ficha simple */
   #detalle-queso .imagen{
-    border:1px solid var(--line); border-radius:8px; background:#fafafa;
-    height:220px; display:grid; place-items:center; color:#9ca3af;
-    margin:8px 0 12px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fafafa;
+  max-width: 280px;
+  margin:8px 0 12px; 
   }
-  #detalle-queso img{ width:100%; height:100%; object-fit:cover; border-radius:8px }
+  #detalle-queso .imagen img{
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius:8px;
+}
   #detalle-queso a{ color:#111827; text-decoration:none; margin-bottom:8px; display:inline-block }
   #detalle-queso a:hover{ text-decoration:underline }
   #detalle-queso p{ margin:6px 0 }
@@ -117,7 +124,7 @@
 <body>
 
   <!-- =========================================================
-       CATÁLOGO (US-01 + US-02 unificados)
+       CATÁLOGO
        ========================================================= -->
   <section id="buscar-queso" aria-labelledby="titulo-catalogo">
     <div class="row">
@@ -144,7 +151,7 @@
   </section>
 
   <!-- =========================================================
-       US-03: Ver detalle (lógica ya conectada por JS)
+       US-03: Ver detalle
        ========================================================= -->
   <section id="detalle-queso">
     <a href="#buscar-queso">← Volver al catálogo</a>
@@ -176,7 +183,7 @@
   </script>
 
   <!-- =========================================================
-       JS UNIFICADO (búsqueda + filtro en UNA lista)
+       JS (búsqueda + filtro)
        ========================================================= -->
   <script>
     // Estado
@@ -245,22 +252,22 @@
   const $btnCarrito = $detalle.querySelector("button");
   const $volver = $detalle.querySelector("a");
 
-  // Datos extendidos de ejemplo
+  // Datos de ejemplo
   productos.forEach(p => {
     if (p.id === "gouda-1") {
-      Object.assign(p, { imagen:"https://via.placeholder.com/400x250?text=Gouda", stock:10,
+      Object.assign(p, { imagen:"img/quesogouda1.jpg", stock:10,
         descripcion:"Queso holandés de sabor suave y textura cremosa.",
         notas:"Notas mantecosas, con leve dulzura.", recomendaciones:"Ideal con vino blanco seco." });
     } else if (p.id === "manchego-1") {
-      Object.assign(p, { imagen:"https://via.placeholder.com/400x250?text=Manchego", stock:5,
+      Object.assign(p, { imagen:"img/quesomanchego1.jpeg", stock:5,
         descripcion:"Queso español elaborado con leche de oveja.", notas:"Sabor intenso y ligeramente salado.",
         recomendaciones:"Perfecto con pan rústico y vino tinto." });
     } else if (p.id === "cabra-1") {
-      Object.assign(p, { imagen:"https://via.placeholder.com/400x250?text=Cabra", stock:0,
+      Object.assign(p, { imagen:"img/quesodecabra1.jpeg", stock:0,
         descripcion:"Queso curado de cabra, sabor fuerte y persistente.",
         notas:"Aromas lácticos y toque picante.", recomendaciones:"Acompáñalo con miel o frutos secos." });
     } else {
-      Object.assign(p, { imagen:"https://via.placeholder.com/400x250?text=Gouda+Reserva", stock:8,
+      Object.assign(p, { imagen:"img/goudagranreserva1.jpg", stock:8,
         descripcion:"Madurado, sabor profundo y textura firme.",
         notas:"Toques de nuez y caramelo.", recomendaciones:"Excelente con cerveza ámbar." });
     }
