@@ -5,161 +5,118 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Mi perfil — Queso & Sabor</title>
 <style>
-  :root{--bg:#f6f7f9;--card:#fff;--text:#1f2937;--muted:#6b7280;--line:#e5e7eb;--r:10px}
-  *{box-sizing:border-box} body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
-  .wrap{width:min(960px,94vw);margin:18px auto}
-  header,section{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px}
-  header{display:flex;justify-content:space-between;align-items:center}
-  .btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;text-decoration:none;color:inherit;cursor:pointer}
-  .btn:hover{background:#f9fafb}
-  h2{margin:0 0 8px}
-  .muted{color:var(--muted)}
-  label{font-size:13px;color:var(--muted)}
-  input,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
-  .grid{display:grid;gap:8px}
-  .g-2{grid-template-columns:1fr 1fr}
-  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  .card{border:1px solid var(--line);border-radius:8px;padding:10px}
-  ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
-  .addr{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:8px;padding:10px;background:#fff}
-  .chip{border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:12px}
-  .star{cursor:pointer}
-  .msg{font-size:14px;margin-top:6px}
-  .ok{color:#065f46}
+body{margin:0;font-family:system-ui;background:#f6f7f9}
+.wrap{max-width:600px;margin:auto;padding:10px}
+header,section{background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px;margin:8px 0}
+header{display:flex;justify-content:space-between}
+.btn{border:1px solid #ddd;border-radius:6px;padding:6px 12px;text-decoration:none;color:#333}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.addr{border:1px solid #ddd;border-radius:6px;padding:8px;margin:6px 0;display:flex;justify-content:space-between}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <nav class="row">
-      <a class="btn" href="index.html">← Tienda</a>
-      <a class="btn" href="mispedidos.html">Mis pedidos</a>
-      <a class="btn" href="carrito.html">Carrito</a>
-    </nav>
-    <div>Mi perfil</div>
-    <button id="logout" class="btn">Salir</button>
+    <a class="btn" href="index.html">← Tienda</a>
+    <button class="btn" id="logout">Salir</button>
   </header>
 
-  <section id="needlogin" class="card" hidden>
-    <p>Debes iniciar sesión para ver tu perfil.</p>
-    <div class="row"><a class="btn" href="login.html">Iniciar sesión</a><a class="btn" href="registro.html">Crear cuenta</a></div>
+  <section id="needlogin" hidden>
+    <p>Inicia sesión para ver tu perfil.</p>
+    <a class="btn" href="login.html">Ingresar</a>
   </section>
 
   <section id="content" hidden>
-    <h2>Datos de usuario</h2>
-    <div class="grid g-2 card">
-      <div><label>Nombre</label><input id="u-name" disabled></div>
-      <div><label>Correo</label><input id="u-mail" disabled></div>
+    <h3>Datos</h3>
+    <div class="grid">
+      <input id="u-name" disabled>
+      <input id="u-mail" disabled>
     </div>
 
-    <h2 style="margin-top:12px">Direcciones</h2>
-    <div class="card">
-      <div class="grid g-2">
-        <div><label>Dirección (texto)</label><input id="a-text" placeholder="Ej. Av. Siempre Viva 742"></div>
-        <div>
-          <label>Comuna</label>
-          <select id="a-comuna">
-            <option>Providencia</option>
-            <option>Ñuñoa</option>
-            <option>Las Condes</option>
-            <option>Santiago Centro</option>
-          </select>
-        </div>
-      </div>
-      <div class="row">
-        <button id="add" class="btn">Guardar</button>
-        <span id="amsg" class="msg ok"></span>
-      </div>
+    <h3>Direcciones</h3>
+    <div class="grid">
+      <input id="a-text" placeholder="Dirección">
+      <select id="a-comuna">
+        <option>Providencia</option>
+        <option>Ñuñoa</option>
+        <option>Las Condes</option>
+      </select>
     </div>
+    <button class="btn" id="add">Guardar dirección</button>
 
-    <ul id="alist" style="margin-top:8px"></ul>
+    <div id="alist"></div>
   </section>
 </div>
 
 <script>
-const USERS_KEY="qs_users", SESS_KEY="qs_session";
-const loadUsers=()=>{ try{return JSON.parse(localStorage.getItem(USERS_KEY))||[]}catch{return[]} };
-const saveUsers=(arr)=>localStorage.setItem(USERS_KEY,JSON.stringify(arr));
-const getSession=()=>{ try{return JSON.parse(localStorage.getItem(SESS_KEY))}catch{return null} };
-const setSession=(s)=>localStorage.setItem(SESS_KEY,JSON.stringify(s));
-const uid=()=> "a_"+Math.random().toString(36).slice(2,10);
-
-// refs
-const $need = document.getElementById("needlogin");
-const $cnt  = document.getElementById("content");
-const $name = document.getElementById("u-name");
-const $mail = document.getElementById("u-mail");
-const $alist= document.getElementById("alist");
-const $atext= document.getElementById("a-text");
-const $acom = document.getElementById("a-comuna");
-const $amsg = document.getElementById("amsg");
-
-document.getElementById("logout").onclick = ()=>{
-  localStorage.removeItem(SESS_KEY);
-  location.href="index.html";
-};
-
-const sess = getSession();
-if(!sess){ $need.hidden=false; $cnt.hidden=true; }
-else{
-  const users = loadUsers();
-  const i = users.findIndex(u=>u.email===sess.email);
-  if(i<0){ $need.hidden=false; $cnt.hidden=true; }
-  else{
-    $need.hidden=true; $cnt.hidden=false;
-    const user = users[i];
-    $name.value = user.nombre; $mail.value = user.email;
-
-    function renderAddrs(){
-      const u = loadUsers().find(u=>u.email===sess.email) || { direcciones:[] };
-      const list = u.direcciones||[];
-      if(!list.length){ $alist.innerHTML = `<li class="addr"><span class="muted">No hay direcciones guardadas.</span></li>`; return; }
-
-      $alist.innerHTML = list.map(a => `
-        <li class="addr" data-id="${a.id}">
-          <div>
-            <div><strong>${a.texto}</strong></div>
-            <div class="muted">${a.comuna||""}</div>
-          </div>
-          <div class="row" style="align-items:center">
-            <span class="chip">${a.principal ? "Principal" : "Secundaria"}</span>
-            <button class="btn star" title="Marcar principal">${a.principal ? "⭐" : "☆"}</button>
-            <button class="btn del">Eliminar</button>
-          </div>
-        </li>
-      `).join("");
-
-      // wire
-      [...$alist.children].forEach(li=>{
-        const id = li.dataset.id;
-        li.querySelector(".star").onclick = ()=>{
-          const us = loadUsers(); const idx = us.findIndex(u=>u.email===sess.email); if(idx<0) return;
-          us[idx].direcciones = (us[idx].direcciones||[]).map(a=> ({...a, principal: a.id===id}));
-          saveUsers(us); renderAddrs();
-        };
-        li.querySelector(".del").onclick = ()=>{
-          const us = loadUsers(); const idx = us.findIndex(u=>u.email===sess.email); if(idx<0) return;
-          us[idx].direcciones = (us[idx].direcciones||[]).filter(a=>a.id!==id);
-          // si borré la principal, marcar otra como principal
-          if(!us[idx].direcciones.some(a=>a.principal) && us[idx].direcciones[0]) us[idx].direcciones[0].principal=true;
-          saveUsers(us); renderAddrs();
-        };
-      });
-    }
-
-    document.getElementById("add").onclick = ()=>{
-      const texto = $atext.value.trim(), comuna = $acom.value;
-      if(!texto){ $amsg.textContent=""; return; }
-      const us = loadUsers(); const idx = us.findIndex(u=>u.email===sess.email); if(idx<0) return;
-      const isFirst = !(us[idx].direcciones&&us[idx].direcciones.length);
-      us[idx].direcciones = [...(us[idx].direcciones||[]), { id:uid(), texto, comuna, principal:isFirst }];
-      saveUsers(us);
-      $atext.value=""; $amsg.textContent="Dirección guardada"; setTimeout(()=>($amsg.textContent=""),900);
-      renderAddrs();
-    };
-
-    renderAddrs();
+const session = JSON.parse(localStorage.getItem("qs_session")||"null")
+if(!session){
+  document.getElementById("needlogin").hidden=false
+}else{
+  document.getElementById("content").hidden=false
+  const users=JSON.parse(localStorage.getItem("qs_users")||"[]")
+  const user=users.find(u=>u.email===session.email)||{}
+  
+  document.getElementById("u-name").value=user.nombre||""
+  document.getElementById("u-mail").value=user.email||""
+  
+  document.getElementById("logout").onclick=()=>{
+    localStorage.removeItem("qs_session")
+    location.href="index.html"
   }
+
+  function renderAddrs(){
+    const users=JSON.parse(localStorage.getItem("qs_users")||"[]")
+    const user=users.find(u=>u.email===session.email)||{}
+    const addrs=user.direcciones||[]
+    document.getElementById("alist").innerHTML=addrs.map(a=>`
+      <div class="addr">
+        <div>${a.texto}, ${a.comuna} ${a.principal?"⭐":""}</div>
+        <div>
+          <button class="btn" onclick="setPrincipal('${a.id}')">Principal</button>
+          <button class="btn" onclick="deleteAddr('${a.id}')">Eliminar</button>
+        </div>
+      </div>
+    `).join("")
+  }
+
+  window.setPrincipal=(id)=>{
+    const users=JSON.parse(localStorage.getItem("qs_users")||"[]")
+    const i=users.findIndex(u=>u.email===session.email)
+    if(i===-1)return
+    users[i].direcciones=users[i].direcciones.map(a=>({...a,principal:a.id===id}))
+    localStorage.setItem("qs_users",JSON.stringify(users))
+    renderAddrs()
+  }
+
+  window.deleteAddr=(id)=>{
+    const users=JSON.parse(localStorage.getItem("qs_users")||"[]")
+    const i=users.findIndex(u=>u.email===session.email)
+    if(i===-1)return
+    users[i].direcciones=users[i].direcciones.filter(a=>a.id!==id)
+    localStorage.setItem("qs_users",JSON.stringify(users))
+    renderAddrs()
+  }
+
+  document.getElementById("add").onclick=()=>{
+    const texto=document.getElementById("a-text").value.trim()
+    const comuna=document.getElementById("a-comuna").value
+    if(!texto)return
+    
+    const users=JSON.parse(localStorage.getItem("qs_users")||"[]")
+    const i=users.findIndex(u=>u.email===session.email)
+    if(i===-1)return
+    
+    users[i].direcciones=[
+      ...users[i].direcciones||[],
+      {id:Date.now().toString(),texto,comuna,principal:!users[i].direcciones?.length}
+    ]
+    localStorage.setItem("qs_users",JSON.stringify(users))
+    document.getElementById("a-text").value=""
+    renderAddrs()
+  }
+
+  renderAddrs()
 }
 </script>
 </body>

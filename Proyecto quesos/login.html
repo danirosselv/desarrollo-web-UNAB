@@ -5,42 +5,30 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Iniciar sesión — Queso & Sabor</title>
 <style>
-  :root{--bg:#f6f7f9;--card:#fff;--text:#1f2937;--muted:#6b7280;--line:#e5e7eb;--r:10px}
-  *{box-sizing:border-box} body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
-  .wrap{width:min(960px,94vw);margin:18px auto}
-  header,section{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px}
-  header{display:flex;justify-content:space-between;align-items:center}
-  .btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;text-decoration:none;color:inherit;cursor:pointer}
-  .btn:hover{background:#f9fafb}
-  h2{margin:0 0 8px}
-  label{font-size:13px;color:var(--muted)}
-  input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
-  form{display:grid;gap:8px;max-width:420px}
-  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  .msg{font-size:14px;margin-top:6px}
-  .err{color:#7f1d1d}
+  body{margin:0;font-family:system-ui;background:#f6f7f9;color:#1f2937}
+  .wrap{max-width:960px;margin:auto;padding:10px}
+  header,section{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:12px}
+  header{display:flex;justify-content:space-between}
+  .btn{border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;text-decoration:none;color:inherit}
+  form{display:grid;gap:8px;max-width:420px;margin-top:12px}
+  input{width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px}
+  .row{display:flex;gap:8px;margin-top:8px}
+  .msg{margin-top:8px;color:#7f1d1d}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <a class="btn" href="index.html">← Tienda</a>
-    <div>Queso &amp; Sabor</div>
+    <div>Queso & Sabor</div>
     <a class="btn" href="registro.html">Crear cuenta</a>
   </header>
 
   <section>
     <h2>Iniciar sesión</h2>
     <form id="form">
-      <div>
-        <label>Correo</label>
-        <input id="email" type="email" placeholder="nombre@dominio.com">
-      </div>
-      <div>
-        <label>Contraseña</label>
-        <input id="pass" type="password" placeholder="********">
-      </div>
-      <a class="btn" href="#" style="width:max-content">Olvidé la contraseña</a>
+      <input id="email" type="email" placeholder="Correo">
+      <input id="pass" type="password" placeholder="Contraseña">
       <div class="row">
         <button class="btn" type="submit">Ingresar</button>
         <a class="btn" href="registro.html">Registrarse</a>
@@ -51,48 +39,32 @@
 </div>
 
 <script>
-const USERS_KEY="qs_users", SESS_KEY="qs_session";
-const loadUsers = ()=>{ try{return JSON.parse(localStorage.getItem(USERS_KEY))||[]}catch{return[]} };
-const setSession = (s)=> localStorage.setItem(SESS_KEY, JSON.stringify(s));
-const getAttemptsKey=(email)=>"qs_login_attempts_"+email;
-const getBlockKey=(email)=>"qs_login_block_"+email;
+const $form = document.getElementById("form")
+const $msg = document.getElementById("msg")
 
-const $f = document.getElementById("form"), $e = email, $p = pass, $msg = document.getElementById("msg");
-const MAX_TRIES = 5, BLOCK_MS = 2*60*1000;
-
-$f.addEventListener("submit",(ev)=>{
-  ev.preventDefault();
-  const emailV = ($e.value||"").trim().toLowerCase();
-  const passV = ($p.value||"").trim();
-  if(!emailV || !passV){ $msg.className="msg err"; $msg.textContent="Ingresa tu correo y contraseña."; return; }
-
-  const blockUntil = Number(localStorage.getItem(getBlockKey(emailV))||0);
-  const now = Date.now();
-  if(blockUntil && now < blockUntil){
-    const s = Math.ceil((blockUntil-now)/1000);
-    $msg.className="msg err"; $msg.textContent = `Usuario bloqueado por intentos. Intenta en ${s}s.`; return;
+$form.addEventListener("submit", e => {
+  e.preventDefault()
+  const email = document.getElementById("email").value.trim()
+  const pass = document.getElementById("pass").value.trim()
+  
+  if(!email || !pass){ 
+    $msg.textContent = "Ingresa correo y contraseña"
+    return 
   }
 
-  const user = loadUsers().find(u=>u.email===emailV);
-  if(!user || user.pass!==passV){
-    const k = getAttemptsKey(emailV);
-    const tries = (Number(localStorage.getItem(k))||0)+1;
-    localStorage.setItem(k, String(tries));
-    if(tries>=MAX_TRIES){
-      localStorage.setItem(getBlockKey(emailV), String(now+BLOCK_MS));
-      localStorage.removeItem(k);
-    }
-    $msg.className="msg err"; $msg.textContent="Credenciales inválidas. Intenta nuevamente.";
-    return;
+  const users = JSON.parse(localStorage.getItem("qs_users") || "[]")
+  const user = users.find(u => u.email === email && u.pass === pass)
+  
+  if(user){
+    localStorage.setItem("qs_session", JSON.stringify({
+      email: user.email,
+      nombre: user.nombre
+    }))
+    location.href = "index.html"
+  }else{
+    $msg.textContent = "Credenciales incorrectas"
   }
-
-  // éxito: reset intentos y bloqueo
-  localStorage.removeItem(getAttemptsKey(emailV));
-  localStorage.removeItem(getBlockKey(emailV));
-  setSession({ email:user.email, nombre:user.nombre, loggedAt: Date.now() });
-
-  location.href = "index.html";
-});
+})
 </script>
 </body>
 </html>
