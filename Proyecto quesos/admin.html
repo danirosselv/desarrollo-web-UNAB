@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin — Queso & Sabor</title>
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --radius:10px }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text);line-height:1.45}
+  .wrap{width:min(980px,94vw);margin:18px auto}
+  header{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);background:#fff;border-radius:var(--radius);padding:10px 14px}
+  .brand{font-weight:700}
+  .btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;text-decoration:none;color:var(--text);cursor:pointer}
+  .btn:hover{background:#f9fafb}
+  section{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-top:12px}
+  h2{margin:0 0 10px;font-size:20px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+  label{font-size:14px;color:var(--muted)}
+  input,textarea{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--text);width:100%}
+  textarea{min-height:80px;resize:vertical}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .muted{color:var(--muted)}
+  .msg{margin-top:8px;padding:10px;border-radius:8px;display:none}
+  .msg.ok{display:block;background:#ecfdf5;border:1px solid #bbf7d0;color:#065f46}
+  .msg.err{display:block;background:#fee2e2;border:1px solid #fecaca;color:#7f1d1d}
+  .list{display:grid;gap:8px;margin-top:10px}
+  .item{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:10px;background:#fff}
+  .thumb{width:56px;height:56px;border-radius:8px;object-fit:cover;background:#f3f4f6}
+  .name{font-weight:600}
+  .small{font-size:14px;color:var(--muted)}
+  .pill{padding:2px 8px;border:1px solid var(--line);border-radius:999px}
+  details{border:1px dashed var(--line);border-radius:8px;padding:10px;background:#fafafa}
+  details[open]{background:#fff7ed}
+  .inline{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <nav class="row">
+      <a class="btn" href="index.html">← Tienda</a>
+      <a class="btn" href="carrito.html">Carrito</a>
+      <a class="btn" href="mispedidos.html">Mis pedidos</a>
+    </nav>
+    <div class="brand">Queso &amp; Sabor — Admin/CMS</div>
+    <div></div>
+  </header>
+
+  <!-- Crear producto -->
+  <section>
+    <h2>Crear producto</h2>
+    <div class="grid-3">
+      <div>
+        <label>Nombre*</label>
+        <input id="p-nombre" placeholder="Ej. Gouda clásico">
+      </div>
+      <div>
+        <label>Precio (CLP)*</label>
+        <input id="p-precio" type="number" min="0" step="1" placeholder="Ej. 5990">
+      </div>
+      <div>
+        <label>Stock*</label>
+        <input id="p-stock" type="number" min="0" step="1" placeholder="Ej. 8">
+      </div>
+    </div>
+    <div class="grid" style="margin-top:10px">
+      <div>
+        <label>Descripción</label>
+        <textarea id="p-desc" placeholder="Opcional"></textarea>
+      </div>
+      <div>
+        <label>Imagen (URL o archivo)</label>
+        <input id="p-img-url" placeholder="https://… (opcional)">
+        <div class="row" style="margin-top:6px">
+          <input id="p-img-file" type="file" accept="image/*">
+          <img id="p-img-prev" class="thumb" alt="" />
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <button id="btn-create" class="btn">Guardar</button>
+      <span id="create-msg" class="msg"></span>
+    </div>
+  </section>
+
+  <!-- Lista / edición -->
+  <section>
+    <h2>Productos</h2>
+    <div id="list" class="list"></div>
+    <p class="small muted" id="empty" hidden>No hay productos.</p>
+  </section>
+</div>
+
+<script>
+/* ===== Storage helpers ===== */
+const PROD_KEY = "qs_products";
+function loadProducts(){ try{ return JSON.parse(localStorage.getItem(PROD_KEY)) || [] }catch{ return [] } }
+function saveProducts(list){ localStorage.setItem(PROD_KEY, JSON.stringify(list)); }
+function uid(){ return "p_" + Math.random().toString(36).slice(2,10); }
+function money(n){ return `$${Number(n||0).toLocaleString("es-CL")}`; }
+
+/* ===== Crear producto ===== */
+const $n = document.getElementById("p-nombre");
+const $pr= document.getElementById("p-precio");
+const $st= document.getElementById("p-stock");
+const $de= document.getElementById("p-desc");
+const $iu= document.getElementById("p-img-url");
+const $if= document.getElementById("p-img-file");
+const $ip= document.getElementById("p-img-prev");
+const $btnCreate = document.getElementById("btn-create");
+const $cmsg = document.getElementById("create-msg");
+
+$if.addEventListener("change", (e)=>{
+  const f = e.target.files?.[0];
+  if(!f) return ($ip.src = "");
+  const r = new FileReader(); r.onload = ()=>($ip.src = r.result); r.readAsDataURL(f);
+});
+
+function validCreate(){
+  const ok = $n.value.trim() && Number($pr.value)>=0 && Number.isInteger(Number($st.value)) && Number($st.value)>=0;
+  $btnCreate.disabled = !ok;
+  return ok;
+}
+["input","change"].forEach(ev=>{ [$n,$pr,$st,$iu,$if].forEach(el=>el.addEventListener(ev, validCreate)); });
+
+$btnCreate.addEventListener("click", ()=>{
+  if(!validCreate()){ $cmsg.className="msg err"; $cmsg.textContent="Completa nombre, precio y stock válidos."; return; }
+  const now = Date.now();
+  const p = {
+    id: uid(),
+    nombre: $n.value.trim(),
+    precio: Number($pr.value||0),
+    stock: Number($st.value||0),
+    descripcion: $de.value.trim(),
+    imagen: $ip.src || $iu.value.trim() || "",
+    createdAt: now,
+    updatedAt: now,
+    activo: true
+  };
+  const list = loadProducts(); list.push(p); saveProducts(list);
+  $cmsg.className="msg ok"; $cmsg.textContent="Producto creado.";
+  $n.value=$pr.value=$st.value=$de.value=$iu.value=""; $if.value=""; $ip.src="";
+  render();
+});
+
+/* ===== Lista y edición inline ===== */
+const $list = document.getElementById("list");
+const $empty = document.getElementById("empty");
+
+function render(){
+  const list = loadProducts();
+  $empty.hidden = list.length>0;
+  $list.innerHTML = list.map(p => `
+    <div class="item" data-id="${p.id}">
+      <img class="thumb" src="${p.imagen||''}" alt="" onerror="this.style.display='none'">
+      <div>
+        <div class="name">${p.nombre}</div>
+        <div class="small">${money(p.precio)} · Stock: <span class="pill">${p.stock}</span></div>
+      </div>
+      <details>
+        <summary class="btn" style="list-style:none">Editar</summary>
+        <div class="inline" style="margin-top:8px">
+          <div>
+            <label>Precio</label>
+            <input class="e-precio" type="number" min="0" step="1" value="${p.precio}">
+          </div>
+          <div>
+            <label>Stock</label>
+            <input class="e-stock" type="number" min="0" step="1" value="${p.stock}">
+          </div>
+          <div>
+            <label>Imagen (URL)</label>
+            <input class="e-imgurl" placeholder="https://…" value="${p.imagen||''}">
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <input class="e-imgfile" type="file" accept="image/*">
+          <img class="e-prev thumb" src="${p.imagen||''}" alt="">
+        </div>
+        <div class="row">
+          <button class="btn e-save">Guardar</button>
+          <span class="small muted">id: ${p.id}</span>
+        </div>
+        <span class="msg"></span>
+      </details>
+    </div>
+  `).join("");
+
+  $list.querySelectorAll(".item").forEach(card=>{
+    const id = card.dataset.id;
+    const $precio = card.querySelector(".e-precio");
+    const $stock  = card.querySelector(".e-stock");
+    const $imgurl = card.querySelector(".e-imgurl");
+    const $imgfile= card.querySelector(".e-imgfile");
+    const $prev   = card.querySelector(".e-prev");
+    const $save   = card.querySelector(".e-save");
+    const $msg    = card.querySelector(".msg");
+
+    $imgfile.addEventListener("change", e=>{
+      const f=e.target.files?.[0]; if(!f) return;
+      const r=new FileReader(); r.onload=()=>($prev.src=r.result); r.readAsDataURL(f);
+    });
+
+    $save.addEventListener("click", ()=>{
+      const precio = Number($precio.value);
+      const stock  = Number($stock.value);
+      if(!Number.isInteger(stock) || stock<0){ $msg.className="msg err"; $msg.textContent="Stock inválido."; return; }
+      if(!(precio>=0)){ $msg.className="msg err"; $msg.textContent="Precio inválido."; return; }
+
+      const list = loadProducts();
+      const i = list.findIndex(p=>p.id===id);
+      if(i<0) return;
+      list[i].precio = precio;
+      list[i].stock  = stock;
+      list[i].imagen = $prev.src || $imgurl.value.trim() || list[i].imagen;
+      list[i].updatedAt = Date.now();
+      saveProducts(list);
+      $msg.className="msg ok"; $msg.textContent="Actualizado con éxito.";
+      render();
+    });
+  });
+}
+
+/* ===== init ===== */
+render();
+</script>
+</body>
+</html>

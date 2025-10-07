@@ -223,44 +223,53 @@
        JS GLOBAL (datos y helpers)
        ========================================================= -->
        <script>
-  // ===== Núcleo de carrito (compartido con Epica 2) =====
-  const CART_KEY = "qs_cart_v1";
-  const Cart = {
-    items: {},
-    load() {
-      try { this.items = JSON.parse(localStorage.getItem(CART_KEY)) || {}; }
-      catch { this.items = {}; }
-    },
-    save() { localStorage.setItem(CART_KEY, JSON.stringify(this.items)); },
-    count() { return Object.values(this.items).reduce((n, it) => n + it.qty, 0); },
-    add(product, qty = 1) {
-      const id = product.id;
-      if (!this.items[id]) {
-        this.items[id] = { id, nombre: product.nombre, precio: product.precio, imagen: product.imagen, qty: 0 };
-      }
-      this.items[id].qty += qty;
-      this.save();
-    }
-  };
+  // === Productos (admin guarda en qs_products)
+  const PROD_KEY = "qs_products";
 
-  function updateBadge() {
-    const badge = document.getElementById("cart-badge");
-    if (badge) badge.textContent = Cart.count();
+  function loadProducts(){
+    try { return JSON.parse(localStorage.getItem(PROD_KEY)) || []; }
+    catch { return []; }
+  }
+  function capitalizar(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : ""; }
+
+  // Demo (fallback si no hay nada en storage)
+  function demoProducts(){
+    return [
+      { id:"gouda-1", nombre:"Gouda clásico",      precio:5990, leche:"vaca",  stock:10, imagen:"img/quesogouda1.jpg",
+        descripcion:"Queso holandés de sabor suave y textura cremosa.",
+        notas:"Notas mantecosas, con leve dulzura.", recomendaciones:"Ideal con vino blanco seco." },
+      { id:"manchego-1", nombre:"Manchego curado", precio:7990, leche:"oveja", stock:5,  imagen:"img/quesomanchego1.jpeg",
+        descripcion:"Queso español elaborado con leche de oveja.",
+        notas:"Sabor intenso y ligeramente salado.", recomendaciones:"Perfecto con pan rústico y vino tinto." },
+      { id:"cabra-1", nombre:"Queso de cabra",     precio:6990, leche:"cabra", stock:0,  imagen:"img/quesodecabra1.jpeg",
+        descripcion:"Queso curado de cabra, sabor fuerte y persistente.",
+        notas:"Aromas lácticos y toque picante.", recomendaciones:"Acompáñalo con miel o frutos secos." },
+      { id:"gouda-reserva", nombre:"Gouda gran reserva", precio:9990, leche:"vaca", stock:8, imagen:"img/goudagranreserva1.jpg",
+        descripcion:"Madurado, sabor profundo y textura firme.",
+        notas:"Toques de nuez y caramelo.", recomendaciones:"Excelente con cerveza ámbar." },
+    ];
   }
 
-  Cart.load();
-  updateBadge();
+  // Productos usados por el catálogo:
+  // - Si hay en storage, usa esos (los creados en admin.html)
+  // - Si no, muestra los de demo
+  let productos = (() => {
+    const stored = loadProducts();
+    return stored.length ? stored : demoProducts();
+  })();
 </script>
 
+
   <script>
-    const productos = [
-      { id: "gouda-1",       nombre: "Gouda clásico",       precio: 5990, leche: "vaca" },
-      { id: "manchego-1",    nombre: "Manchego curado",     precio: 7990, leche: "oveja" },
-      { id: "cabra-1",       nombre: "Queso de cabra",      precio: 6990, leche: "cabra" },
-      { id: "gouda-reserva", nombre: "Gouda gran reserva",  precio: 9990, leche: "vaca" },
-    ];
-    function capitalizar(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
-  </script>
+// === Productos desde el CMS (localStorage)
+const PROD_KEY = "qs_products";
+function loadProducts(){ try{ return JSON.parse(localStorage.getItem(PROD_KEY)) || [] }catch{ return [] } }
+function saveProducts(list){ localStorage.setItem(PROD_KEY, JSON.stringify(list)); }
+function reloadProductos(){
+  productos = loadProducts().filter(p=>p.activo!==false);
+}
+</script>
+
 
   <!-- =========================================================
        JS (búsqueda + filtro)
@@ -381,14 +390,15 @@
     $btnCarrito.disabled = p.stock <= 0;
     $btnCarrito.textContent = p.stock <= 0 ? "Sin stock" : "Agregar al carrito";
     $btnCarrito.onclick = () => {
-  if (p.stock > 0) {
+  const inCart = (Cart.items[p.id]?.qty || 0);
+  if (p.stock > 0 && inCart < p.stock) {
     Cart.add(p, 1);
     updateBadge();
     alert(`✅ ${p.nombre} se ha agregado al carrito.`);
+  } else {
+    alert("No hay más stock disponible para este producto.");
   }
 };
-
-
     $detalle.hidden = false;
     $detalle.scrollIntoView({ behavior: "smooth" });
   }
