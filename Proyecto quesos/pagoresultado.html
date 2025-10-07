@@ -5,20 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Resultado del pago</title>
 <style>
-  :root{ --line:#e5e7eb; --muted:#6b7280; }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#f6f7f9;color:#1f2937}
-  .wrap{width:min(720px,94vw);margin:24px auto}
-  .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px}
-  h1{font-size:20px;margin:0 0 8px}
-  .box{display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;padding:24px;margin:10px 0;background:#fafafa;text-align:center}
-  .ok{font-size:56px} .err{font-size:56px}
-  .muted{color:var(--muted)}
-  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-  a,button{padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;text-decoration:none;color:#1f2937}
-  a:hover,button:hover{background:#f9fafb}
-  ul.items{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
-  ul.items li{display:flex;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff}
+  body{margin:0;font-family:system-ui;background:#f6f7f9;color:#1f2937}
+  .wrap{max-width:720px;margin:24px auto;padding:0 10px}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px}
+  .box{border:1px solid #e5e7eb;border-radius:10px;padding:24px;margin:10px 0;background:#fafafa;text-align:center}
+  .icon{font-size:56px}
+  .row{display:flex;gap:10px;margin-top:10px}
+  a,button{padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;text-decoration:none;color:#1f2937}
+  .items{list-style:none;margin:10px 0 0;padding:0}
+  .items li{display:flex;justify-content:space-between;border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -26,92 +21,79 @@
   <div class="card">
     <h1 id="title">Resultado del pago</h1>
     <div id="box" class="box"></div>
-
-    <div id="order" class="muted"></div>
+    <div id="info"></div>
     <ul id="items" class="items"></ul>
-
     <div class="row" id="actions"></div>
   </div>
 </div>
 
 <script>
-  // ===== Helpers
-  const qs = new URLSearchParams(location.search);
-  const status = (qs.get("status") || "").toLowerCase(); // ok | rechazo | error
-  const orderId = qs.get("orderId") || "";
-  function money(n){ return `$${Number(n||0).toLocaleString("es-CL")}`; }
+const qs = new URLSearchParams(location.search)
+const status = (qs.get("status") || "").toLowerCase()
+const orderId = qs.get("orderId") || ""
 
-  // Storage
-  function loadPending(){ try{ return JSON.parse(localStorage.getItem("qs_pending_order")) }catch{ return null } }
-  function loadOrders(){ try{ return JSON.parse(localStorage.getItem("qs_orders")) || [] }catch{ return [] } }
+function loadPending(){ 
+  return JSON.parse(localStorage.getItem("qs_pending_order") || "null") 
+}
 
-  // UI refs
-  const $title  = document.getElementById("title");
-  const $box    = document.getElementById("box");
-  const $info   = document.getElementById("order");
-  const $items  = document.getElementById("items");
-  const $actions= document.getElementById("actions");
+function loadOrders(){ 
+  return JSON.parse(localStorage.getItem("qs_orders") || "[]") 
+}
 
-  function renderItems(order){
-    if(!order || !order.items) return;
-    const entries = Object.values(order.items);
-    if(!entries.length) return;
-    $items.innerHTML = entries.map(it => {
-      const subtotal = it.qty * it.precio;
-      return `<li><span>${it.nombre} (x${it.qty})</span><strong>${money(subtotal)}</strong></li>`;
-    }).join("");
+function renderItems(order){
+  if(!order?.items) return
+  $items.innerHTML = Object.values(order.items).map(it => 
+    `<li><span>${it.nombre} x${it.qty}</span><span>$${(it.qty*it.precio).toLocaleString()}</span></li>`
+  ).join("")
+}
+
+const $title = document.getElementById("title")
+const $box = document.getElementById("box")
+const $info = document.getElementById("info")
+const $items = document.getElementById("items")
+const $actions = document.getElementById("actions")
+
+if(status === "ok"){
+  const orders = loadOrders()
+  const order = orders.find(o => o.id === orderId)
+
+  if(order){
+    $title.textContent = "Pago exitoso"
+    $box.innerHTML = `<div class="icon">✅</div><p>Tu pago fue aprobado</p>`
+    $info.innerHTML = `Orden <strong>${order.id}</strong> - $${order.total?.toLocaleString() || '0'}`
+    renderItems(order)
+    $actions.innerHTML = `<a href="mispedidos.html">Mis pedidos</a><a href="index.html">Tienda</a>`
+  }else{
+    $title.textContent = "Pago realizado"
+    $box.innerHTML = `<div class="icon">✅</div><p>Transacción aprobada</p>`
+    $actions.innerHTML = `<a href="mispedidos.html">Mis pedidos</a><a href="index.html">Tienda</a>`
   }
+}
+else if(status === "rechazo" || status === "error"){
+  const pending = loadPending()
+  const msg = status === "rechazo" ? "Transacción rechazada" : "Error en el pago"
+  
+  $title.textContent = "Pago fallido"
+  $box.innerHTML = `<div class="icon">⚠️</div><p>${msg}</p>`
 
-  // ===== Ramas
-  if(status === "ok"){
-    // Buscar la orden por id en qs_orders (webpaysim la guardó ahí)
-    const orders = loadOrders();
-    const order = orders.find(o => o.id === orderId) || null;
-
-    if(!order){
-      // Fallback: nada encontrado
-      $title.textContent = "Pago realizado (sin detalles)";
-      $box.innerHTML = `<div class="ok">✅</div><p style="margin:8px 0 0">Tu pago fue aprobado.</p>`;
-      $actions.innerHTML = `<a href="mispedidos.html">Ver mis pedidos</a><a href="index.html">Volver a la tienda</a>`;
-    }else{
-      $title.textContent = "Pago realizado con éxito";
-      $box.innerHTML = `<div class="ok">✅</div>`;
-      $info.innerHTML =
-        `Orden <strong>${order.id}</strong> por <strong>${money(order.total)}</strong>. ` +
-        `Se enviará confirmación a <strong>${order.buyer?.email || "—"}</strong>.`;
-      renderItems(order);
-      $actions.innerHTML = `<a href="mispedidos.html">Ver mis pedidos</a><a href="index.html">Volver a la tienda</a>`;
-    }
+  if(pending){
+    $info.innerHTML = `Orden <strong>${pending.id}</strong> - $${pending.total?.toLocaleString() || '0'}`
+    renderItems(pending)
+    const params = new URLSearchParams({ orderId: pending.id, amount: pending.total })
+    $actions.innerHTML = `<a href="webpaysim.html?${params}">Reintentar</a><a href="carrito.html">Carrito</a>`
+  }else{
+    $actions.innerHTML = `<a href="carrito.html">Carrito</a>`
   }
-  else if(status === "rechazo" || status === "error"){
-    // En rechazo/error webpaysim deja la orden pendiente para reintentar
-    const pending = loadPending();
-    const msg = status === "rechazo"
-      ? "Transacción rechazada. Verifica los datos e inténtalo de nuevo."
-      : "El pago no pudo procesarse. Inténtalo nuevamente más tarde.";
-
-    $title.textContent = "Pago no realizado";
-    $box.innerHTML = `<div class="err">⚠️</div><p style="margin:8px 0 0">${msg}</p>`;
-
-    if(pending){
-      $info.innerHTML = `Orden <strong>${pending.id}</strong> — Total ${money(pending.total)}.`;
-      renderItems(pending);
-      const retryParams = new URLSearchParams({ orderId: pending.id, amount: pending.total });
-      $actions.innerHTML = `<a href="webpaysim.html?${retryParams}">Reintentar</a><a href="carrito.html">Volver al carrito</a>`;
-    }else{
-      $actions.innerHTML = `<a href="carrito.html">Volver al carrito</a>`;
-    }
+}
+else{
+  const pending = loadPending()
+  $title.textContent = "Sin orden"
+  $box.innerHTML = `<div class="icon">⚠️</div><p>Vuelve al carrito</p>`
+  $actions.innerHTML = `<a href="carrito.html">Carrito</a>`
+  if(pending){
+    $info.innerHTML = `Orden pendiente: <strong>${pending.id}</strong>`
   }
-  else{
-    // Estado desconocido o acceso directo
-    const pending = loadPending();
-    $title.textContent = "No hay orden pendiente";
-    $box.innerHTML = `<div class="err">⚠️</div><p style="margin:8px 0 0">Vuelve al carrito para iniciar el pago.</p>`;
-    $actions.innerHTML = `<a href="carrito.html">Ir al carrito</a>`;
-    if (pending){
-      $info.innerHTML = `Orden pendiente detectada: <strong>${pending.id}</strong> — Total ${money(pending.total)}.`;
-    }
-  }
+}
 </script>
 </body>
 </html>

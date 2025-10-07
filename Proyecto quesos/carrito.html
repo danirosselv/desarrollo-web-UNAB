@@ -6,43 +6,26 @@
 <title>Carrito — Queso & Sabor</title>
 
 <style>
-  /* =========================================================
-     EPICA 2 — ESTILOS BASE (US-05/US-06)
-     ========================================================= */
-  :root{
-    --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
-    --accent:#fbbf24; --radius:10px;
-  }
+  :root{ --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --radius:10px; }
   *{box-sizing:border-box}
-  body{margin:0; font-family:system-ui, Segoe UI, Roboto, Arial; color:var(--text); background:var(--bg); line-height:1.45}
+  body{margin:0; font-family:system-ui, sans-serif; color:var(--text); background:var(--bg); line-height:1.45}
   .container{width:min(960px,94vw); margin:18px auto}
-
-  /* ===== Header (igual a index) ===== */
-  header{
-    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-    padding:10px 14px; display:flex; align-items:center; justify-content:space-between;
-  }
+  
+  header{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+          padding:10px 14px; display:flex; align-items:center; justify-content:space-between; }
   .brand{font-weight:700}
   .cart{ position:relative; display:inline-flex; align-items:center; justify-content:center;
          width:40px; height:36px; border:1px solid var(--line); border-radius:8px; background:#fff; text-decoration:none }
   .badge{ position:absolute; top:-8px; right:-8px; background:#111827; color:#fff; font-size:12px;
           border-radius:999px; padding:2px 6px; min-width:20px; text-align:center }
-
-  /* ===== Card principal ===== */
-  section{
-    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-    padding:16px; margin-top:12px;
-  }
+  
+  section{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+           padding:16px; margin-top:12px; }
   h2{ margin:0 0 12px; font-size:20px }
-
-  /* =========================================================
-     US-05 — LISTA DE ÍTEMS + CONTROLES
-     ========================================================= */
+  
   .items{ list-style:none; padding:0; margin:0; display:grid; gap:10px }
-  .item{
-    border:1px solid var(--line); border-radius:8px; padding:12px;
-    display:grid; grid-template-columns: 56px 1fr auto; gap:12px; align-items:center; background:#fff;
-  }
+  .item{ border:1px solid var(--line); border-radius:8px; padding:12px;
+          display:grid; grid-template-columns: 56px 1fr auto; gap:12px; align-items:center; background:#fff; }
   .thumb{ width:56px; height:56px; border-radius:8px; object-fit:cover; display:block; background:#f3f4f6; }
   .name{ font-weight:600 }
   .unit{ color:var(--muted); font-size:14px }
@@ -51,38 +34,26 @@
   .qtybox button{ width:28px; height:28px; border:0; background:#fff; cursor:pointer }
   .qtybox span{ width:32px; text-align:center; font-variant-numeric:tabular-nums }
   .remove{ border:1px solid var(--line); background:#fff; border-radius:8px; width:34px; height:34px; cursor:pointer }
-
-  /* =========================================================
-     US-06 — RESUMEN DE TOTALES
-     ========================================================= */
+  
   .totals{ border-top:1px dashed var(--line); margin-top:12px; padding-top:12px; display:grid; gap:8px; }
   .row{ display:flex; justify-content:space-between; align-items:center; gap:10px }
   .muted{ color:var(--muted) }
-  select{ font:inherit; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--text) }
-
+  select, input{ font:inherit; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--text) }
+  
   .actions{ margin-top:10px; display:flex; gap:10px; flex-wrap:wrap }
-  button.primary{ background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px 14px; cursor:pointer }
-  button.primary:hover{ background:#f9fafb }
-  a.link{ color:#1f2937; text-decoration:none; border:1px solid var(--line); border-radius:8px; padding:8px 12px; background:#fff }
-  a.link:hover{ background:#f9fafb }
-
-  /* ===== Estado vacío ===== */
+  button, a.link{ background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px 14px; cursor:pointer; text-decoration:none; color:var(--text) }
+  button:hover, a.link:hover{ background:#f9fafb }
+  button:disabled{ opacity:.55; cursor:not-allowed }
+  
   .empty{ text-align:center; color:var(--muted); padding:24px 8px }
   .empty .cart-draw{ font-size:64px; line-height:1; margin-bottom:8px }
-
-  /* ===== EPICA 3 — Datos comprador (US-07) ===== */
+  
   .buyer { margin:10px 0 6px }
   .buyer h3 { margin:0 0 8px; font-size:16px; color:var(--muted) }
   .buyer .grid { display:grid; grid-template-columns:1fr 1fr; gap:8px }
-  .buyer input {
-    font:inherit; padding:10px 12px; border:1px solid var(--line);
-    border-radius:8px; background:#fff; color:var(--text);
-  }
   .buyer .error { color:#b91c1c; font-size:14px; margin-top:6px }
-  button.primary:disabled{ opacity:.55; cursor:not-allowed }
   @media (max-width:640px){ .buyer .grid{ grid-template-columns:1fr } }
-
-  /* ===== EPICA 4 — método de envío (US-11/US-12) ===== */
+  
   .ship-group{ display:flex; gap:10px; flex-wrap:wrap }
   .ship-group label{ display:flex; gap:6px; align-items:center }
 </style>
@@ -90,11 +61,8 @@
 <body>
 
 <div class="container">
-  <!-- =========================================================
-       HEADER
-       ========================================================= -->
   <header>
-    <a class="link" href="index.html">← Volver a la tienda</a>
+    <a class="link" href="index.html">← Volver</a>
     <div class="brand">Queso & Sabor</div>
     <a class="cart" href="carrito.html" title="Tu carrito">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -107,84 +75,62 @@
     </a>
   </header>
 
-  <!-- =========================================================
-       US-06: RESUMEN DEL PEDIDO (incluye US-05)
-       ========================================================= -->
   <section>
     <h2>Resumen del pedido</h2>
 
-    <!-- B2: Carrito vacío -->
     <div id="empty" class="empty" hidden>
       <div class="cart-draw">🛒</div>
       <p>Tu carrito está vacío</p>
       <a class="link" href="index.html">Ir a la tienda</a>
     </div>
 
-    <!-- B1: Con ítems -->
     <ul id="items" class="items"></ul>
 
-    <!-- ===== Resumen de totales (US-11/US-12 + US-07) ===== -->
     <div id="totals" class="totals" hidden>
       <h3 class="muted" style="margin:0 0 8px">Resumen de totales</h3>
 
-      <div class="row">
-        <span class="muted">Subtotal</span>
-        <strong id="t-subtotal">$0</strong>
-      </div>
+      <div class="row"><span class="muted">Subtotal</span><strong id="t-subtotal">$0</strong></div>
 
-      <!-- Método de envío -->
       <div class="row">
         <span class="muted">Método</span>
         <div class="ship-group" role="radiogroup" aria-label="Método de envío">
-          <label><input type="radio" name="shipmethod" id="m-despacho" value="despacho"> Despacho a domicilio</label>
-          <label><input type="radio" name="shipmethod" id="m-retiro" value="retiro"> Retiro en tienda</label>
+          <label><input type="radio" name="shipmethod" id="m-despacho" value="despacho"> Despacho</label>
+          <label><input type="radio" name="shipmethod" id="m-retiro" value="retiro"> Retiro</label>
         </div>
       </div>
 
-      <!-- Si despacho: comuna -->
       <div id="row-comuna" class="row">
         <label class="muted" for="ship-comuna">Comuna</label>
         <select id="ship-comuna"></select>
       </div>
 
-      <!-- Si retiro: sucursal -->
       <div id="row-sucursal" class="row" hidden>
         <label class="muted" for="ship-sucursal">Sucursal</label>
         <select id="ship-sucursal"></select>
       </div>
 
-      <div class="row"><span class="muted">Costo de envío</span><strong id="t-shipping">$0</strong></div>
-      <div class="row" style="font-size:18px">
-        <span><strong>Total</strong></span>
-        <strong id="t-total">$0</strong>
-      </div>
+      <div class="row"><span class="muted">Envío</span><strong id="t-shipping">$0</strong></div>
+      <div class="row" style="font-size:18px"><span><strong>Total</strong></span><strong id="t-total">$0</strong></div>
 
-      <!-- Datos comprador (US-07) -->
       <div id="buyer" class="buyer">
-        <h3>Datos de envío / contacto</h3>
+        <h3>Datos de contacto</h3>
         <div class="grid">
-          <input id="b-nombre" placeholder="Nombre y apellido" autocomplete="name" required>
+          <input id="b-nombre" placeholder="Nombre" autocomplete="name" required>
           <input id="b-email" type="email" placeholder="Email" autocomplete="email" required>
-          <input id="b-dire" placeholder="Dirección (solo si es despacho)" style="grid-column:1/-1">
+          <input id="b-dire" placeholder="Dirección (solo despacho)" style="grid-column:1/-1">
         </div>
-        <p id="buyer-error" class="error" hidden>Completa los datos requeridos para continuar.</p>
+        <p id="buyer-error" class="error" hidden>Completa los datos requeridos.</p>
       </div>
 
       <div class="actions">
-        <button id="btn-checkout" class="primary">Continuar con el pago</button>
-        <button id="btn-clear" class="primary" title="Vaciar carrito">Vaciar carrito</button>
+        <button id="btn-checkout" class="primary">Continuar con pago</button>
+        <button id="btn-clear" class="primary">Vaciar carrito</button>
       </div>
     </div>
   </section>
 </div>
 
-<!-- =========================================================
-     JS
-     ========================================================= -->
 <script>
-  /* =========================================================
-     EPICA 2 — MÓDULO DE CARRITO (COMPATIBLE CON INDEX)
-     ========================================================= */
   const CART_KEY = "qs_cart_v1";
   const Cart = {
     items:{},
@@ -202,35 +148,6 @@
     clear(){ this.items = {}; this.save(); }
   };
 
-  // Badge header
-  function updateBadge(){ document.getElementById("cart-badge").textContent = Cart.count(); }
-
-  // ===== Referencias UI
-  const $items = document.getElementById("items");
-  const $empty = document.getElementById("empty");
-  const $totals = document.getElementById("totals");
-  const $tSubtotal = document.getElementById("t-subtotal");
-  const $tShipping = document.getElementById("t-shipping");
-  const $tTotal = document.getElementById("t-total");
-
-  // Envío
-  const $mDespacho   = document.getElementById("m-despacho");
-  const $mRetiro     = document.getElementById("m-retiro");
-  const $rowComuna   = document.getElementById("row-comuna");
-  const $rowSucursal = document.getElementById("row-sucursal");
-  const $selComuna   = document.getElementById("ship-comuna");
-  const $selSucursal = document.getElementById("ship-sucursal");
-
-  // Comprador
-  const $bn = document.getElementById("b-nombre");
-  const $be = document.getElementById("b-email");
-  const $bd = document.getElementById("b-dire");
-  const $err = document.getElementById("buyer-error");
-  const $btnPay = document.getElementById("btn-checkout");
-
-  /* =========================================================
-     EPICA 4 — Envío (US-11/US-12)
-     ========================================================= */
   const COSTO_POR_COMUNA = {
     "Santiago Centro":1990,
     "Providencia":2490,
@@ -239,18 +156,6 @@
   };
   const SUCURSALES = ["Providencia","Ñuñoa","Las Condes"];
 
-  const SHIP_METHOD_KEY   = "qs_ship_method_v1";   // "despacho" | "retiro"
-  const SHIP_COMUNA_KEY   = "qs_ship_comuna_v1";
-  const SHIP_SUCURSAL_KEY = "qs_ship_sucursal_v1";
-
-  function getSavedMethod(){ return localStorage.getItem(SHIP_METHOD_KEY) || "retiro"; }
-  function setSavedMethod(v){ localStorage.setItem(SHIP_METHOD_KEY, v); }
-  function getSavedComuna(){ return localStorage.getItem(SHIP_COMUNA_KEY) || "Santiago Centro"; }
-  function setSavedComuna(v){ localStorage.setItem(SHIP_COMUNA_KEY, v); }
-  function getSavedSucursal(){ return localStorage.getItem(SHIP_SUCURSAL_KEY) || "Providencia"; }
-  function setSavedSucursal(v){ localStorage.setItem(SHIP_SUCURSAL_KEY, v); }
-
-  /* ===== Util ===== */
   function money(n){ return `$${n.toLocaleString("es-CL")}`; }
   function getShipMethod(){
     return document.querySelector('input[name="shipmethod"]:checked')?.value || "retiro";
@@ -258,8 +163,6 @@
   function getShipCost(){
     return getShipMethod()==="despacho" ? (COSTO_POR_COMUNA[$selComuna.value] || 0) : 0;
   }
-
-  /* ===== Validación comprador (US-07) ===== */
   function buyerOk(){
     const nameOk  = ($bn?.value || "").trim();
     const emailOk = /\S+@\S+\.\S+/.test(($be?.value || "").trim());
@@ -271,55 +174,59 @@
     $btnPay.disabled = !buyerOk();
     $err.hidden = true;
   }
-  [$bn,$be,$bd].forEach($i => $i && $i.addEventListener("input", syncPayBtn));
 
-  /* ===== UI de envío ===== */
+  const $items = document.getElementById("items");
+  const $empty = document.getElementById("empty");
+  const $totals = document.getElementById("totals");
+  const $tSubtotal = document.getElementById("t-subtotal");
+  const $tShipping = document.getElementById("t-shipping");
+  const $tTotal = document.getElementById("t-total");
+  const $mDespacho = document.getElementById("m-despacho");
+  const $mRetiro = document.getElementById("m-retiro");
+  const $rowComuna = document.getElementById("row-comuna");
+  const $rowSucursal = document.getElementById("row-sucursal");
+  const $selComuna = document.getElementById("ship-comuna");
+  const $selSucursal = document.getElementById("ship-sucursal");
+  const $bn = document.getElementById("b-nombre");
+  const $be = document.getElementById("b-email");
+  const $bd = document.getElementById("b-dire");
+  const $err = document.getElementById("buyer-error");
+  const $btnPay = document.getElementById("btn-checkout");
+
   function initShippingUI(){
-    // llenar selects
-    $selComuna.innerHTML   = Object.keys(COSTO_POR_COMUNA).map(c=>`<option>${c}</option>`).join("");
+    $selComuna.innerHTML = Object.keys(COSTO_POR_COMUNA).map(c=>`<option>${c}</option>`).join("");
     $selSucursal.innerHTML = SUCURSALES.map(s=>`<option>${s}</option>`).join("");
-
-    // cargar guardados
-    (getSavedMethod()==="despacho" ? $mDespacho : $mRetiro).checked = true;
-    $selComuna.value   = getSavedComuna();
-    $selSucursal.value = getSavedSucursal();
-
+    $mRetiro.checked = true;
+    $selComuna.value = "Santiago Centro";
+    $selSucursal.value = "Providencia";
     applyShipUI();
-
-    // listeners
-    [$mDespacho, $mRetiro].forEach(r => r.addEventListener("change", ()=>{
-      setSavedMethod(getShipMethod());
-      applyShipUI(); calcTotals(); syncPayBtn();
-    }));
-    $selComuna.addEventListener("change", ()=>{ setSavedComuna($selComuna.value); calcTotals(); });
-    $selSucursal.addEventListener("change", ()=>{ setSavedSucursal($selSucursal.value); });
+    [$mDespacho, $mRetiro].forEach(r => r.addEventListener("change", ()=>{ applyShipUI(); calcTotals(); syncPayBtn(); }));
+    $selComuna.addEventListener("change", ()=>{ calcTotals(); });
+    $selSucursal.addEventListener("change", ()=>{ });
   }
 
   function applyShipUI(){
     const isDespacho = getShipMethod()==="despacho";
-    $rowComuna.hidden   = !isDespacho;
-    $rowSucursal.hidden =  isDespacho;
+    $rowComuna.hidden = !isDespacho;
+    $rowSucursal.hidden = isDespacho;
   }
 
-  /* ===== Totales ===== */
   function calcTotals(){
     const shipping = getShipCost();
     const subtotal = Cart.subtotal();
     const total = subtotal + shipping;
     $tSubtotal.textContent = money(subtotal);
     $tShipping.textContent = money(shipping);
-    $tTotal.textContent    = money(total);
+    $tTotal.textContent = money(total);
     syncPayBtn();
   }
 
-  /* ===== Render principal (US-05 + US-06) ===== */
   function render(){
     const ids = Object.keys(Cart.items);
     const isEmpty = ids.length === 0;
-
     $empty.hidden = !isEmpty;
     $totals.hidden = isEmpty;
-    updateBadge();
+    document.getElementById("cart-badge").textContent = Cart.count();
 
     if(isEmpty){ $items.innerHTML = ""; return; }
 
@@ -332,22 +239,21 @@
           <img class="thumb" src="${img}" alt="" onerror="this.style.display='none'">
           <div>
             <div class="name">${it.nombre}</div>
-            <div class="unit">Precio: $${it.precio.toLocaleString("es-CL")} c/u (x${it.qty})</div>
+            <div class="unit">$${it.precio.toLocaleString("es-CL")} c/u (x${it.qty})</div>
           </div>
           <div class="right">
-            <div class="qtybox" role="group" aria-label="Control de cantidad">
-              <button class="btn-dec" aria-label="Restar uno">−</button>
+            <div class="qtybox">
+              <button class="btn-dec">−</button>
               <span class="qty">${it.qty}</span>
-              <button class="btn-inc" aria-label="Sumar uno">＋</button>
+              <button class="btn-inc">＋</button>
             </div>
-            <div class="unit"><strong>Total: $${subtotalItem.toLocaleString("es-CL")}</strong></div>
-            <button class="remove" title="Eliminar">🗑️</button>
+            <div class="unit"><strong>$${subtotalItem.toLocaleString("es-CL")}</strong></div>
+            <button class="remove">🗑️</button>
           </div>
         </li>
       `;
     }).join("");
 
-    // Eventos por item
     $items.querySelectorAll(".item").forEach($li => {
       const id = $li.dataset.id;
       $li.querySelector(".btn-inc").addEventListener("click", () => { Cart.updateQty(id, +1); render(); });
@@ -358,13 +264,13 @@
     calcTotals();
   }
 
-  /* ===== Init ===== */
   Cart.load();
   initShippingUI();
   render();
   syncPayBtn();
 
-  /* ===== Acciones ===== */
+  [$bn,$be,$bd].forEach($i => $i && $i.addEventListener("input", syncPayBtn));
+
   document.getElementById("btn-clear").addEventListener("click", () => {
     if(confirm("¿Vaciar carrito?")){ Cart.clear(); render(); }
   });
@@ -375,7 +281,7 @@
       return;
     }
 
-    const method   = getShipMethod();
+    const method = getShipMethod();
     const shipping = getShipCost();
     const shippingDetail = method==="despacho"
       ? { comuna: $selComuna.value }

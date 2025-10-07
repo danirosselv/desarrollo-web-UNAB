@@ -5,182 +5,73 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Queso y Sabor — MVP</title>
   <style>
-    /* Header con carrito US-04*/
-#app-header{
-  width:min(960px,94vw);
-  margin:12px auto 0;
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  padding:10px 14px;
-  display:flex; align-items:center; justify-content:space-between;
-}
-#app-header .brand{ font-weight:700 }
-
-#cart-link{
-  position:relative;
-  display:inline-flex; align-items:center; justify-content:center;
-  width:40px; height:36px; border:1px solid var(--line);
-  border-radius:8px; background:#fff; text-decoration:none;
-}
-#cart-badge{
-  position:absolute; top:-8px; right:-8px;
-  background:#111827; color:#fff; font-size:12px;
-  border-radius:999px; padding:2px 6px; min-width:20px; text-align:center;
-}
-/* === NUEVO: nav y botón del header === */
-#app-header .nav{ display:flex; gap:8px; align-items:center }
-.btn{
-  color:var(--text);
-  text-decoration:none;
-  border:1px solid var(--line);
-  border-radius:8px;
-  padding:8px 12px;
-  background:#fff;
-}
-.btn:hover{ background:#f9fafb }
-  /* ======== Diseño ======== */
-
-  :root{
-    --bg:#f6f7f9;
-    --card:#ffffff;
-    --text:#1f2937;
-    --muted:#6b7280;
-    --line:#e5e7eb;
-    --accent:#fbbf24;
-    --radius:10px;
-  }
-
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue";
-    color:var(--text);
-    background:var(--bg);
-    line-height:1.45;
-  }
-
-  /* Secciones */
-  section{
-    width:min(960px, 94vw);
-    margin:20px auto;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:16px;
-  }
-
-  /* Cabecera del catálogo */
-  .row{
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    margin-bottom:10px;
-  }
-  h2{ margin:0; font-size:20px }
-  .controls{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
-
-  label{ color:var(--muted); font-size:14px }
-
-  /* Inputs */
-  input[type="search"], select{
-    font:inherit;
-    padding:10px 12px;
-    border:1px solid var(--line);
-    border-radius:8px;
-    background:#fff;
-    color:var(--text);
-    outline:none;
-  }
-  input[type="search"]{ width:100%; margin-top:8px }
-  input[type="search"]::placeholder{ color:#9ca3af }
-
-  /* Botón */
-  button{
-    font:inherit; padding:10px 14px; border:1px solid var(--line);
-    border-radius:8px; background:#fff; cursor:pointer;
-  }
-  button:hover{ background:#f9fafb }
-  button:disabled{ background:#f3f4f6; color:#9ca3af; cursor:not-allowed }
-
-  /* Chip de filtro */
-  #filtro-activo[hidden]{ display:none }
-  #filtro-activo{
-    padding:6px 10px; border-radius:999px; border:1px solid var(--line);
-    background:#fff7ed; color:#92400e; font-size:14px;
-  }
-  #btn-limpiar[hidden]{ display:none }
-
-  /* Lista de resultados */
-  ul[role="list"]{
-    list-style:none; padding:0; margin:12px 0 0;
-    display:grid; gap:8px;
-  }
-  li[data-id]{
-    display:flex; align-items:center; justify-content:space-between;
-    border:1px solid var(--line); border-radius:8px;
-    padding:10px 12px; background:#fff; cursor:pointer;
-  }
-  li[data-id]:hover{ background:#f9fafb }
-  li[data-id] strong{ font-weight:600 }
-  li[data-id] small{ color:var(--muted) }
-
-  /* Mensaje vacío */
-  #estado-vacio[hidden]{ display:none }
-  #estado-vacio{
-    margin:10px 0 0; border:1px dashed var(--line); background:#fafafa;
-    border-radius:8px; padding:10px 12px; color:var(--muted);
-  }
-
-  /* US-03: ficha simple */
-  #detalle-queso .imagen{
-  border:1px solid var(--line);
-  border-radius:8px;
-  background:#fafafa;
-  max-width: 280px;
-  margin:8px 0 12px; 
-  }
-  #detalle-queso .imagen img{
-  width:100%;
-  height:auto;
-  display:block;
-  border-radius:8px;
-}
-  #detalle-queso a{ color:#111827; text-decoration:none; margin-bottom:8px; display:inline-block }
-  #detalle-queso a:hover{ text-decoration:underline }
-  #detalle-queso p{ margin:6px 0 }
-
-  /* Accesibilidad */
-  .sr-only {
-    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
-    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
-  }
+    :root{ --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --radius:10px }
+    *{box-sizing:border-box}
+    body{ margin:0; font-family:system-ui, sans-serif; color:var(--text); background:var(--bg); line-height:1.45 }
+    
+    header{ width:min(960px,94vw); margin:12px auto 0; background:#fff; border:1px solid var(--line);
+            border-radius:var(--radius); padding:10px 14px; display:flex; align-items:center; justify-content:space-between }
+    .nav{ display:flex; gap:8px; align-items:center }
+    .btn, button{ color:var(--text); text-decoration:none; border:1px solid var(--line); border-radius:8px;
+                  padding:8px 12px; background:#fff; cursor:pointer }
+    .btn:hover, button:hover{ background:#f9fafb }
+    button:disabled{ opacity:.55; cursor:not-allowed }
+    
+    #cart-link{ position:relative; display:inline-flex; align-items:center; justify-content:center;
+                width:40px; height:36px; border:1px solid var(--line); border-radius:8px; background:#fff; text-decoration:none }
+    #cart-badge{ position:absolute; top:-8px; right:-8px; background:#111827; color:#fff; font-size:12px;
+                 border-radius:999px; padding:2px 6px; min-width:20px; text-align:center }
+    
+    section{ width:min(960px,94vw); margin:20px auto; background:var(--card); border:1px solid var(--line);
+             border-radius:var(--radius); padding:16px }
+    
+    .row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px }
+    h2{ margin:0; font-size:20px }
+    .controls{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+    
+    input, select{ font:inherit; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--text) }
+    input[type="search"]{ width:100%; margin-top:8px }
+    
+    #filtro-activo{ padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:#fff7ed; color:#92400e; font-size:14px }
+    #filtro-activo[hidden], #btn-limpiar[hidden], #estado-vacio[hidden]{ display:none }
+    
+    ul[role="list"]{ list-style:none; padding:0; margin:12px 0 0; display:grid; gap:8px }
+    li[data-id]{ display:flex; align-items:center; justify-content:space-between; border:1px solid var(--line); 
+                 border-radius:8px; padding:10px 12px; background:#fff; cursor:pointer }
+    li[data-id]:hover{ background:#f9fafb }
+    
+    #estado-vacio{ margin:10px 0 0; border:1px dashed var(--line); background:#fafafa; border-radius:8px; padding:10px 12px; color:var(--muted) }
+    
+    #detalle-queso .imagen{ border:1px solid var(--line); border-radius:8px; background:#fafafa; max-width:280px; margin:8px 0 12px }
+    #detalle-queso .imagen img{ width:100%; height:auto; display:block; border-radius:8px }
+    #detalle-queso a{ color:#111827; text-decoration:none; margin-bottom:8px; display:inline-block }
+    #detalle-queso a:hover{ text-decoration:underline }
+    #detalle-queso p{ margin:6px 0 }
+    
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0 }
   </style>
 </head>
 <body>
   <header id="app-header">
-  <div class="brand">Queso &amp; Sabor</div>
-  <nav class="nav">
-    <a class="btn" href="mispedidos.html">Mis pedidos</a>
-    <!-- Lleva al carrito (Épica 2) -->
-    <a id="cart-link" href="carrito.html" title="Ir al carrito">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M3 3h2l2.2 9.2A2 2 0 0 0 9.1 14h7.8a2 2 0 0 0 1.9-1.5L21 8H7"
-              stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="10" cy="19" r="1.5" fill="#374151"/>
-        <circle cx="17" cy="19" r="1.5" fill="#374151"/>
-      </svg>
-      <span id="cart-badge">0</span>
-    </a>
-  </nav>
-</header>
+    <div class="brand">Queso & Sabor</div>
+    <nav class="nav">
+      <a class="btn" href="mispedidos.html">Mis pedidos</a>
+      <a id="cart-link" href="carrito.html" title="Carrito">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 3h2l2.2 9.2A2 2 0 0 0 9.1 14h7.8a2 2 0 0 0 1.9-1.5L21 8H7"
+                stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="10" cy="19" r="1.5" fill="#374151"/>
+          <circle cx="17" cy="19" r="1.5" fill="#374151"/>
+        </svg>
+        <span id="cart-badge">0</span>
+      </a>
+    </nav>
+  </header>
 
-  <!-- =========================================================
-       CATÁLOGO
-       ========================================================= -->
-  <section id="buscar-queso" aria-labelledby="titulo-catalogo">
+  <section id="buscar-queso">
     <div class="row">
-      <h2 id="titulo-catalogo">Catálogo</h2>
-
-      <div class="controls" aria-label="Controles de filtro">
+      <h2>Catálogo</h2>
+      <div class="controls">
         <label for="tipo-leche">Tipo de leche:</label>
         <select id="tipo-leche">
           <option value="todas">Todas</option>
@@ -188,223 +79,168 @@
           <option value="cabra">Cabra</option>
           <option value="oveja">Oveja</option>
         </select>
-        <button id="btn-limpiar" hidden>Limpiar filtro</button>
-        <span id="filtro-activo" hidden aria-live="polite"></span>
+        <button id="btn-limpiar" hidden>Limpiar</button>
+        <span id="filtro-activo" hidden></span>
       </div>
     </div>
 
-    <label for="buscador" class="sr-only">Buscar queso por nombre</label>
-    <input id="buscador" type="search" placeholder="Ej. Gouda" autocomplete="off" />
-
+    <input id="buscador" type="search" placeholder="Buscar queso..." autocomplete="off" />
     <ul id="resultados" role="list"></ul>
-    <p id="estado-vacio" hidden>—</p>
+    <p id="estado-vacio" hidden></p>
   </section>
 
-  <!-- =========================================================
-       US-03: Ver detalle
-       ========================================================= -->
-  <section id="detalle-queso">
-    <a href="#buscar-queso">← Volver al catálogo</a>
-    <h2>Queso y Sabor</h2>
-    <div class="imagen">[Imagen del queso]</div>
-    <h3>Nombre del queso</h3>
-    <p>Precio: $XX.XX</p>
-    <p>Stock: En stock</p>
+  <section id="detalle-queso" hidden>
+    <a href="#buscar-queso">← Volver</a>
+    <h2>Detalle</h2>
+    <div class="imagen"></div>
+    <h3></h3>
+    <p class="precio"></p>
+    <p class="stock"></p>
     <button>Agregar al carrito</button>
     <h4>Descripción</h4>
-    <p>Texto de descripción</p>
+    <p class="desc"></p>
     <h4>Notas</h4>
-    <p>Notas del queso</p>
+    <p class="notas"></p>
     <h4>Recomendaciones</h4>
-    <p>"Otros quesos que te podrían gustar"</p>
+    <p class="recom"></p>
   </section>
 
-  <!-- =========================================================
-       JS GLOBAL (datos y helpers)
-       ========================================================= -->
-       <script>
-  // === Productos (admin guarda en qs_products)
-  const PROD_KEY = "qs_products";
-
-  function loadProducts(){
-    try { return JSON.parse(localStorage.getItem(PROD_KEY)) || []; }
-    catch { return []; }
-  }
-  function capitalizar(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : ""; }
-
-  // Demo (fallback si no hay nada en storage)
-  function demoProducts(){
-    return [
-      { id:"gouda-1", nombre:"Gouda clásico",      precio:5990, leche:"vaca",  stock:10, imagen:"img/quesogouda1.jpg",
-        descripcion:"Queso holandés de sabor suave y textura cremosa.",
-        notas:"Notas mantecosas, con leve dulzura.", recomendaciones:"Ideal con vino blanco seco." },
-      { id:"manchego-1", nombre:"Manchego curado", precio:7990, leche:"oveja", stock:5,  imagen:"img/quesomanchego1.jpeg",
-        descripcion:"Queso español elaborado con leche de oveja.",
-        notas:"Sabor intenso y ligeramente salado.", recomendaciones:"Perfecto con pan rústico y vino tinto." },
-      { id:"cabra-1", nombre:"Queso de cabra",     precio:6990, leche:"cabra", stock:0,  imagen:"img/quesodecabra1.jpeg",
-        descripcion:"Queso curado de cabra, sabor fuerte y persistente.",
-        notas:"Aromas lácticos y toque picante.", recomendaciones:"Acompáñalo con miel o frutos secos." },
-      { id:"gouda-reserva", nombre:"Gouda gran reserva", precio:9990, leche:"vaca", stock:8, imagen:"img/goudagranreserva1.jpg",
-        descripcion:"Madurado, sabor profundo y textura firme.",
-        notas:"Toques de nuez y caramelo.", recomendaciones:"Excelente con cerveza ámbar." },
-    ];
-  }
-
-  // Productos usados por el catálogo:
-  // - Si hay en storage, usa esos (los creados en admin.html)
-  // - Si no, muestra los de demo
-  let productos = (() => {
-    const stored = loadProducts();
-    return stored.length ? stored : demoProducts();
-  })();
-</script>
-
-
   <script>
-// === Productos desde el CMS (localStorage)
-const PROD_KEY = "qs_products";
-function loadProducts(){ try{ return JSON.parse(localStorage.getItem(PROD_KEY)) || [] }catch{ return [] } }
-function saveProducts(list){ localStorage.setItem(PROD_KEY, JSON.stringify(list)); }
-function reloadProductos(){
-  productos = loadProducts().filter(p=>p.activo!==false);
-}
-</script>
-
-
-  <!-- =========================================================
-       JS (búsqueda + filtro)
-       ========================================================= -->
-  <script>
-    // Estado
+    // === Datos y estado ===
+    const PROD_KEY = "qs_products";
+    const CART_KEY = "qs_cart_v1";
+    
+    const Cart = {
+      items: {},
+      load() { try { this.items = JSON.parse(localStorage.getItem(CART_KEY)) || {} } catch { this.items = {} } },
+      save() { localStorage.setItem(CART_KEY, JSON.stringify(this.items)) },
+      count() { return Object.values(this.items).reduce((n,it) => n + it.qty, 0) },
+      add(p, qty) {
+        if (!this.items[p.id]) this.items[p.id] = { ...p, qty: 0 };
+        this.items[p.id].qty += qty;
+        this.save();
+      }
+    };
+    
+    function loadProducts() {
+      try { 
+        const stored = JSON.parse(localStorage.getItem(PROD_KEY));
+        return stored && stored.length ? stored : demoProducts();
+      } catch { 
+        return demoProducts(); 
+      }
+    }
+    
+    function demoProducts() {
+      return [
+        { id:"gouda-1", nombre:"Gouda clásico", precio:5990, leche:"vaca", stock:10, imagen:"img/quesogouda1.jpg",
+          descripcion:"Queso holandés de sabor suave y textura cremosa.",
+          notas:"Notas mantecosas, con leve dulzura.", recomendaciones:"Ideal con vino blanco seco." },
+        { id:"manchego-1", nombre:"Manchego curado", precio:7990, leche:"oveja", stock:5, imagen:"img/quesomanchego1.jpeg",
+          descripcion:"Queso español elaborado con leche de oveja.",
+          notas:"Sabor intenso y ligeramente salado.", recomendaciones:"Perfecto con pan rústico y vino tinto." },
+        { id:"cabra-1", nombre:"Queso de cabra", precio:6990, leche:"cabra", stock:0, imagen:"img/quesodecabra1.jpeg",
+          descripcion:"Queso curado de cabra, sabor fuerte y persistente.",
+          notas:"Aromas lácticos y toque picante.", recomendaciones:"Acompáñalo con miel o frutos secos." },
+        { id:"gouda-reserva", nombre:"Gouda gran reserva", precio:9990, leche:"vaca", stock:8, imagen:"img/goudagranreserva1.jpg",
+          descripcion:"Madurado, sabor profundo y textura firme.",
+          notas:"Toques de nuez y caramelo.", recomendaciones:"Excelente con cerveza ámbar." },
+      ];
+    }
+    
+    let productos = loadProducts();
     let term = "";
     let filtroLeche = "todas";
-
-    // Referencias
-    const $qBusqueda       = document.getElementById("buscador");
-    const $selectLeche     = document.getElementById("tipo-leche");
-    const $btnLimpiar      = document.getElementById("btn-limpiar");
-    const $chipFiltro      = document.getElementById("filtro-activo");
-    const $lista           = document.getElementById("resultados");
-    const $estado          = document.getElementById("estado-vacio");
-
-    // Eventos
-    $qBusqueda.addEventListener("input", () => { term = $qBusqueda.value.trim().toLowerCase(); render(); });
-    $selectLeche.addEventListener("change", () => { filtroLeche = $selectLeche.value; render(); });
-    $btnLimpiar.addEventListener("click", () => { filtroLeche = "todas"; $selectLeche.value = "todas"; render(); });
-
-    // Render inicial
-    render();
-
-    function render(){
+    
+    // === Referencias ===
+    const $buscar = document.getElementById("buscador");
+    const $leche = document.getElementById("tipo-leche");
+    const $limpiar = document.getElementById("btn-limpiar");
+    const $filtro = document.getElementById("filtro-activo");
+    const $lista = document.getElementById("resultados");
+    const $estado = document.getElementById("estado-vacio");
+    const $detalle = document.getElementById("detalle-queso");
+    const $volver = $detalle.querySelector("a");
+    const $btnCarrito = $detalle.querySelector("button");
+    
+    // === Funciones ===
+    function capitalizar(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : "" }
+    function updateBadge() { document.getElementById("cart-badge").textContent = Cart.count() }
+    
+    function render() {
       let items = productos;
-
       if (term) items = items.filter(p => p.nombre.toLowerCase().includes(term));
       if (filtroLeche !== "todas") items = items.filter(p => p.leche === filtroLeche);
-
-      // Chip + botón
+      
       const hayFiltro = filtroLeche !== "todas";
-      $chipFiltro.hidden = !hayFiltro;
-      $btnLimpiar.hidden = !hayFiltro;
-      if (hayFiltro) $chipFiltro.textContent = `Filtro activo: ${capitalizar(filtroLeche)}`;
-
-      // Lista o estado vacío con mensaje correcto
+      $filtro.hidden = !hayFiltro;
+      $limpiar.hidden = !hayFiltro;
+      if (hayFiltro) $filtro.textContent = `Filtro: ${capitalizar(filtroLeche)}`;
+      
       if (!items.length) {
         $lista.innerHTML = "";
         $estado.hidden = false;
-        $estado.textContent = term
-          ? "No hay productos que coincidan con tu búsqueda"
-          : "No hay productos disponibles para este filtro";
+        $estado.textContent = term ? "No hay productos que coincidan" : "No hay productos para este filtro";
         return;
       }
+      
       $estado.hidden = true;
       $lista.innerHTML = items.map(p => `
         <li data-id="${p.id}">
           <strong>${p.nombre}</strong>
-          <span>— $${p.precio.toLocaleString("es-CL")} <small>(Leche: ${capitalizar(p.leche)})</small></span>
+          <span>— $${p.precio.toLocaleString("es-CL")} <small>(${capitalizar(p.leche)})</small></span>
         </li>
       `).join("");
     }
-  </script>
-
-  <!-- =========================================================
-       JS US-03 (detalle)
-       ========================================================= -->
-  <script>
-  const $detalle = document.getElementById("detalle-queso");
-  const $detalleImg = $detalle.querySelector(".imagen");
-  const $detalleNombre = $detalle.querySelector("h3");
-  const $detallePrecio = $detalle.querySelector("p:nth-of-type(1)");
-  const $detalleStock = $detalle.querySelector("p:nth-of-type(2)");
-  const $detalleDesc = $detalle.querySelector("p:nth-of-type(3)");
-  const $detalleNotas = $detalle.querySelector("p:nth-of-type(4)");
-  const $detalleRecom = $detalle.querySelector("p:nth-of-type(5)");
-  const $btnCarrito = $detalle.querySelector("button");
-  const $volver = $detalle.querySelector("a");
-
-  // Datos de ejemplo
-  productos.forEach(p => {
-    if (p.id === "gouda-1") {
-      Object.assign(p, { imagen:"img/quesogouda1.jpg", stock:10,
-        descripcion:"Queso holandés de sabor suave y textura cremosa.",
-        notas:"Notas mantecosas, con leve dulzura.", recomendaciones:"Ideal con vino blanco seco." });
-    } else if (p.id === "manchego-1") {
-      Object.assign(p, { imagen:"img/quesomanchego1.jpeg", stock:5,
-        descripcion:"Queso español elaborado con leche de oveja.", notas:"Sabor intenso y ligeramente salado.",
-        recomendaciones:"Perfecto con pan rústico y vino tinto." });
-    } else if (p.id === "cabra-1") {
-      Object.assign(p, { imagen:"img/quesodecabra1.jpeg", stock:0,
-        descripcion:"Queso curado de cabra, sabor fuerte y persistente.",
-        notas:"Aromas lácticos y toque picante.", recomendaciones:"Acompáñalo con miel o frutos secos." });
-    } else {
-      Object.assign(p, { imagen:"img/goudagranreserva1.jpg", stock:8,
-        descripcion:"Madurado, sabor profundo y textura firme.",
-        notas:"Toques de nuez y caramelo.", recomendaciones:"Excelente con cerveza ámbar." });
+    
+    function mostrarDetalle(p) {
+      $detalle.querySelector(".imagen").innerHTML = `<img src="${p.imagen}" alt="${p.nombre}">`;
+      $detalle.querySelector("h3").textContent = p.nombre;
+      $detalle.querySelector(".precio").textContent = `Precio: $${p.precio.toLocaleString("es-CL")}`;
+      $detalle.querySelector(".stock").textContent = `Stock: ${p.stock > 0 ? "En stock" : "Sin stock"}`;
+      $detalle.querySelector(".desc").textContent = p.descripcion;
+      $detalle.querySelector(".notas").textContent = p.notas;
+      $detalle.querySelector(".recom").textContent = p.recomendaciones;
+      
+      $btnCarrito.disabled = p.stock <= 0;
+      $btnCarrito.textContent = p.stock <= 0 ? "Sin stock" : "Agregar al carrito";
+      $btnCarrito.onclick = () => {
+        const inCart = (Cart.items[p.id]?.qty || 0);
+        if (p.stock > 0 && inCart < p.stock) {
+          Cart.add(p, 1);
+          updateBadge();
+          alert(`✅ ${p.nombre} agregado al carrito.`);
+        } else {
+          alert("No hay más stock disponible.");
+        }
+      };
+      
+      $detalle.hidden = false;
+      $detalle.scrollIntoView({ behavior: "smooth" });
     }
-  });
-
-  // Clic en cualquier <li> del catálogo
-  document.addEventListener("click", e => {
-    const item = e.target.closest("li[data-id]");
-    if (!item) return;
-    const queso = productos.find(p => p.id === item.dataset.id);
-    if (queso) mostrarDetalle(queso);
-  });
-
-  // Volver
-  $volver.addEventListener("click", e => {
-    e.preventDefault();
-    $detalle.hidden = true;
-    document.getElementById("buscar-queso").scrollIntoView({ behavior: "smooth" });
-  });
-
-  function mostrarDetalle(p){
-    $detalle.querySelector("h2").textContent = "Queso y Sabor";
-    $detalleImg.innerHTML = `<img src="${p.imagen}" alt="${p.nombre}">`;
-    $detalleNombre.textContent = p.nombre;
-    $detallePrecio.textContent = `Precio: $${p.precio.toLocaleString("es-CL")}`;
-    $detalleStock.textContent = `Stock: ${p.stock > 0 ? "En stock" : "Sin stock"}`;
-    $detalleDesc.textContent = p.descripcion;
-    $detalleNotas.textContent = p.notas;
-    $detalleRecom.textContent = p.recomendaciones;
-// US-04
-    $btnCarrito.disabled = p.stock <= 0;
-    $btnCarrito.textContent = p.stock <= 0 ? "Sin stock" : "Agregar al carrito";
-    $btnCarrito.onclick = () => {
-  const inCart = (Cart.items[p.id]?.qty || 0);
-  if (p.stock > 0 && inCart < p.stock) {
-    Cart.add(p, 1);
+    
+    // === Eventos ===
+    $buscar.addEventListener("input", () => { term = $buscar.value.trim().toLowerCase(); render(); });
+    $leche.addEventListener("change", () => { filtroLeche = $leche.value; render(); });
+    $limpiar.addEventListener("click", () => { filtroLeche = "todas"; $leche.value = "todas"; render(); });
+    
+    document.addEventListener("click", e => {
+      const item = e.target.closest("li[data-id]");
+      if (!item) return;
+      const queso = productos.find(p => p.id === item.dataset.id);
+      if (queso) mostrarDetalle(queso);
+    });
+    
+    $volver.addEventListener("click", e => {
+      e.preventDefault();
+      $detalle.hidden = true;
+      document.getElementById("buscar-queso").scrollIntoView({ behavior: "smooth" });
+    });
+    
+    // === Inicialización ===
+    Cart.load();
     updateBadge();
-    alert(`✅ ${p.nombre} se ha agregado al carrito.`);
-  } else {
-    alert("No hay más stock disponible para este producto.");
-  }
-};
-    $detalle.hidden = false;
-    $detalle.scrollIntoView({ behavior: "smooth" });
-  }
-
-  $detalle.hidden = true;
+    render();
   </script>
-
 </body>
 </html>

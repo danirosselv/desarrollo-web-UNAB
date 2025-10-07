@@ -5,143 +5,87 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Mis pedidos — Queso & Sabor</title>
 <style>
-  :root{ --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --radius:10px; }
-  *{box-sizing:border-box}
-  body{margin:0; font-family:system-ui, Segoe UI, Roboto, Arial; color:var(--text); background:var(--bg); line-height:1.45}
-  .container{width:min(960px,94vw); margin:18px auto}
-  header{ background:#fff; border:1px solid var(--line); border-radius:var(--radius);
-          padding:10px 14px; display:flex; align-items:center; justify-content:space-between; }
-  .brand{font-weight:700}
-  .btn{ color:var(--text); text-decoration:none; border:1px solid var(--line);
-        border-radius:8px; padding:8px 12px; background:#fff }
-  .btn:hover{ background:#f9fafb }
-
-  section.card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-top:12px; }
-  h2{ margin:0 0 12px; font-size:28px }
-  .empty{ border:2px dashed var(--line); border-radius:12px; padding:24px; color:var(--muted); text-align:center }
-  ul#orders{ list-style:none; padding:0; margin:0; display:grid; gap:10px }
-  .order{ border:1px solid var(--line); border-radius:10px; background:#fff; padding:12px }
-  .row{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap }
-  .muted{ color:var(--muted) }
-  .chips{ display:flex; gap:6px; align-items:center; flex-wrap:wrap }
-  .chip{ padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:#fafafa; font-size:12px }
-  details{ margin-top:8px }
-  details summary{ cursor:pointer; user-select:none }
-  .items{ list-style:none; padding:0; margin:8px 0 0; display:grid; gap:6px }
-  .items li{ display:flex; justify-content:space-between; border:1px solid var(--line); border-radius:8px; padding:8px 10px; background:#fff }
+  body{margin:0; font-family:system-ui; background:#f6f7f9; line-height:1.45}
+  .container{max-width:960px; margin:auto; padding:10px}
+  header{background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between}
+  .btn{border:1px solid #e5e7eb; border-radius:8px; padding:8px 12px; text-decoration:none; color:#1f2937}
+  section{background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:16px}
+  .empty{border:2px dashed #e5e7eb; border-radius:12px; padding:24px; text-align:center; color:#6b7280}
+  ul{padding:0; list-style:none; margin:12px 0 0}
+  .order{border:1px solid #e5e7eb; border-radius:10px; padding:12px; margin-bottom:10px}
+  .row{display:flex; justify-content:space-between; flex-wrap:wrap}
+  .chip{padding:4px 8px; border-radius:999px; border:1px solid #e5e7eb; background:#fafafa; font-size:12px; margin-right:6px}
+  .items li{display:flex; justify-content:space-between; border:1px solid #e5e7eb; border-radius:8px; padding:8px; margin-top:6px}
 </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <nav style="display:flex; gap:8px">
+    <nav>
       <a class="btn" href="index.html">← Tienda</a>
       <a class="btn" href="carrito.html">Carrito</a>
     </nav>
-    <div class="brand">Queso &amp; Sabor</div>
+    <div>Queso & Sabor</div>
   </header>
 
-  <section class="card">
+  <section>
     <h2>Mis pedidos</h2>
-    <div id="empty" class="empty" hidden>
-      Actualmente no tienes pedidos. <a href="index.html">Ir a la tienda</a>
-    </div>
+    <div id="empty" class="empty" hidden>No tienes pedidos.</div>
     <ul id="orders"></ul>
   </section>
 </div>
 
 <script>
-  // ==== Storage helpers
-  function loadOrders(){ try{ return JSON.parse(localStorage.getItem("qs_orders")) || [] }catch{ return [] } }
-  function saveOrders(list){ localStorage.setItem("qs_orders", JSON.stringify(list)); }
+function loadOrders(){ 
+  return JSON.parse(localStorage.getItem("qs_orders")||"[]") 
+}
 
-  // ==== Migración (compatibilidad con versiones anteriores)
-  (function migrateLegacy(){
-    try{
-      const legacy = JSON.parse(localStorage.getItem("qs_last_order") || "null");
-      if (!legacy) return;
-      const list = loadOrders();
-      if (!list.some(o => o.id === legacy.id)) {
-        list.push(legacy);
-        saveOrders(list);
-      }
-      // opcional: conservar o limpiar el legacy
-      // localStorage.removeItem("qs_last_order");
-    }catch{}
-  })();
-
-  // ==== Utils
-  const $list = document.getElementById("orders");
-  const $empty = document.getElementById("empty");
-  function money(n){ return `$${Number(n||0).toLocaleString("es-CL")}`; }
-  function sumQty(items){ return Object.values(items||{}).reduce((n,it)=>n+Number(it.qty||0),0); }
-  function lastStatusAt(o){
-    const hist = o.statusHistory || [];
-    return hist.length ? (hist[hist.length-1].at || o.createdAt || o.paidAt || Date.now()) : (o.createdAt || o.paidAt || Date.now());
+function render(){
+  const orders = loadOrders()
+  const $list = document.getElementById("orders")
+  const $empty = document.getElementById("empty")
+  
+  if(!orders.length){
+    $list.innerHTML = ""
+    $empty.hidden = false
+    return
   }
-  function timeago(ts){
-    const diff = Math.max(0, Date.now()-Number(ts||0));
-    const m = Math.round(diff/60000);
-    if (m < 1) return "justo ahora";
-    if (m === 1) return "hace 1 min";
-    if (m < 60) return `hace ${m} min`;
-    const h = Math.round(m/60);
-    if (h === 1) return "hace 1 hora";
-    if (h < 24) return `hace ${h} horas`;
-    const d = Math.round(h/24);
-    return d === 1 ? "hace 1 día" : `hace ${d} días`;
-  }
-
-  // ==== Render
-  function render(){
-    let orders = loadOrders();
-    if (!orders.length){
-      $list.innerHTML = "";
-      $empty.hidden = false;
-      return;
-    }
-    $empty.hidden = true;
-
-    // ordenar (más recientes primero)
-    orders.sort((a,b)=> (lastStatusAt(b)||0) - (lastStatusAt(a)||0));
-
-    $list.innerHTML = orders.map(o=>{
-      const estado = (o.status && o.status.current) || "Nuevo";
-      const qty = sumQty(o.items);
-      const updated = timeago(lastStatusAt(o));
-      const envio = o.shippingMethod === "despacho"
-        ? `Despacho — ${o.shippingDetail?.comuna || "—"}`
-        : `Retiro — ${o.shippingDetail?.sucursal || "—"}`;
-
-      const itemsHTML = Object.values(o.items||{}).map(it=>{
-        const sub = Number(it.qty||0)*Number(it.precio||0);
-        return `<li><span>${it.nombre} (x${it.qty})</span><strong>${money(sub)}</strong></li>`;
-      }).join("");
-
-      return `
-        <li class="order">
-          <div class="row">
-            <div>
-              <div><strong>Pedido ${o.id}</strong></div>
-              <div class="chips">
-                <span class="chip">${estado}</span>
-                <span class="chip muted">act.: ${updated}</span>
-                <span class="chip muted">${envio}</span>
-                <span class="chip muted">Quesos: ${qty}</span>
-              </div>
-            </div>
-            <div><strong>${money(o.total)}</strong></div>
+  
+  $empty.hidden = true
+  orders.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0))
+  
+  $list.innerHTML = orders.map(o=>{
+    const items = Object.values(o.items||{}).map(it=>
+      `<li><span>${it.nombre} x${it.qty}</span><span>$${(it.qty*it.precio).toLocaleString()}</span></li>`
+    ).join("")
+    
+    return `
+      <li class="order">
+        <div class="row">
+          <div>
+            <strong>Pedido ${o.id}</strong>
+            <div>${o.status?.current||'Nuevo'} • $${o.total?.toLocaleString()||'0'}</div>
           </div>
-          <details>
-            <summary>Ver detalle</summary>
-            <ul class="items">${itemsHTML}</ul>
-          </details>
-        </li>
-      `;
-    }).join("");
-  }
+        </div>
+        <details style="margin-top:8px">
+          <summary>Detalles</summary>
+          <ul class="items">${items}</ul>
+        </details>
+      </li>`
+  }).join("")
+}
 
-  render();
+// Migrar pedido antiguo si existe
+const old = JSON.parse(localStorage.getItem("qs_last_order")||"null")
+if(old){
+  const orders = loadOrders()
+  if(!orders.some(o=>o.id===old.id)){
+    orders.push(old)
+    localStorage.setItem("qs_orders",JSON.stringify(orders))
+  }
+}
+
+render()
 </script>
 </body>
 </html>

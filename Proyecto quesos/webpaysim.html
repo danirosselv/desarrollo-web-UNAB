@@ -5,61 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>WebPay Sim — Queso & Sabor</title>
 <style>
-  :root{ --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --radius:10px; }
-  *{box-sizing:border-box}
-  body{margin:0; font-family:system-ui, Segoe UI, Roboto, Arial; color:var(--text); background:var(--bg); line-height:1.45}
-  .container{width:min(960px,94vw); margin:18px auto}
-  header{ background:#fff; border:1px solid var(--line); border-radius:var(--radius);
-          padding:10px 14px; display:flex; align-items:center; justify-content:space-between; }
-  .brand{font-weight:700}
-  .btn{ color:var(--text); text-decoration:none; border:1px solid var(--line);
-        border-radius:8px; padding:8px 12px; background:#fff }
-  .btn:hover{ background:#f9fafb }
-  section{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-top:12px; }
-  h2{ margin:0 0 12px; font-size:20px }
-  .muted{ color:var(--muted) }
-  form{ display:grid; gap:10px; max-width:420px }
-  input{ font:inherit; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff }
-  .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:6px }
-  button{ font:inherit; padding:10px 14px; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:pointer }
-  button:hover{ background:#f9fafb }
-  .amount{ font-size:18px }
-  #msg{ margin:8px 0 0; padding:10px; border-radius:8px; display:none }
-  .err{ color:#b91c1c; background:#fee2e2; border:1px solid #fecaca }
+  body{margin:0; font-family:system-ui; background:#f6f7f9; color:#1f2937; line-height:1.45}
+  .container{max-width:960px; margin:auto; padding:10px}
+  header{background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between}
+  .btn{border:1px solid #e5e7eb; border-radius:8px; padding:8px 12px; text-decoration:none; color:#1f2937}
+  section{background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:16px; margin-top:12px}
+  form{display:grid; gap:10px; max-width:420px; margin-top:12px}
+  input{padding:10px 12px; border:1px solid #e5e7eb; border-radius:8px}
+  .actions{display:flex; gap:10px; margin-top:10px}
+  button{padding:10px 14px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; cursor:pointer}
+  .msg{margin:8px 0 0; padding:10px; border-radius:8px; background:#fee2e2; color:#b91c1c; display:none}
 </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <div class="brand">Queso &amp; Sabor — WebPay (Sim)</div>
+    <div>WebPay Sim</div>
     <nav style="display:flex; gap:8px">
       <a class="btn" href="carrito.html">← Carrito</a>
       <a class="btn" href="index.html">Tienda</a>
-      <a class="btn" href="mispedidos.html">Mis pedidos</a>
     </nav>
   </header>
 
   <section>
     <h2>Pagar</h2>
-    <p class="amount"><strong>Total: <span id="monto">$0</span></strong></p>
-    <p class="muted" style="margin-top:4px">
-      Reglas del simulador: si el número termina en <b>0000</b> ⇒ <u>Error del sistema</u>.<br>
-      Si faltan datos o el número termina en <b>1111</b> ⇒ <u>Pago rechazado</u>.<br>
-      En cualquier otro caso ⇒ <u>Pago aprobado</u>.
+    <p><strong>Total: <span id="monto">$0</span></strong></p>
+    <p style="color:#6b7280; margin-top:8px">
+      Reglas: <b>0000</b> = Error • <b>1111</b> = Rechazado • Otro = Aprobado
     </p>
 
-    <div id="msg" class="err"></div>
+    <div id="msg" class="msg"></div>
 
-    <form id="payform" autocomplete="off">
-      <input id="card-name" placeholder="Titular (nombre y apellido)">
-      <input id="card-number" placeholder="Número de tarjeta (solo números)" inputmode="numeric">
+    <form id="payform">
+      <input id="card-name" placeholder="Nombre">
+      <input id="card-number" placeholder="Número tarjeta" inputmode="numeric">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
-        <input id="card-exp" placeholder="Vencimiento (MM/AA)">
+        <input id="card-exp" placeholder="MM/AA">
         <input id="card-cvv" placeholder="CVV" inputmode="numeric">
       </div>
 
       <div class="actions">
-        <button id="btn-pay" type="submit">Pagar</button>
+        <button type="submit">Pagar</button>
         <a class="btn" href="carrito.html">Cancelar</a>
       </div>
     </form>
@@ -67,81 +53,46 @@
 </div>
 
 <script>
-  // ===== Claves de storage
-  const PENDING_KEY = "qs_pending_order";
-  const ORDERS_KEY  = "qs_orders";
-  const CART_KEY    = "qs_cart_v1";
+const qs = new URLSearchParams(location.search)
+const pending = JSON.parse(localStorage.getItem("qs_pending_order") || "null")
+const amount = pending?.total || Number(qs.get("amount") || 0)
 
-  // ===== Helpers
-  const qs = new URLSearchParams(location.search);
-  function loadPending(){ try{ return JSON.parse(localStorage.getItem(PENDING_KEY)) }catch{ return null } }
-  function loadOrders(){ try{ return JSON.parse(localStorage.getItem(ORDERS_KEY)) || [] }catch{ return [] } }
-  function saveOrders(list){ localStorage.setItem(ORDERS_KEY, JSON.stringify(list)); }
-  function money(n){ return `$${Number(n||0).toLocaleString("es-CL")}`; }
-  function showErr(t){ const m=document.getElementById("msg"); m.textContent=t; m.style.display="block"; }
+document.getElementById("monto").textContent = `$${amount.toLocaleString()}`
 
-  // ===== Mostrar monto
-  const pending = loadPending();
-  const fallbackAmount = Number(qs.get("amount") || 0);
-  const monto = pending ? (pending.total ?? ((pending.subtotal||0)+(pending.shipping||0))) : fallbackAmount;
-  document.getElementById("monto").textContent = money(monto);
+if(!pending){
+  document.getElementById("msg").style.display = "block"
+  document.getElementById("msg").textContent = "No hay orden pendiente"
+  document.querySelector("button").disabled = true
+}
 
-  // Si no hay orden, avisar
-  if (!pending){
-    showErr("No hay una orden pendiente. Vuelve al carrito.");
-    document.getElementById("btn-pay").disabled = true;
+document.getElementById("payform").addEventListener("submit", e=>{
+  e.preventDefault()
+  if(!pending) return
+
+  const num = (document.getElementById("card-number").value||"").replace(/\D+/g,"")
+  const last4 = num.slice(-4)
+  const name = document.getElementById("card-name").value.trim()
+  const exp = document.getElementById("card-exp").value.trim()
+  const cvv = document.getElementById("card-cvv").value.trim()
+
+  let status = "ok"
+  if(last4 === "0000") status = "error"
+  else if(!name || !num || !exp || !cvv || last4 === "1111") status = "rechazo"
+
+  if(status === "ok"){
+    const orders = JSON.parse(localStorage.getItem("qs_orders") || "[]")
+    orders.push({
+      ...pending,
+      createdAt: Date.now(),
+      status: { current: "nuevo" }
+    })
+    localStorage.setItem("qs_orders", JSON.stringify(orders))
+    localStorage.removeItem("qs_pending_order")
+    localStorage.removeItem("qs_cart_v1")
   }
 
-  // ===== Lógica simple de resultado
-  document.getElementById("payform").addEventListener("submit", (e)=>{
-    e.preventDefault();
-    if (!pending) return;
-
-    const name = document.getElementById("card-name").value.trim();
-    const num  = (document.getElementById("card-number").value||"").replace(/\D+/g,"");
-    const exp  = document.getElementById("card-exp").value.trim();
-    const cvv  = document.getElementById("card-cvv").value.trim();
-    const last4 = num.slice(-4);
-
-    let outcome = "ok"; // por defecto aprobado
-
-    if (last4 === "0000"){
-      outcome = "error";
-    } else if (!name || !num || !exp || !cvv || last4 === "1111"){
-      outcome = "rechazo";
-    }
-
-    if (outcome === "ok"){
-      // Guardar pedido en Mis pedidos y limpiar pendientes + carrito
-      const now = Date.now();
-      const order = {
-        ...pending,
-        createdAt: now,
-        // Estados para la épica 4 (flujo nuevo→preparación→despachado→entregado)
-        status: { current: "nuevo", updatedAt: now },
-        statusHistory: [{ label: "nuevo", at: now }]
-      };
-
-      const list = loadOrders();
-      list.push(order);
-      saveOrders(list);
-
-      localStorage.removeItem(PENDING_KEY);
-      localStorage.removeItem(CART_KEY);
-
-      location.href = `pagoresultado.html?status=ok&orderId=${encodeURIComponent(order.id)}&amount=${encodeURIComponent(order.total)}`;
-      return;
-    }
-
-    if (outcome === "rechazo"){
-      // Mantener la orden pendiente para reintento
-      location.href = `pagoresultado.html?status=rechazo&orderId=${encodeURIComponent(pending.id)}&amount=${encodeURIComponent(monto)}`;
-      return;
-    }
-
-    // error de sistema
-    location.href = `pagoresultado.html?status=error&orderId=${encodeURIComponent(pending.id)}&amount=${encodeURIComponent(monto)}`;
-  });
+  location.href = `pagoresultado.html?status=${status}&orderId=${pending.id}`
+})
 </script>
 </body>
 </html>

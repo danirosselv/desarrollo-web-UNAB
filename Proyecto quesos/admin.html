@@ -2,38 +2,26 @@
 <html lang="es">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Admin — Queso & Sabor</title>
 <style>
-  :root{ --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --radius:10px }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text);line-height:1.45}
-  .wrap{width:min(980px,94vw);margin:18px auto}
-  header{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);background:#fff;border-radius:var(--radius);padding:10px 14px}
-  .brand{font-weight:700}
-  .btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;text-decoration:none;color:var(--text);cursor:pointer}
-  .btn:hover{background:#f9fafb}
-  section{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-top:12px}
-  h2{margin:0 0 10px;font-size:20px}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .grid-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
-  label{font-size:14px;color:var(--muted)}
-  input,textarea{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--text);width:100%}
-  textarea{min-height:80px;resize:vertical}
-  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .muted{color:var(--muted)}
-  .msg{margin-top:8px;padding:10px;border-radius:8px;display:none}
-  .msg.ok{display:block;background:#ecfdf5;border:1px solid #bbf7d0;color:#065f46}
-  .msg.err{display:block;background:#fee2e2;border:1px solid #fecaca;color:#7f1d1d}
-  .list{display:grid;gap:8px;margin-top:10px}
-  .item{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:10px;background:#fff}
+  :root{--bg:#f6f7f9;--card:#fff;--text:#1f2937;--muted:#6b7280;--line:#e5e7eb;--r:10px}
+  *{box-sizing:border-box} body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+  .wrap{width:min(960px,94vw);margin:18px auto}
+  header,section{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+  header{display:flex;justify-content:space-between;align-items:center}
+  .brand{font-weight:700} .muted{color:var(--muted)} .row{display:flex;gap:8px;flex-wrap:wrap}
+  .btn,a.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;text-decoration:none;color:inherit}
+  .btn:hover,a.btn:hover{background:#f9fafb}
+  h2{margin:0 0 8px;font-size:18px}
+  label{font-size:13px;color:var(--muted)} input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .grid{display:grid;gap:8px} .g-4{grid-template-columns:2fr 1fr 1fr 1fr} .g-2{grid-template-columns:1fr 1fr}
+  .list{display:grid;gap:8px;margin-top:8px}
+  .item{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:8px}
+  .head{display:flex;align-items:center;gap:10px}
   .thumb{width:56px;height:56px;border-radius:8px;object-fit:cover;background:#f3f4f6}
-  .name{font-weight:600}
-  .small{font-size:14px;color:var(--muted)}
-  .pill{padding:2px 8px;border:1px solid var(--line);border-radius:999px}
-  details{border:1px dashed var(--line);border-radius:8px;padding:10px;background:#fafafa}
-  details[open]{background:#fff7ed}
-  .inline{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .title{font-weight:600} .small{font-size:12px;color:var(--muted)}
+  .ok{color:#065f46} .err{color:#7f1d1d}
 </style>
 </head>
 <body>
@@ -44,186 +32,124 @@
       <a class="btn" href="carrito.html">Carrito</a>
       <a class="btn" href="mispedidos.html">Mis pedidos</a>
     </nav>
-    <div class="brand">Queso &amp; Sabor — Admin/CMS</div>
+    <div class="brand">Queso &amp; Sabor — Admin</div>
     <div></div>
   </header>
 
-  <!-- Crear producto -->
+  <!-- US-13: Crear producto -->
   <section>
     <h2>Crear producto</h2>
-    <div class="grid-3">
-      <div>
-        <label>Nombre*</label>
-        <input id="p-nombre" placeholder="Ej. Gouda clásico">
-      </div>
-      <div>
-        <label>Precio (CLP)*</label>
-        <input id="p-precio" type="number" min="0" step="1" placeholder="Ej. 5990">
-      </div>
-      <div>
-        <label>Stock*</label>
-        <input id="p-stock" type="number" min="0" step="1" placeholder="Ej. 8">
+    <div class="grid g-4">
+      <div><label>Nombre*</label><input id="c-nombre" placeholder="Ej. Gouda clásico"></div>
+      <div><label>Precio (CLP)*</label><input id="c-precio" type="number" min="0" step="1" placeholder="5990"></div>
+      <div><label>Stock*</label><input id="c-stock" type="number" min="0" step="1" placeholder="8"></div>
+      <div><label>Tipo de leche*</label>
+        <select id="c-leche">
+          <option value="">—</option><option value="vaca">Vaca</option><option value="cabra">Cabra</option><option value="oveja">Oveja</option>
+        </select>
       </div>
     </div>
-    <div class="grid" style="margin-top:10px">
-      <div>
-        <label>Descripción</label>
-        <textarea id="p-desc" placeholder="Opcional"></textarea>
-      </div>
-      <div>
-        <label>Imagen (URL o archivo)</label>
-        <input id="p-img-url" placeholder="https://… (opcional)">
-        <div class="row" style="margin-top:6px">
-          <input id="p-img-file" type="file" accept="image/*">
-          <img id="p-img-prev" class="thumb" alt="" />
-        </div>
-      </div>
+    <div class="grid g-2" style="margin-top:8px">
+      <div><label>Descripción</label><textarea id="c-desc" placeholder="Opcional"></textarea></div>
+      <div><label>Imagen (URL)</label><input id="c-img" placeholder="https://… (opcional)"></div>
     </div>
-    <div class="row">
+    <div class="row" style="margin-top:8px">
       <button id="btn-create" class="btn">Guardar</button>
-      <span id="create-msg" class="msg"></span>
+      <span id="c-msg" class="small"></span>
     </div>
   </section>
 
-  <!-- Lista / edición -->
+  <!-- US-14/15: Editar precio/stock/foto/leche -->
   <section>
     <h2>Productos</h2>
     <div id="list" class="list"></div>
-    <p class="small muted" id="empty" hidden>No hay productos.</p>
+    <p id="empty" class="small muted" hidden>No hay productos.</p>
   </section>
 </div>
 
 <script>
-/* ===== Storage helpers ===== */
-const PROD_KEY = "qs_products";
-function loadProducts(){ try{ return JSON.parse(localStorage.getItem(PROD_KEY)) || [] }catch{ return [] } }
-function saveProducts(list){ localStorage.setItem(PROD_KEY, JSON.stringify(list)); }
-function uid(){ return "p_" + Math.random().toString(36).slice(2,10); }
-function money(n){ return `$${Number(n||0).toLocaleString("es-CL")}`; }
+/* ===== Storage básico ===== */
+const PROD_KEY="qs_products";
+const load=()=>{try{return JSON.parse(localStorage.getItem(PROD_KEY))||[]}catch{return[]}};
+const save=(list)=>localStorage.setItem(PROD_KEY,JSON.stringify(list));
+const uid=()=> "p_"+Math.random().toString(36).slice(2,10);
 
-/* ===== Crear producto ===== */
-const $n = document.getElementById("p-nombre");
-const $pr= document.getElementById("p-precio");
-const $st= document.getElementById("p-stock");
-const $de= document.getElementById("p-desc");
-const $iu= document.getElementById("p-img-url");
-const $if= document.getElementById("p-img-file");
-const $ip= document.getElementById("p-img-prev");
-const $btnCreate = document.getElementById("btn-create");
-const $cmsg = document.getElementById("create-msg");
+/* ===== Crear ===== */
+const $n=document.getElementById("c-nombre");
+const $p=document.getElementById("c-precio");
+const $s=document.getElementById("c-stock");
+const $l=document.getElementById("c-leche");
+const $d=document.getElementById("c-desc");
+const $i=document.getElementById("c-img");
+const $cmsg=document.getElementById("c-msg");
 
-$if.addEventListener("change", (e)=>{
-  const f = e.target.files?.[0];
-  if(!f) return ($ip.src = "");
-  const r = new FileReader(); r.onload = ()=>($ip.src = r.result); r.readAsDataURL(f);
+document.getElementById("btn-create").addEventListener("click",()=>{
+  const nombre=$n.value.trim(), precio=Number($p.value), stock=Number($s.value), leche=$l.value;
+  if(!nombre || !(precio>=0) || !Number.isInteger(stock)||stock<0 || !leche){
+    $cmsg.className="small err"; $cmsg.textContent="Completa nombre, precio, stock y leche."; return;
+  }
+  const now=Date.now();
+  const prod={id:uid(),nombre,precio,stock,leche,descripcion:$d.value.trim(),imagen:$i.value.trim(),createdAt:now,updatedAt:now,activo:true};
+  const list=load(); list.push(prod); save(list);
+  [$n,$p,$s,$l,$d,$i].forEach(el=>el.value=""); 
+  $cmsg.className="small ok"; $cmsg.textContent="Producto creado."; render(); setTimeout(()=>($cmsg.textContent=""),1200);
 });
 
-function validCreate(){
-  const ok = $n.value.trim() && Number($pr.value)>=0 && Number.isInteger(Number($st.value)) && Number($st.value)>=0;
-  $btnCreate.disabled = !ok;
-  return ok;
-}
-["input","change"].forEach(ev=>{ [$n,$pr,$st,$iu,$if].forEach(el=>el.addEventListener(ev, validCreate)); });
+/* ===== Lista + edición simple ===== */
+const $list=document.getElementById("list"), $empty=document.getElementById("empty");
 
-$btnCreate.addEventListener("click", ()=>{
-  if(!validCreate()){ $cmsg.className="msg err"; $cmsg.textContent="Completa nombre, precio y stock válidos."; return; }
-  const now = Date.now();
-  const p = {
-    id: uid(),
-    nombre: $n.value.trim(),
-    precio: Number($pr.value||0),
-    stock: Number($st.value||0),
-    descripcion: $de.value.trim(),
-    imagen: $ip.src || $iu.value.trim() || "",
-    createdAt: now,
-    updatedAt: now,
-    activo: true
-  };
-  const list = loadProducts(); list.push(p); saveProducts(list);
-  $cmsg.className="msg ok"; $cmsg.textContent="Producto creado.";
-  $n.value=$pr.value=$st.value=$de.value=$iu.value=""; $if.value=""; $ip.src="";
-  render();
-});
-
-/* ===== Lista y edición inline ===== */
-const $list = document.getElementById("list");
-const $empty = document.getElementById("empty");
-
-function render(){
-  const list = loadProducts();
-  $empty.hidden = list.length>0;
-  $list.innerHTML = list.map(p => `
-    <div class="item" data-id="${p.id}">
+function card(p){return `
+  <div class="item" data-id="${p.id}">
+    <div class="head">
       <img class="thumb" src="${p.imagen||''}" alt="" onerror="this.style.display='none'">
       <div>
-        <div class="name">${p.nombre}</div>
-        <div class="small">${money(p.precio)} · Stock: <span class="pill">${p.stock}</span></div>
+        <div class="title">${p.nombre}</div>
+        <div class="small">Precio: $${Number(p.precio||0).toLocaleString('es-CL')} · Stock: ${p.stock} · Leche: ${p.leche||'—'}</div>
       </div>
-      <details>
-        <summary class="btn" style="list-style:none">Editar</summary>
-        <div class="inline" style="margin-top:8px">
-          <div>
-            <label>Precio</label>
-            <input class="e-precio" type="number" min="0" step="1" value="${p.precio}">
-          </div>
-          <div>
-            <label>Stock</label>
-            <input class="e-stock" type="number" min="0" step="1" value="${p.stock}">
-          </div>
-          <div>
-            <label>Imagen (URL)</label>
-            <input class="e-imgurl" placeholder="https://…" value="${p.imagen||''}">
-          </div>
-        </div>
-        <div class="row" style="margin-top:8px">
-          <input class="e-imgfile" type="file" accept="image/*">
-          <img class="e-prev thumb" src="${p.imagen||''}" alt="">
-        </div>
-        <div class="row">
-          <button class="btn e-save">Guardar</button>
-          <span class="small muted">id: ${p.id}</span>
-        </div>
-        <span class="msg"></span>
-      </details>
     </div>
-  `).join("");
+    <div class="grid g-4">
+      <div><label>Precio</label><input class="e-precio" type="number" min="0" step="1" value="${p.precio}"></div>
+      <div><label>Stock</label><input class="e-stock" type="number" min="0" step="1" value="${p.stock}"></div>
+      <div><label>Leche</label>
+        <select class="e-leche">
+          <option value="vaca">Vaca</option><option value="cabra">Cabra</option><option value="oveja">Oveja</option>
+        </select>
+      </div>
+      <div><label>Imagen (URL)</label><input class="e-img" value="${p.imagen||''}" placeholder="https://…"></div>
+    </div>
+    <div class="row">
+      <button class="btn e-save">Guardar</button>
+      <span class="small muted">id: ${p.id}</span>
+      <span class="small" data-msg></span>
+    </div>
+  </div>`;}
 
-  $list.querySelectorAll(".item").forEach(card=>{
-    const id = card.dataset.id;
-    const $precio = card.querySelector(".e-precio");
-    const $stock  = card.querySelector(".e-stock");
-    const $imgurl = card.querySelector(".e-imgurl");
-    const $imgfile= card.querySelector(".e-imgfile");
-    const $prev   = card.querySelector(".e-prev");
-    const $save   = card.querySelector(".e-save");
-    const $msg    = card.querySelector(".msg");
+function wire(cardEl,p){
+  const id=p.id;
+  const $precio=cardEl.querySelector(".e-precio");
+  const $stock =cardEl.querySelector(".e-stock");
+  const $leche =cardEl.querySelector(".e-leche");
+  const $img   =cardEl.querySelector(".e-img");
+  const $msg   =cardEl.querySelector("[data-msg]");
+  $leche.value=p.leche||"";
 
-    $imgfile.addEventListener("change", e=>{
-      const f=e.target.files?.[0]; if(!f) return;
-      const r=new FileReader(); r.onload=()=>($prev.src=r.result); r.readAsDataURL(f);
-    });
-
-    $save.addEventListener("click", ()=>{
-      const precio = Number($precio.value);
-      const stock  = Number($stock.value);
-      if(!Number.isInteger(stock) || stock<0){ $msg.className="msg err"; $msg.textContent="Stock inválido."; return; }
-      if(!(precio>=0)){ $msg.className="msg err"; $msg.textContent="Precio inválido."; return; }
-
-      const list = loadProducts();
-      const i = list.findIndex(p=>p.id===id);
-      if(i<0) return;
-      list[i].precio = precio;
-      list[i].stock  = stock;
-      list[i].imagen = $prev.src || $imgurl.value.trim() || list[i].imagen;
-      list[i].updatedAt = Date.now();
-      saveProducts(list);
-      $msg.className="msg ok"; $msg.textContent="Actualizado con éxito.";
-      render();
-    });
+  cardEl.querySelector(".e-save").addEventListener("click",()=>{
+    const precio=Number($precio.value), stock=Number($stock.value);
+    if(!(precio>=0)){ $msg.className="small err"; $msg.textContent="Precio inválido"; return; }
+    if(!Number.isInteger(stock)||stock<0){ $msg.className="small err"; $msg.textContent="Stock inválido"; return; }
+    const list=load(); const i=list.findIndex(x=>x.id===id); if(i<0) return;
+    list[i].precio=precio; list[i].stock=stock; list[i].leche=$leche.value||list[i].leche; list[i].imagen=$img.value.trim(); list[i].updatedAt=Date.now();
+    save(list); $msg.className="small ok"; $msg.textContent="Guardado"; render();
   });
 }
 
-/* ===== init ===== */
+function render(){
+  const list=load();
+  $empty.hidden=list.length>0;
+  $list.innerHTML=list.map(card).join("");
+  [...$list.children].forEach((el,idx)=>wire(el,list[idx]));
+}
+
 render();
 </script>
 </body>

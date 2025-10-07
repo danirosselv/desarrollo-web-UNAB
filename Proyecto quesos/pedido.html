@@ -5,209 +5,139 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Detalle de pedido — Queso & Sabor</title>
 <style>
-  :root{
-    --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
-    --accent:#fbbf24; --radius:10px;
-  }
-  *{box-sizing:border-box}
-  body{margin:0; font-family:system-ui, Segoe UI, Roboto, Arial; color:var(--text); background:var(--bg); line-height:1.45}
-  .container{width:min(960px,94vw); margin:18px auto}
-
-  #app-header{
-    background:#fff; border:1px solid var(--line); border-radius:var(--radius);
-    padding:10px 14px; display:flex; align-items:center; justify-content:space-between;
-  }
-  .brand{font-weight:700}
-  .nav{ display:flex; gap:8px; align-items:center }
-  .btn{
-    color:var(--text); text-decoration:none; border:1px solid var(--line);
-    border-radius:8px; padding:8px 12px; background:#fff;
-  }
-  .btn:hover{ background:#f9fafb }
-  .cart{ position:relative; display:inline-flex; align-items:center; justify-content:center;
-         width:40px; height:36px; border:1px solid var(--line); border-radius:8px; background:#fff; text-decoration:none }
-  .badge{ position:absolute; top:-8px; right:-8px; background:#111827; color:#fff; font-size:12px;
-          border-radius:999px; padding:2px 6px; min-width:20px; text-align:center }
-
-  section{
-    background:#fff; border:1px solid var(--line); border-radius:var(--radius);
-    padding:16px; margin-top:12px;
-  }
-  h2{ margin:0 0 12px; font-size:20px }
-
-  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
-  @media (max-width:720px){ .grid{ grid-template-columns:1fr } }
-
-  .muted{ color:var(--muted) }
-
-  /* Items */
-  .items{ list-style:none; padding:0; margin:0; display:grid; gap:10px }
-  .item{ border:1px solid var(--line); border-radius:8px; padding:10px; display:grid; grid-template-columns:56px 1fr auto; gap:10px; align-items:center }
-  .thumb{ width:56px; height:56px; border-radius:8px; object-fit:cover; background:#f3f4f6 }
-  .right{ text-align:right }
-
-  /* Timeline simple */
-  .timeline{ list-style:none; padding:0; margin:0; display:grid; gap:8px }
-  .timeline li{ border:1px dashed var(--line); border-radius:8px; padding:10px }
+  body{margin:0; font-family:system-ui; background:#f6f7f9; color:#1f2937; line-height:1.45}
+  .container{max-width:960px; margin:auto; padding:10px}
+  header{background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center}
+  .btn{border:1px solid #e5e7eb; border-radius:8px; padding:8px 12px; text-decoration:none; color:#1f2937}
+  section{background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:16px; margin-top:12px}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  @media (max-width:720px){ .grid{grid-template-columns:1fr} }
+  .muted{color:#6b7280}
+  .items{list-style:none; padding:0; margin:12px 0 0}
+  .item{border:1px solid #e5e7eb; border-radius:8px; padding:10px; margin-bottom:8px; display:flex; gap:10px; align-items:center}
+  .thumb{width:56px; height:56px; border-radius:8px; background:#f3f4f6}
+  .timeline{list-style:none; padding:0; margin:12px 0 0}
+  .timeline li{border:1px dashed #e5e7eb; border-radius:8px; padding:10px; margin-bottom:8px}
 </style>
 </head>
 <body>
 <div class="container">
-  <header id="app-header">
-    <div class="brand">Queso &amp; Sabor</div>
-    <nav class="nav">
-      <a class="btn" href="mispedidos.html">← Volver a mis pedidos</a>
+  <header>
+    <div>Queso & Sabor</div>
+    <nav style="display:flex; gap:8px; align-items:center">
+      <a class="btn" href="mispedidos.html">← Pedidos</a>
       <a class="btn" href="index.html">Tienda</a>
-      <a class="cart" href="carrito.html" title="Tu carrito">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M3 3h2l2.2 9.2A2 2 0 0 0 9.1 14h7.8a2 2 0 0 0 1.9-1.5L21 8H7"
-                stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="10" cy="19" r="1.5" fill="#374151"/>
-          <circle cx="17" cy="19" r="1.5" fill="#374151"/>
-        </svg>
-        <span id="cart-badge" class="badge">0</span>
-      </a>
     </nav>
   </header>
 
-  <section>
+  <section id="main" hidden>
     <h2 id="title">Pedido</h2>
 
-    <div class="grid" style="margin-bottom:12px">
+    <div class="grid">
       <div>
-        <div class="muted" id="when">—</div>
-        <div id="ship">—</div>
-        <div class="muted" id="buyer">—</div>
+        <div id="when" class="muted"></div>
+        <div id="ship"></div>
+        <div id="buyer" class="muted"></div>
       </div>
-      <div class="right">
-        <div><strong id="total">$0</strong></div>
-        <div class="muted" id="estado">Estado: —</div>
+      <div style="text-align:right">
+        <div><strong id="total"></strong></div>
+        <div id="estado" class="muted"></div>
       </div>
     </div>
 
-    <h3 class="muted" style="margin:0 0 8px">Ítems</h3>
+    <h3 class="muted">Ítems</h3>
     <ul id="items" class="items"></ul>
 
-    <div class="grid" style="margin-top:12px">
+    <div class="grid">
       <div>
-        <h3 class="muted" style="margin:0 0 8px">Seguimiento</h3>
+        <h3 class="muted">Seguimiento</h3>
         <ul id="timeline" class="timeline"></ul>
       </div>
-      <div class="right">
-        <div class="muted">Subtotal</div>
-        <div id="sub">$0</div>
-        <div class="muted" style="margin-top:8px">Envío</div>
-        <div id="shipcost">$0</div>
-        <div style="margin-top:12px; font-size:18px"><strong>Total</strong></div>
-        <div id="tt">$0</div>
+      <div style="text-align:right">
+        <div class="muted">Subtotal <span id="sub"></span></div>
+        <div class="muted">Envío <span id="shipcost"></span></div>
+        <div style="margin-top:8px"><strong>Total <span id="tt"></span></strong></div>
       </div>
     </div>
   </section>
 
-  <section id="notfound" hidden>
+  <section id="notfound">
     <h2>Pedido no encontrado</h2>
-    <p class="muted">Revisa el enlace o vuelve a <a class="btn" href="mispedidos.html">mis pedidos</a>.</p>
+    <p class="muted"><a class="btn" href="mispedidos.html">Volver a pedidos</a></p>
   </section>
 </div>
 
 <script>
-  // Badge
-  const CART_KEY = "qs_cart_v1";
-  function cartCount(){
-    try { return Object.values(JSON.parse(localStorage.getItem(CART_KEY))||{}).reduce((n,it)=>n+it.qty,0); }
-    catch { return 0; }
-  }
-  document.getElementById("cart-badge").textContent = cartCount();
+// Badge carrito
+function cartCount(){
+  try{ 
+    const cart = JSON.parse(localStorage.getItem("qs_cart_v1")||"{}")
+    return Object.values(cart).reduce((n,it)=>n+it.qty,0)
+  }catch{ return 0 }
+}
 
-  // Helpers
-  const ORDERS_KEY = "qs_orders";
-  function loadOrders(){ try{ return JSON.parse(localStorage.getItem(ORDERS_KEY)) || []; }catch{ return []; } }
-  function fmtMoney(n){ return `$${Number(n||0).toLocaleString("es-CL")}`; }
-  function fmtDate(ms){
-    const d = new Date(ms);
-    return d.toLocaleDateString("es-CL", {year:"numeric", month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"});
-  }
+// Cargar pedido
+const params = new URLSearchParams(location.search)
+const id = params.get("id")
+const orders = JSON.parse(localStorage.getItem("qs_orders")||"[]")
+const order = orders.find(o => String(o.id) === String(id))
 
-  // UI refs
-  const $nf = document.getElementById("notfound");
-  const $title = document.getElementById("title");
-  const $when = document.getElementById("when");
-  const $ship = document.getElementById("ship");
-  const $buyer = document.getElementById("buyer");
-  const $estado = document.getElementById("estado");
-  const $total = document.getElementById("total");
-  const $sub = document.getElementById("sub");
-  const $shipcost = document.getElementById("shipcost");
-  const $tt = document.getElementById("tt");
-  const $items = document.getElementById("items");
-  const $timeline = document.getElementById("timeline");
+const $main = document.getElementById("main")
+const $nf = document.getElementById("notfound")
 
-  // Obtener pedido
-  const params = new URLSearchParams(location.search);
-  const id = params.get("id");
-  const orders = loadOrders();
-  const order = orders.find(o => String(o.id) === String(id));
+if(order){
+  $main.hidden = false
+  $nf.hidden = true
 
-  if (!order){
-    $nf.hidden = false;
-  } else {
-    const createdAt = order.createdAt || Number(String(order.id).split("ORD-")[1]) || Date.now();
-    $title.textContent = `Pedido #${order.id}`;
-    $when.textContent = fmtDate(createdAt);
+  // Información básica
+  const date = new Date(order.createdAt || Date.now())
+  $title.textContent = `Pedido ${order.id}`
+  $when.textContent = date.toLocaleDateString("es-CL")
+  $estado.textContent = `Estado: ${order.status?.current || "Confirmado"}`
+  $total.textContent = `$${order.total?.toLocaleString() || '0'}`
+  $sub.textContent = `$${order.subtotal?.toLocaleString() || '0'}`
+  $shipcost.textContent = `$${order.shipping?.toLocaleString() || '0'}`
+  $tt.textContent = `$${order.total?.toLocaleString() || '0'}`
 
-    // Envío
-    const shipTxt = order.shipping?.method === "retiro"
-      ? `Retiro en tienda — ${order.shipping?.sucursal || "Sucursal"}`
-      : (order.shipping?.comuna ? `Despacho a ${order.shipping.comuna}` : "Método de envío: —");
-    $ship.textContent = shipTxt;
+  // Envío
+  $ship.textContent = order.shippingMethod === "retiro" 
+    ? `Retiro: ${order.shippingDetail?.sucursal || "Tienda"}`
+    : `Despacho: ${order.shippingDetail?.comuna || "Domicilio"}`
 
-    // Comprador
-    const buyerTxt = [order.buyer?.nombre, order.buyer?.email, order.buyer?.dire].filter(Boolean).join(" • ");
-    $buyer.textContent = buyerTxt || "—";
+  // Comprador
+  $buyer.textContent = order.buyer ? `${order.buyer.nombre} • ${order.buyer.email}` : ""
 
-    // Totales
-    $sub.textContent = fmtMoney(order.subtotal);
-    $shipcost.textContent = fmtMoney(order.shipping || 0);
-    $total.textContent = fmtMoney(order.total);
-    $tt.textContent = fmtMoney(order.total);
+  // Ítems
+  $items.innerHTML = Object.values(order.items||{}).map(it => 
+    `<li class="item">
+      <img class="thumb" src="${it.imagen||''}" onerror="this.style.display='none'">
+      <div>
+        <div><strong>${it.nombre}</strong></div>
+        <div class="muted">${it.qty} × $${it.precio?.toLocaleString()}</div>
+      </div>
+      <div style="margin-left:auto"><strong>$${(it.qty*it.precio)?.toLocaleString()}</strong></div>
+    </li>`
+  ).join("")
 
-    // Estado
-    const estado = (order.status && order.status.current) || (order.statusHistory?.slice(-1)[0]?.label) || "Pago confirmado";
-    $estado.textContent = `Estado: ${estado}`;
-
-    // Ítems
-    const items = Object.values(order.items || {});
-    $items.innerHTML = items.map(it=>{
-      const line = (it.qty||0) * (it.precio||0);
-      return `
-        <li class="item">
-          <img class="thumb" src="${it.imagen||''}" alt="" onerror="this.style.display='none'">
-          <div>
-            <div><strong>${it.nombre}</strong></div>
-            <div class="muted">${it.qty} × ${fmtMoney(it.precio)}</div>
-          </div>
-          <div class="right"><strong>${fmtMoney(line)}</strong></div>
-        </li>
-      `;
-    }).join("");
-
-    // Timeline (si no hay historico, armamos uno básico)
-    const hist = order.statusHistory && order.statusHistory.length
-      ? order.statusHistory
-      : [
-          { label:"Pago confirmado", at: createdAt },
-          { label:"Preparando pedido", at: createdAt + 2*60*60*1000 },
-          ...(order.shipping?.method==="retiro"
-                ? [{ label:"Listo para retiro", at: createdAt + 6*60*60*1000 }]
-                : [{ label:"En reparto", at: createdAt + 6*60*60*1000 }])
-        ];
-    $timeline.innerHTML = hist.map(h=>`
-      <li>
-        <div><strong>${h.label}</strong></div>
-        <div class="muted">${fmtDate(h.at)}</div>
-      </li>
-    `).join("");
-  }
+  // Timeline
+  const hist = order.statusHistory || [
+    { label:"Pago confirmado", at: order.createdAt || Date.now() },
+    { label:"Preparando pedido", at: (order.createdAt || Date.now()) + 2*60*60*1000 },
+    { label: order.shippingMethod === "retiro" ? "Listo para retiro" : "En reparto", 
+      at: (order.createdAt || Date.now()) + 6*60*60*1000 }
+  ]
+  
+  $timeline.innerHTML = hist.map(h => 
+    `<li>
+      <div><strong>${h.label}</strong></div>
+      <div class="muted">${new Date(h.at).toLocaleDateString("es-CL")}</div>
+    </li>`
+  ).join("")
+  
+}else{
+  $main.hidden = true
+  $nf.hidden = false
+}
 </script>
 </body>
 </html>
