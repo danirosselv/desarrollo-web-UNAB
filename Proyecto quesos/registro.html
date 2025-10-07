@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Registro — Queso & Sabor</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--text:#1f2937;--muted:#6b7280;--line:#e5e7eb;--r:10px}
+  *{box-sizing:border-box} body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+  .wrap{width:min(960px,94vw);margin:18px auto}
+  header,section{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+  header{display:flex;justify-content:space-between;align-items:center}
+  .btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;text-decoration:none;color:inherit;cursor:pointer}
+  .btn:hover{background:#f9fafb}
+  h2{margin:0 0 8px}
+  label{font-size:13px;color:var(--muted)}
+  input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  form{display:grid;gap:8px;max-width:420px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .msg{font-size:14px;margin-top:6px}
+  .ok{color:#065f46} .err{color:#7f1d1d}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="btn" href="index.html">← Tienda</a>
+    <div>Queso &amp; Sabor</div>
+    <a class="btn" href="login.html">Iniciar sesión</a>
+  </header>
+
+  <section>
+    <h2>Crea tu cuenta</h2>
+    <form id="form">
+      <div>
+        <label>Nombre*</label>
+        <input id="name" placeholder="Tu nombre">
+      </div>
+      <div>
+        <label>Correo*</label>
+        <input id="email" type="email" placeholder="nombre@dominio.com">
+      </div>
+      <div>
+        <label>Contraseña* (mín. 8)</label>
+        <input id="pass" type="password" placeholder="********">
+      </div>
+      <div class="row">
+        <button class="btn" type="submit">Registrarse</button>
+        <a class="btn" href="login.html">Ya tengo cuenta</a>
+      </div>
+      <div id="msg" class="msg"></div>
+    </form>
+  </section>
+</div>
+
+<script>
+const USERS_KEY = "qs_users";
+const loadUsers = () => { try{ return JSON.parse(localStorage.getItem(USERS_KEY))||[] }catch{ return [] } };
+const saveUsers = (arr) => localStorage.setItem(USERS_KEY, JSON.stringify(arr));
+const uid = () => "u_"+Math.random().toString(36).slice(2,10);
+const $f = document.getElementById("form"), $n = name, $e = email, $p = pass, $msg = document.getElementById("msg");
+
+$f.addEventListener("submit", (ev)=>{
+  ev.preventDefault();
+  const nombre = $n.value.trim();
+  const correo = ($e.value||"").trim().toLowerCase();
+  const pass = ($p.value||"").trim();
+
+  if(!nombre || !/\S+@\S+\.\S+/.test(correo) || pass.length<8){
+    $msg.className="msg err"; $msg.textContent="Completa nombre, correo válido y contraseña (mín. 8)."; return;
+  }
+  const users = loadUsers();
+  if(users.some(u=>u.email===correo)){
+    $msg.className="msg err"; $msg.textContent="El email ya está en uso."; return;
+  }
+
+  users.push({ id:uid(), nombre, email:correo, pass, direcciones:[] });
+  saveUsers(users);
+  $msg.className="msg ok"; $msg.textContent="Registro exitoso. Ahora inicia sesión.";
+  setTimeout(()=> location.href="login.html", 900);
+});
+</script>
+</body>
+</html>
