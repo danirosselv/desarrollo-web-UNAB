@@ -43,19 +43,19 @@
     <h2>Pagar</h2>
     <p class="amount"><strong>Total: <span id="monto">$0</span></strong></p>
     <p class="muted" style="margin-top:4px">
-      Reglas del simulador: si el número termina en <b>0000</b> ⇒ <u>Error del sistema</u>. <br>
-      Si faltan datos o el número termina en <b>1111</b> ⇒ <u>Pago rechazado</u>. <br>
+      Reglas del simulador: si el número termina en <b>0000</b> ⇒ <u>Error del sistema</u>.<br>
+      Si faltan datos o el número termina en <b>1111</b> ⇒ <u>Pago rechazado</u>.<br>
       En cualquier otro caso ⇒ <u>Pago aprobado</u>.
     </p>
 
     <div id="msg" class="err"></div>
 
-    <form id="payform">
-      <input id="card-name" placeholder="Titular (nombre y apellido)" autocomplete="off">
-      <input id="card-number" placeholder="Número de tarjeta (solo números)" autocomplete="off">
+    <form id="payform" autocomplete="off">
+      <input id="card-name" placeholder="Titular (nombre y apellido)">
+      <input id="card-number" placeholder="Número de tarjeta (solo números)" inputmode="numeric">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
-        <input id="card-exp" placeholder="Vencimiento (MM/AA)" autocomplete="off">
-        <input id="card-cvv" placeholder="CVV" autocomplete="off">
+        <input id="card-exp" placeholder="Vencimiento (MM/AA)">
+        <input id="card-cvv" placeholder="CVV" inputmode="numeric">
       </div>
 
       <div class="actions">
@@ -70,8 +70,10 @@
   // ===== Claves de storage
   const PENDING_KEY = "qs_pending_order";
   const ORDERS_KEY  = "qs_orders";
+  const CART_KEY    = "qs_cart_v1";
 
   // ===== Helpers
+  const qs = new URLSearchParams(location.search);
   function loadPending(){ try{ return JSON.parse(localStorage.getItem(PENDING_KEY)) }catch{ return null } }
   function loadOrders(){ try{ return JSON.parse(localStorage.getItem(ORDERS_KEY)) || [] }catch{ return [] } }
   function saveOrders(list){ localStorage.setItem(ORDERS_KEY, JSON.stringify(list)); }
@@ -80,7 +82,8 @@
 
   // ===== Mostrar monto
   const pending = loadPending();
-  const monto = pending ? (pending.total || ((pending.subtotal||0)+(pending.shipping||0))) : 0;
+  const fallbackAmount = Number(qs.get("amount") || 0);
+  const monto = pending ? (pending.total ?? ((pending.subtotal||0)+(pending.shipping||0))) : fallbackAmount;
   document.getElementById("monto").textContent = money(monto);
 
   // Si no hay orden, avisar
@@ -100,7 +103,7 @@
     const cvv  = document.getElementById("card-cvv").value.trim();
     const last4 = num.slice(-4);
 
-    let outcome = "ok"; // por defecto
+    let outcome = "ok"; // por defecto aprobado
 
     if (last4 === "0000"){
       outcome = "error";
@@ -109,30 +112,35 @@
     }
 
     if (outcome === "ok"){
-      // guardar pedido en Mis pedidos
+      // Guardar pedido en Mis pedidos y limpiar pendientes + carrito
       const now = Date.now();
       const order = {
         ...pending,
         createdAt: now,
-        status: { current:"Pago confirmado" },
-        statusHistory: [{ label:"Pago confirmado", at: now }]
+        // Estados para la épica 4 (flujo nuevo→preparación→despachado→entregado)
+        status: { current: "nuevo", updatedAt: now },
+        statusHistory: [{ label: "nuevo", at: now }]
       };
+
       const list = loadOrders();
       list.push(order);
       saveOrders(list);
+
       localStorage.removeItem(PENDING_KEY);
+      localStorage.removeItem(CART_KEY);
 
       location.href = `pagoresultado.html?status=ok&orderId=${encodeURIComponent(order.id)}&amount=${encodeURIComponent(order.total)}`;
       return;
     }
 
     if (outcome === "rechazo"){
-      location.href = `pagoresultado.html?status=rechazo&orderId=${encodeURIComponent(pending.id)}&amount=${encodeURIComponent(pending.total)}`;
+      // Mantener la orden pendiente para reintento
+      location.href = `pagoresultado.html?status=rechazo&orderId=${encodeURIComponent(pending.id)}&amount=${encodeURIComponent(monto)}`;
       return;
     }
 
     // error de sistema
-    location.href = `pagoresultado.html?status=error&orderId=${encodeURIComponent(pending.id)}&amount=${encodeURIComponent(pending.total)}`;
+    location.href = `pagoresultado.html?status=error&orderId=${encodeURIComponent(pending.id)}&amount=${encodeURIComponent(monto)}`;
   });
 </script>
 </body>

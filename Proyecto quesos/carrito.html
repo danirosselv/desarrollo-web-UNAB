@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Épica 2 — Carrito</title>
+<title>Carrito — Queso & Sabor</title>
 
 <style>
   /* =========================================================
@@ -82,7 +82,7 @@
   button.primary:disabled{ opacity:.55; cursor:not-allowed }
   @media (max-width:640px){ .buyer .grid{ grid-template-columns:1fr } }
 
-  /* ===== EPICA 4 — método de envío (US-11/12) ===== */
+  /* ===== EPICA 4 — método de envío (US-11/US-12) ===== */
   .ship-group{ display:flex; gap:10px; flex-wrap:wrap }
   .ship-group label{ display:flex; gap:6px; align-items:center }
 </style>
@@ -183,7 +183,7 @@
      ========================================================= -->
 <script>
   /* =========================================================
-     MÓDULO DE CARRITO (COMPATIBLE CON INDEX)
+     EPICA 2 — MÓDULO DE CARRITO (COMPATIBLE CON INDEX)
      ========================================================= */
   const CART_KEY = "qs_cart_v1";
   const Cart = {
@@ -228,7 +228,9 @@
   const $err = document.getElementById("buyer-error");
   const $btnPay = document.getElementById("btn-checkout");
 
-  /* ===== EPICA 4 — Envío (US-11/12) ===== */
+  /* =========================================================
+     EPICA 4 — Envío (US-11/US-12)
+     ========================================================= */
   const COSTO_POR_COMUNA = {
     "Santiago Centro":1990,
     "Providencia":2490,
@@ -287,10 +289,10 @@
     // listeners
     [$mDespacho, $mRetiro].forEach(r => r.addEventListener("change", ()=>{
       setSavedMethod(getShipMethod());
-      applyShipUI(); calcTotals();
+      applyShipUI(); calcTotals(); syncPayBtn();
     }));
     $selComuna.addEventListener("change", ()=>{ setSavedComuna($selComuna.value); calcTotals(); });
-    $selSucursal.addEventListener("change", ()=>{ setSavedSucursal($selSucursal.value); calcTotals(); });
+    $selSucursal.addEventListener("change", ()=>{ setSavedSucursal($selSucursal.value); });
   }
 
   function applyShipUI(){

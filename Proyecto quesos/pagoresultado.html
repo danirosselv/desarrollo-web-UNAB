@@ -11,7 +11,7 @@
   .wrap{width:min(720px,94vw);margin:24px auto}
   .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px}
   h1{font-size:20px;margin:0 0 8px}
-  .box{display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;padding:24px;margin:10px 0;background:#fafafa}
+  .box{display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;padding:24px;margin:10px 0;background:#fafafa;text-align:center}
   .ok{font-size:56px} .err{font-size:56px}
   .muted{color:var(--muted)}
   .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
@@ -35,17 +35,22 @@
 </div>
 
 <script>
+  // ===== Helpers
   const qs = new URLSearchParams(location.search);
-  const status = qs.get("status"); // "approved" | "rejected" | "error"
-  const pending = JSON.parse(localStorage.getItem("qs_pending_order") || "null");
-
-  const $title = document.getElementById("title");
-  const $box = document.getElementById("box");
-  const $info = document.getElementById("order");
-  const $items = document.getElementById("items");
-  const $actions = document.getElementById("actions");
-
+  const status = (qs.get("status") || "").toLowerCase(); // ok | rechazo | error
+  const orderId = qs.get("orderId") || "";
   function money(n){ return `$${Number(n||0).toLocaleString("es-CL")}`; }
+
+  // Storage
+  function loadPending(){ try{ return JSON.parse(localStorage.getItem("qs_pending_order")) }catch{ return null } }
+  function loadOrders(){ try{ return JSON.parse(localStorage.getItem("qs_orders")) || [] }catch{ return [] } }
+
+  // UI refs
+  const $title  = document.getElementById("title");
+  const $box    = document.getElementById("box");
+  const $info   = document.getElementById("order");
+  const $items  = document.getElementById("items");
+  const $actions= document.getElementById("actions");
 
   function renderItems(order){
     if(!order || !order.items) return;
@@ -57,42 +62,55 @@
     }).join("");
   }
 
-  if(!pending){
-    // No hay orden pendiente guardada
-    $title.textContent = "No hay orden pendiente";
-    $box.innerHTML = `<div class="err">⚠️</div><p style="margin:8px 0 0">Vuelve al carrito para iniciar el pago.</p>`;
-    $actions.innerHTML = `<a href="carrito.html">Ir al carrito</a>`;
-  } else if(status === "approved"){
-    // Guardar última orden y limpiar carrito + orden pendiente
-    localStorage.setItem("qs_last_order", JSON.stringify({ ...pending, paidAt: Date.now() }));
-    localStorage.removeItem("qs_cart_v1");
-    localStorage.removeItem("qs_pending_order");
+  // ===== Ramas
+  if(status === "ok"){
+    // Buscar la orden por id en qs_orders (webpaysim la guardó ahí)
+    const orders = loadOrders();
+    const order = orders.find(o => o.id === orderId) || null;
 
-    $title.textContent = "Pago realizado con éxito";
-    $box.innerHTML = `<div class="ok">✅</div>`;
-    $info.innerHTML =
-      `Orden <strong>${pending.id}</strong> por <strong>${money(pending.total)}</strong>. ` +
-      `Se enviará confirmación a <strong>${pending.buyer.email}</strong>.`;
-
-    renderItems(pending);
-    $actions.innerHTML = `<a href="index.html">Volver a la tienda</a><a href="carrito.html">Ver carrito</a>`;
-  } else if(status === "rejected" || status === "error"){
-    const msg = status === "rejected"
+    if(!order){
+      // Fallback: nada encontrado
+      $title.textContent = "Pago realizado (sin detalles)";
+      $box.innerHTML = `<div class="ok">✅</div><p style="margin:8px 0 0">Tu pago fue aprobado.</p>`;
+      $actions.innerHTML = `<a href="mispedidos.html">Ver mis pedidos</a><a href="index.html">Volver a la tienda</a>`;
+    }else{
+      $title.textContent = "Pago realizado con éxito";
+      $box.innerHTML = `<div class="ok">✅</div>`;
+      $info.innerHTML =
+        `Orden <strong>${order.id}</strong> por <strong>${money(order.total)}</strong>. ` +
+        `Se enviará confirmación a <strong>${order.buyer?.email || "—"}</strong>.`;
+      renderItems(order);
+      $actions.innerHTML = `<a href="mispedidos.html">Ver mis pedidos</a><a href="index.html">Volver a la tienda</a>`;
+    }
+  }
+  else if(status === "rechazo" || status === "error"){
+    // En rechazo/error webpaysim deja la orden pendiente para reintentar
+    const pending = loadPending();
+    const msg = status === "rechazo"
       ? "Transacción rechazada. Verifica los datos e inténtalo de nuevo."
       : "El pago no pudo procesarse. Inténtalo nuevamente más tarde.";
 
     $title.textContent = "Pago no realizado";
     $box.innerHTML = `<div class="err">⚠️</div><p style="margin:8px 0 0">${msg}</p>`;
-    $info.innerHTML = `Orden <strong>${pending.id}</strong> — Total ${money(pending.total)}.`;
-    renderItems(pending);
 
-    const retryParams = new URLSearchParams({ orderId: pending.id, amount: pending.total });
-    $actions.innerHTML = `<a href="webpaywim.html?${retryParams}">Reintentar</a><a href="carrito.html">Volver al carrito</a>`;
-  } else {
-    // Estado desconocido
-    $title.textContent = "Estado de pago desconocido";
-    $box.innerHTML = `<div class="err">❓</div><p style="margin:8px 0 0">No se reconoce el estado recibido.</p>`;
-    $actions.innerHTML = `<a href="carrito.html">Volver al carrito</a>`;
+    if(pending){
+      $info.innerHTML = `Orden <strong>${pending.id}</strong> — Total ${money(pending.total)}.`;
+      renderItems(pending);
+      const retryParams = new URLSearchParams({ orderId: pending.id, amount: pending.total });
+      $actions.innerHTML = `<a href="webpaysim.html?${retryParams}">Reintentar</a><a href="carrito.html">Volver al carrito</a>`;
+    }else{
+      $actions.innerHTML = `<a href="carrito.html">Volver al carrito</a>`;
+    }
+  }
+  else{
+    // Estado desconocido o acceso directo
+    const pending = loadPending();
+    $title.textContent = "No hay orden pendiente";
+    $box.innerHTML = `<div class="err">⚠️</div><p style="margin:8px 0 0">Vuelve al carrito para iniciar el pago.</p>`;
+    $actions.innerHTML = `<a href="carrito.html">Ir al carrito</a>`;
+    if (pending){
+      $info.innerHTML = `Orden pendiente detectada: <strong>${pending.id}</strong> — Total ${money(pending.total)}.`;
+    }
   }
 </script>
 </body>

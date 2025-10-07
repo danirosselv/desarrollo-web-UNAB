@@ -5,136 +5,143 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Mis pedidos — Queso & Sabor</title>
 <style>
-  :root{
-    --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
-    --accent:#fbbf24; --radius:10px;
-  }
+  :root{ --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --radius:10px; }
   *{box-sizing:border-box}
   body{margin:0; font-family:system-ui, Segoe UI, Roboto, Arial; color:var(--text); background:var(--bg); line-height:1.45}
   .container{width:min(960px,94vw); margin:18px auto}
-
-  /* Header igual al index */
-  #app-header{
-    background:#fff; border:1px solid var(--line); border-radius:var(--radius);
-    padding:10px 14px; display:flex; align-items:center; justify-content:space-between;
-  }
+  header{ background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+          padding:10px 14px; display:flex; align-items:center; justify-content:space-between; }
   .brand{font-weight:700}
-  .nav{ display:flex; gap:8px; align-items:center }
-  .btn{
-    color:var(--text); text-decoration:none; border:1px solid var(--line);
-    border-radius:8px; padding:8px 12px; background:#fff;
-  }
+  .btn{ color:var(--text); text-decoration:none; border:1px solid var(--line);
+        border-radius:8px; padding:8px 12px; background:#fff }
   .btn:hover{ background:#f9fafb }
-  .cart{ position:relative; display:inline-flex; align-items:center; justify-content:center;
-         width:40px; height:36px; border:1px solid var(--line); border-radius:8px; background:#fff; text-decoration:none }
-  .badge{ position:absolute; top:-8px; right:-8px; background:#111827; color:#fff; font-size:12px;
-          border-radius:999px; padding:2px 6px; min-width:20px; text-align:center }
 
-  /* Card */
-  section{
-    background:#fff; border:1px solid var(--line); border-radius:var(--radius);
-    padding:16px; margin-top:12px;
-  }
-  h2{ margin:0 0 12px; font-size:20px }
-
-  /* Lista de pedidos */
-  .orders{ list-style:none; padding:0; margin:0; display:grid; gap:10px }
-  .order{
-    border:1px solid var(--line); border-radius:8px; padding:12px; background:#fff;
-    display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center;
-  }
-  .order .meta{ color:var(--muted); font-size:14px }
-  .order .right{ text-align:right; display:grid; gap:6px; justify-items:end }
-  .empty{ text-align:center; color:var(--muted); padding:24px 8px }
+  section.card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-top:12px; }
+  h2{ margin:0 0 12px; font-size:28px }
+  .empty{ border:2px dashed var(--line); border-radius:12px; padding:24px; color:var(--muted); text-align:center }
+  ul#orders{ list-style:none; padding:0; margin:0; display:grid; gap:10px }
+  .order{ border:1px solid var(--line); border-radius:10px; background:#fff; padding:12px }
+  .row{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap }
+  .muted{ color:var(--muted) }
+  .chips{ display:flex; gap:6px; align-items:center; flex-wrap:wrap }
+  .chip{ padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:#fafafa; font-size:12px }
+  details{ margin-top:8px }
+  details summary{ cursor:pointer; user-select:none }
+  .items{ list-style:none; padding:0; margin:8px 0 0; display:grid; gap:6px }
+  .items li{ display:flex; justify-content:space-between; border:1px solid var(--line); border-radius:8px; padding:8px 10px; background:#fff }
 </style>
 </head>
 <body>
 <div class="container">
-  <header id="app-header">
-    <div class="brand">Queso &amp; Sabor</div>
-    <nav class="nav">
-      <a class="btn" href="index.html">Tienda</a>
-      <a class="cart" href="carrito.html" title="Tu carrito">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M3 3h2l2.2 9.2A2 2 0 0 0 9.1 14h7.8a2 2 0 0 0 1.9-1.5L21 8H7"
-                stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="10" cy="19" r="1.5" fill="#374151"/>
-          <circle cx="17" cy="19" r="1.5" fill="#374151"/>
-        </svg>
-        <span id="cart-badge" class="badge">0</span>
-      </a>
+  <header>
+    <nav style="display:flex; gap:8px">
+      <a class="btn" href="index.html">← Tienda</a>
+      <a class="btn" href="carrito.html">Carrito</a>
     </nav>
+    <div class="brand">Queso &amp; Sabor</div>
   </header>
 
-  <section>
+  <section class="card">
     <h2>Mis pedidos</h2>
-
     <div id="empty" class="empty" hidden>
-      <p>Aún no tienes pedidos.</p>
-      <a class="btn" href="index.html">Ir a la tienda</a>
+      Actualmente no tienes pedidos. <a href="index.html">Ir a la tienda</a>
     </div>
-
-    <ul id="lista" class="orders"></ul>
+    <ul id="orders"></ul>
   </section>
 </div>
 
 <script>
-  // Badge del carrito (mismo núcleo que index/carrito)
-  const CART_KEY = "qs_cart_v1";
-  function cartCount(){
-    try { return Object.values(JSON.parse(localStorage.getItem(CART_KEY))||{}).reduce((n,it)=>n+it.qty,0); }
-    catch { return 0; }
-  }
-  document.getElementById("cart-badge").textContent = cartCount();
+  // ==== Storage helpers
+  function loadOrders(){ try{ return JSON.parse(localStorage.getItem("qs_orders")) || [] }catch{ return [] } }
+  function saveOrders(list){ localStorage.setItem("qs_orders", JSON.stringify(list)); }
 
-  // Cargar pedidos
-  const ORDERS_KEY = "qs_orders"; // usamos este nombre para la lista consolidada
-  function loadOrders(){
-    try{ return JSON.parse(localStorage.getItem(ORDERS_KEY)) || []; }catch{ return []; }
-  }
+  // ==== Migración (compatibilidad con versiones anteriores)
+  (function migrateLegacy(){
+    try{
+      const legacy = JSON.parse(localStorage.getItem("qs_last_order") || "null");
+      if (!legacy) return;
+      const list = loadOrders();
+      if (!list.some(o => o.id === legacy.id)) {
+        list.push(legacy);
+        saveOrders(list);
+      }
+      // opcional: conservar o limpiar el legacy
+      // localStorage.removeItem("qs_last_order");
+    }catch{}
+  })();
 
-  function parseCreatedAt(o){
-    if (o.createdAt) return o.createdAt;
-    // fallback desde id tipo "ORD-<timestamp>"
-    const ts = Number((o.id||"").split("ORD-")[1]);
-    return isNaN(ts) ? Date.now() : ts;
-  }
-  function fmtMoney(n){ return `$${Number(n||0).toLocaleString("es-CL")}`; }
-  function fmtDate(ms){
-    const d = new Date(ms);
-    return d.toLocaleDateString("es-CL", {year:"numeric", month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"});
-  }
-
-  const $lista = document.getElementById("lista");
+  // ==== Utils
+  const $list = document.getElementById("orders");
   const $empty = document.getElementById("empty");
+  function money(n){ return `$${Number(n||0).toLocaleString("es-CL")}`; }
+  function sumQty(items){ return Object.values(items||{}).reduce((n,it)=>n+Number(it.qty||0),0); }
+  function lastStatusAt(o){
+    const hist = o.statusHistory || [];
+    return hist.length ? (hist[hist.length-1].at || o.createdAt || o.paidAt || Date.now()) : (o.createdAt || o.paidAt || Date.now());
+  }
+  function timeago(ts){
+    const diff = Math.max(0, Date.now()-Number(ts||0));
+    const m = Math.round(diff/60000);
+    if (m < 1) return "justo ahora";
+    if (m === 1) return "hace 1 min";
+    if (m < 60) return `hace ${m} min`;
+    const h = Math.round(m/60);
+    if (h === 1) return "hace 1 hora";
+    if (h < 24) return `hace ${h} horas`;
+    const d = Math.round(h/24);
+    return d === 1 ? "hace 1 día" : `hace ${d} días`;
+  }
 
-  const orders = loadOrders()
-    .map(o => ({...o, createdAt: parseCreatedAt(o)}))
-    .sort((a,b)=> b.createdAt - a.createdAt);
+  // ==== Render
+  function render(){
+    let orders = loadOrders();
+    if (!orders.length){
+      $list.innerHTML = "";
+      $empty.hidden = false;
+      return;
+    }
+    $empty.hidden = true;
 
-  if (!orders.length){
-    $empty.hidden = false;
-  } else {
-    $lista.innerHTML = orders.map(o => {
-      const estado = (o.status && o.status.current) || (o.statusHistory?.slice(-1)[0]?.label) || "Pago confirmado";
+    // ordenar (más recientes primero)
+    orders.sort((a,b)=> (lastStatusAt(b)||0) - (lastStatusAt(a)||0));
+
+    $list.innerHTML = orders.map(o=>{
+      const estado = (o.status && o.status.current) || "Nuevo";
+      const qty = sumQty(o.items);
+      const updated = timeago(lastStatusAt(o));
+      const envio = o.shippingMethod === "despacho"
+        ? `Despacho — ${o.shippingDetail?.comuna || "—"}`
+        : `Retiro — ${o.shippingDetail?.sucursal || "—"}`;
+
+      const itemsHTML = Object.values(o.items||{}).map(it=>{
+        const sub = Number(it.qty||0)*Number(it.precio||0);
+        return `<li><span>${it.nombre} (x${it.qty})</span><strong>${money(sub)}</strong></li>`;
+      }).join("");
+
       return `
         <li class="order">
-          <div>
-            <div><strong>Pedido #${o.id || "—"}</strong></div>
-            <div class="meta">${fmtDate(o.createdAt)}</div>
-            <div class="meta">${o.shipping?.method === "retiro"
-                ? `Retiro en ${o.shipping?.sucursal || "Sucursal"}`
-                : (o.shipping?.comuna ? `Despacho: ${o.shipping.comuna}` : "Método de envío: —")}</div>
+          <div class="row">
+            <div>
+              <div><strong>Pedido ${o.id}</strong></div>
+              <div class="chips">
+                <span class="chip">${estado}</span>
+                <span class="chip muted">act.: ${updated}</span>
+                <span class="chip muted">${envio}</span>
+                <span class="chip muted">Quesos: ${qty}</span>
+              </div>
+            </div>
+            <div><strong>${money(o.total)}</strong></div>
           </div>
-          <div class="right">
-            <div><strong>Total: ${fmtMoney(o.total)}</strong></div>
-            <div class="meta">Estado: ${estado}</div>
-            <a class="btn" href="pedido.html?id=${encodeURIComponent(o.id)}">Ver detalle</a>
-          </div>
+          <details>
+            <summary>Ver detalle</summary>
+            <ul class="items">${itemsHTML}</ul>
+          </details>
         </li>
       `;
     }).join("");
   }
+
+  render();
 </script>
 </body>
 </html>
