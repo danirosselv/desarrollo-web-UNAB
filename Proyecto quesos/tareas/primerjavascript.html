@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <title>Primer Javascript</title>
+</head>
+<body>
+
+  <h1>Interactuar</h1>
+  
+  <p id="miTexto">Este texto va a cambiar.</p>
+  
+  <button onclick="cambiarTexto()">click</button>
+
+  <script>
+    // Esta es la función que se llama desde el botón
+    function cambiarTexto() {
+      // Busca el elemento por su ID
+      var parrafo = document.getElementById("miTexto");
+      
+      // Cambia su contenido
+      parrafo.innerHTML = "skoda";
+      parrafo.style.color = "blue"; // También cambia el estilo
+    }
+  </script>
+
+</body>
+</html>
