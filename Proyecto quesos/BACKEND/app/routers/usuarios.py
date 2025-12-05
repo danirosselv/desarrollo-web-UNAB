@@ -55,12 +55,12 @@ async def register_user(user_in: UsuarioCreate):
 
 
 @router.post("/auth/token", 
-    response_model=Token,
     summary="Iniciar sesión"
 )
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     """
     Verifica email y contraseña, y devuelve un Token JWT (US-17).
+    También devuelve nombre y rol del usuario.
     """
     collection = get_user_collection()
     user_data = await collection.find_one({"email": form_data.username})
@@ -83,7 +83,12 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     # Crear el token JWT
     access_token = create_access_token(data={"sub": user.email})
     
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "nombre": user.nombre,
+        "rol": str(user.rol)
+    }
 
 
 @router.get("/users/me", 

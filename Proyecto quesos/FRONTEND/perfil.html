@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Mi perfil — Queso & Sabor</title>
+<title>Mi perfil — Quesos Skoda</title>
 <style>
 body{margin:0;font-family:system-ui;background:#f6f7f9}
 .wrap{max-width:600px;margin:auto;padding:10px}
@@ -49,74 +49,72 @@ header{display:flex;justify-content:space-between}
 </div>
 
 <script>
-const session = JSON.parse(localStorage.getItem("qs_session")||"null")
-if(!session){
-  document.getElementById("needlogin").hidden=false
-}else{
-  document.getElementById("content").hidden=false
-  const users=JSON.parse(localStorage.getItem("qs_users")||"[]")
-  const user=users.find(u=>u.email===session.email)||{}
+const API_URL = "http://localhost:8000";
+const token = localStorage.getItem("qs_token");
+const session = JSON.parse(localStorage.getItem("qs_session") || "null");
+
+if (!token || !session) {
+  document.getElementById("needlogin").hidden = false;
+} else {
+  document.getElementById("content").hidden = false;
   
-  document.getElementById("u-name").value=user.nombre||""
-  document.getElementById("u-mail").value=user.email||""
-  
-  document.getElementById("logout").onclick=()=>{
-    localStorage.removeItem("qs_session")
-    location.href="index.html"
+  async function loadUserData() {
+    try {
+      const res = await fetch(`${API_URL}/users/me`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      
+      if (!res.ok) throw new Error("Error al cargar perfil");
+      
+      const user = await res.json();
+      document.getElementById("u-name").value = user.nombre || "";
+      document.getElementById("u-mail").value = user.email || "";
+      renderAddrs(user.direcciones || []);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  function renderAddrs(){
-    const users=JSON.parse(localStorage.getItem("qs_users")||"[]")
-    const user=users.find(u=>u.email===session.email)||{}
-    const addrs=user.direcciones||[]
-    document.getElementById("alist").innerHTML=addrs.map(a=>`
+  document.getElementById("logout").onclick = () => {
+    localStorage.removeItem("qs_session");
+    localStorage.removeItem("qs_token");
+    location.href = "index.html";
+  }
+
+  function renderAddrs(addrs) {
+    document.getElementById("alist").innerHTML = addrs.map((a, idx) => `
       <div class="addr">
-        <div>${a.texto}, ${a.comuna} ${a.principal?"⭐":""}</div>
-        <div>
-          <button class="btn" onclick="setPrincipal('${a.id}')">Principal</button>
-          <button class="btn" onclick="deleteAddr('${a.id}')">Eliminar</button>
-        </div>
+        <div>${a.texto}, ${a.comuna} ${a.principal ? "⭐" : ""}</div>
       </div>
-    `).join("")
+    `).join("");
   }
 
-  window.setPrincipal=(id)=>{
-    const users=JSON.parse(localStorage.getItem("qs_users")||"[]")
-    const i=users.findIndex(u=>u.email===session.email)
-    if(i===-1)return
-    users[i].direcciones=users[i].direcciones.map(a=>({...a,principal:a.id===id}))
-    localStorage.setItem("qs_users",JSON.stringify(users))
-    renderAddrs()
-  }
-
-  window.deleteAddr=(id)=>{
-    const users=JSON.parse(localStorage.getItem("qs_users")||"[]")
-    const i=users.findIndex(u=>u.email===session.email)
-    if(i===-1)return
-    users[i].direcciones=users[i].direcciones.filter(a=>a.id!==id)
-    localStorage.setItem("qs_users",JSON.stringify(users))
-    renderAddrs()
-  }
-
-  document.getElementById("add").onclick=()=>{
-    const texto=document.getElementById("a-text").value.trim()
-    const comuna=document.getElementById("a-comuna").value
-    if(!texto)return
+  document.getElementById("add").onclick = async () => {
+    const texto = document.getElementById("a-text").value.trim();
+    const comuna = document.getElementById("a-comuna").value;
+    if (!texto) return;
     
-    const users=JSON.parse(localStorage.getItem("qs_users")||"[]")
-    const i=users.findIndex(u=>u.email===session.email)
-    if(i===-1)return
-    
-    users[i].direcciones=[
-      ...users[i].direcciones||[],
-      {id:Date.now().toString(),texto,comuna,principal:!users[i].direcciones?.length}
-    ]
-    localStorage.setItem("qs_users",JSON.stringify(users))
-    document.getElementById("a-text").value=""
-    renderAddrs()
+    try {
+      const res = await fetch(`${API_URL}/users/me/direcciones`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ texto, comuna, principal: false })
+      });
+
+      if (!res.ok) throw new Error("Error al agregar dirección");
+      
+      document.getElementById("a-text").value = "";
+      loadUserData();
+    } catch (err) {
+      console.error(err);
+      alert("Error al guardar dirección");
+    }
   }
 
-  renderAddrs()
+  loadUserData();
 }
 </script>
 </body>

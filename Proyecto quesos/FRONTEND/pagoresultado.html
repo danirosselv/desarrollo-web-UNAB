@@ -5,15 +5,39 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Resultado del pago</title>
 <style>
-  body{margin:0;font-family:system-ui;background:#f6f7f9;color:#1f2937}
-  .wrap{max-width:720px;margin:24px auto;padding:0 10px}
-  .card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px}
-  .box{border:1px solid #e5e7eb;border-radius:10px;padding:24px;margin:10px 0;background:#fafafa;text-align:center}
-  .icon{font-size:56px}
-  .row{display:flex;gap:10px;margin-top:10px}
-  a,button{padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;text-decoration:none;color:#1f2937}
-  .items{list-style:none;margin:10px 0 0;padding:0}
-  .items li{display:flex;justify-content:space-between;border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;margin-bottom:6px}
+  :root{
+    --primary:#d97706; --primary-dark:#b45309; --primary-light:#fef3c7;
+    --bg:#fafaf9; --card:#fff; --text:#1c1917; --muted:#78716c;
+    --line:#e7e5e4; --shadow:0 1px 3px rgba(0,0,0,0.1); --shadow-lg:0 10px 25px rgba(0,0,0,0.15);
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color:var(--text); background:var(--bg); line-height:1.6}
+  
+  .wrap{max-width:700px; margin:60px auto; padding:0 20px}
+  .card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:40px; box-shadow:var(--shadow-lg)}
+  
+  h1{font-size:28px; font-weight:700; color:var(--text); margin:0 0 24px; text-align:center}
+  
+  .box{border:2px solid var(--line); border-radius:12px; padding:32px; margin:20px 0; background:linear-gradient(135deg, #fafaf9 0%, var(--primary-light) 100%); text-align:center}
+  .box.success{background:linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-color:#86efac}
+  .box.error{background:linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-color:#fca5a5}
+  
+  .icon{font-size:72px; line-height:1; margin-bottom:12px}
+  .box p{font-size:18px; font-weight:600; color:var(--text); margin:0}
+  
+  #info{text-align:center; margin:20px 0; font-size:16px; color:var(--muted)}
+  #info strong{color:var(--primary-dark)}
+  
+  .items{list-style:none; margin:24px 0; padding:0}
+  .items li{display:flex; justify-content:space-between; align-items:center; border:1px solid var(--line); border-radius:8px; padding:12px 16px; margin-bottom:8px; background:#fafaf9}
+  .items li span:first-child{font-weight:500}
+  .items li span:last-child{font-weight:700; color:var(--primary-dark)}
+  
+  .row{display:flex; gap:12px; margin-top:24px; justify-content:center; flex-wrap:wrap}
+  a{padding:12px 24px; border:1px solid var(--line); border-radius:8px; background:var(--primary); color:#fff; text-decoration:none; font-weight:600; transition:all 0.2s}
+  a:hover{background:var(--primary-dark); transform:translateY(-2px); box-shadow:var(--shadow-lg)}
+  a.secondary{background:#fff; color:var(--text)}
+  a.secondary:hover{background:var(--primary-light); border-color:var(--primary)}
 </style>
 </head>
 <body>
@@ -58,38 +82,44 @@ if(status === "ok"){
   const order = orders.find(o => o.id === orderId)
 
   if(order){
-    $title.textContent = "Pago exitoso"
+    $title.textContent = "¡Pago Exitoso!"
+    $box.className = "box success"
     $box.innerHTML = `<div class="icon">✅</div><p>Tu pago fue aprobado</p>`
     $info.innerHTML = `Orden <strong>${order.id}</strong> - $${order.total?.toLocaleString() || '0'}`
     renderItems(order)
-    $actions.innerHTML = `<a href="mispedidos.html">Mis pedidos</a><a href="index.html">Tienda</a>`
+    $actions.innerHTML = `<a href="mispedidos.html">Mis pedidos</a><a class="secondary" href="index.html">Seguir comprando</a>`
   }else{
-    $title.textContent = "Pago realizado"
+    $title.textContent = "¡Pago Exitoso!"
+    $box.className = "box success"
     $box.innerHTML = `<div class="icon">✅</div><p>Transacción aprobada</p>`
-    $actions.innerHTML = `<a href="mispedidos.html">Mis pedidos</a><a href="index.html">Tienda</a>`
+    $actions.innerHTML = `<a href="mispedidos.html">Mis pedidos</a><a class="secondary" href="index.html">Seguir comprando</a>`
   }
 }
 else if(status === "rechazo" || status === "error"){
   const pending = loadPending()
-  const msg = status === "rechazo" ? "Transacción rechazada" : "Error en el pago"
+  const msg = status === "error" 
+    ? "Transacción rechazada (simulación)" 
+    : "Transacción rechazada"
   
-  $title.textContent = "Pago fallido"
-  $box.innerHTML = `<div class="icon">⚠️</div><p>${msg}</p>`
+  $title.textContent = "Pago Rechazado"
+  $box.className = "box error"
+  $box.innerHTML = `<div class="icon">❌</div><p>${msg}</p>`
 
   if(pending){
     $info.innerHTML = `Orden <strong>${pending.id}</strong> - $${pending.total?.toLocaleString() || '0'}`
     renderItems(pending)
     const params = new URLSearchParams({ orderId: pending.id, amount: pending.total })
-    $actions.innerHTML = `<a href="webpaysim.html?${params}">Reintentar</a><a href="carrito.html">Carrito</a>`
+    $actions.innerHTML = `<a href="webpaysim.html?${params}">Reintentar pago</a><a class="secondary" href="carrito.html">Volver al carrito</a>`
   }else{
-    $actions.innerHTML = `<a href="carrito.html">Carrito</a>`
+    $actions.innerHTML = `<a href="carrito.html">Volver al carrito</a>`
   }
 }
 else{
   const pending = loadPending()
-  $title.textContent = "Sin orden"
-  $box.innerHTML = `<div class="icon">⚠️</div><p>Vuelve al carrito</p>`
-  $actions.innerHTML = `<a href="carrito.html">Carrito</a>`
+  $title.textContent = "Sin Orden"
+  $box.className = "box error"
+  $box.innerHTML = `<div class="icon">⚠️</div><p>No hay orden de compra</p>`
+  $actions.innerHTML = `<a href="carrito.html">Ir al carrito</a>`
   if(pending){
     $info.innerHTML = `Orden pendiente: <strong>${pending.id}</strong>`
   }

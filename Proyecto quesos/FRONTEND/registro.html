@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Registro — Queso & Sabor</title>
+<title>Registro — Quesos Skoda</title>
 <style>
 body{margin:0;font-family:system-ui;background:#f6f7f9}
 .wrap{max-width:500px;margin:auto;padding:10px}
@@ -35,29 +35,44 @@ input{padding:8px 10px;border:1px solid #ddd;border-radius:6px}
 </div>
 
 <script>
-document.getElementById("form").onsubmit = e => {
-  e.preventDefault()
-  const nombre = document.getElementById("name").value.trim()
-  const correo = document.getElementById("email").value.trim().toLowerCase()
-  const pass = document.getElementById("pass").value.trim()
-  const $msg = document.getElementById("msg")
+const API_URL = "http://localhost:8000";
+
+document.getElementById("form").onsubmit = async e => {
+  e.preventDefault();
+  const nombre = document.getElementById("name").value.trim();
+  const correo = document.getElementById("email").value.trim().toLowerCase();
+  const pass = document.getElementById("pass").value.trim();
+  const $msg = document.getElementById("msg");
   
-  if(!nombre || !correo.includes('@') || pass.length < 8){
-    $msg.textContent = "Completa todos los campos (contraseña 8+ caracteres)"
-    return
+  if (!nombre || !correo.includes('@') || pass.length < 8) {
+    $msg.style.color = "#7f1d1d";
+    $msg.textContent = "Completa todos los campos (contraseña 8+ caracteres)";
+    return;
   }
   
-  const users = JSON.parse(localStorage.getItem("qs_users") || "[]")
-  if(users.some(u => u.email === correo)){
-    $msg.textContent = "El correo ya está registrado"
-    return
+  try {
+    const res = await fetch(`${API_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: correo,
+        nombre: nombre,
+        password: pass
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Error al registrar");
+    }
+
+    $msg.style.color = "#065f46";
+    $msg.textContent = "Cuenta creada. Redirigiendo...";
+    setTimeout(() => location.href = "login.html", 800);
+  } catch (err) {
+    $msg.style.color = "#7f1d1d";
+    $msg.textContent = err.message;
   }
-  
-  users.push({nombre, email:correo, pass, direcciones:[]})
-  localStorage.setItem("qs_users", JSON.stringify(users))
-  $msg.style.color = "#065f46"
-  $msg.textContent = "Cuenta creada. Redirigiendo..."
-  setTimeout(() => location.href = "login.html", 800)
 }
 </script>
 </body>

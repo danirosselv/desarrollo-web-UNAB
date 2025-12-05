@@ -3,154 +3,507 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Admin — Queso & Sabor</title>
+<title>Admin — Quesos Skoda</title>
 <style>
-  :root{--bg:#f6f7f9;--card:#fff;--text:#1f2937;--muted:#6b7280;--line:#e5e7eb;--r:10px}
-  *{box-sizing:border-box} body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
-  .wrap{width:min(960px,94vw);margin:18px auto}
-  header,section{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px}
-  header{display:flex;justify-content:space-between;align-items:center}
-  .brand{font-weight:700} .muted{color:var(--muted)} .row{display:flex;gap:8px;flex-wrap:wrap}
-  .btn,a.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;text-decoration:none;color:inherit}
-  .btn:hover,a.btn:hover{background:#f9fafb}
-  h2{margin:0 0 8px;font-size:18px}
-  label{font-size:13px;color:var(--muted)} input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
-  .grid{display:grid;gap:8px} .g-4{grid-template-columns:2fr 1fr 1fr 1fr} .g-2{grid-template-columns:1fr 1fr}
-  .list{display:grid;gap:8px;margin-top:8px}
-  .item{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:8px}
-  .head{display:flex;align-items:center;gap:10px}
-  .thumb{width:56px;height:56px;border-radius:8px;object-fit:cover;background:#f3f4f6}
-  .title{font-weight:600} .small{font-size:12px;color:var(--muted)}
-  .ok{color:#065f46} .err{color:#7f1d1d}
+  :root{
+    --primary:#d97706; --primary-dark:#b45309; --primary-light:#fef3c7;
+    --bg:#fafaf9; --card:#fff; --text:#1c1917; --muted:#78716c;
+    --line:#e7e5e4; --shadow:0 1px 3px rgba(0,0,0,0.1); --shadow-lg:0 10px 25px rgba(0,0,0,0.15);
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--bg); color:var(--text); line-height:1.6}
+  
+  header{background:#fff; border-bottom:1px solid rgba(217, 119, 6, 0.15); box-shadow:0 1px 3px rgba(0,0,0,0.04); position:sticky; top:0; z-index:100}
+  .header-content{width:min(1200px,94vw); margin:0 auto; padding:18px 24px; display:flex; align-items:center; justify-content:space-between}
+  .brand{font-size:20px; font-weight:700; color:var(--primary-dark)}
+  .nav{display:flex; gap:8px; align-items:center}
+  .btn-link{color:var(--text); text-decoration:none; border:1px solid var(--line); border-radius:8px; padding:10px 16px; background:#fff; cursor:pointer; font-size:14px; font-weight:500; transition:all 0.2s}
+  .btn-link:hover{background:var(--primary-light); border-color:var(--primary); transform:translateY(-1px); box-shadow:var(--shadow)}
+  
+  .container{width:min(1200px,94vw); margin:24px auto; padding:0 20px}
+  
+  .tabs{display:flex; gap:8px; margin-bottom:24px; border-bottom:2px solid var(--line)}
+  .tab{padding:12px 24px; border:none; background:transparent; cursor:pointer; font-size:15px; font-weight:600; color:var(--muted); transition:all 0.2s; border-bottom:3px solid transparent; margin-bottom:-2px}
+  .tab:hover{color:var(--text); background:var(--primary-light)}
+  .tab.active{color:var(--primary-dark); border-bottom-color:var(--primary)}
+  
+  .tab-content{display:none}
+  .tab-content.active{display:block}
+  
+  .section{background:#fff; border:1px solid var(--line); border-radius:12px; padding:24px; margin-bottom:24px; box-shadow:var(--shadow)}
+  h2{font-size:22px; font-weight:700; color:var(--text); margin-bottom:16px}
+  h3{font-size:18px; font-weight:600; color:var(--text); margin-bottom:12px}
+  
+  .form-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px}
+  .form-group{display:flex; flex-direction:column; gap:6px}
+  label{font-size:13px; font-weight:600; color:var(--muted)}
+  input,select,textarea{padding:10px 12px; border:1px solid var(--line); border-radius:8px; font-size:14px; background:#fff; transition:all 0.2s}
+  input:focus,select:focus,textarea:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-light)}
+  textarea{min-height:80px; resize:vertical}
+  
+  .btn{border:none; background:var(--primary); color:#fff; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s}
+  .btn:hover:not(:disabled){background:var(--primary-dark); transform:translateY(-2px); box-shadow:var(--shadow-lg)}
+  .btn:disabled{opacity:0.5; cursor:not-allowed}
+  .btn-secondary{background:#fff; color:var(--text); border:1px solid var(--line)}
+  .btn-secondary:hover{background:var(--bg)}
+  
+  .product-list{display:grid; gap:16px; margin-top:16px}
+  .product-item{border:1px solid var(--line); border-radius:12px; padding:16px; background:#fff; transition:all 0.2s}
+  .product-item:hover{box-shadow:var(--shadow)}
+  .product-header{display:flex; gap:16px; align-items:center; margin-bottom:12px}
+  .product-thumb{width:80px; height:80px; border-radius:8px; object-fit:cover; background:linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%)}
+  .product-info{flex:1}
+  .product-name{font-size:18px; font-weight:700; margin-bottom:4px}
+  .product-meta{font-size:13px; color:var(--muted)}
+  
+  .order-list{display:grid; gap:16px; margin-top:16px}
+  .order-item{border:1px solid var(--line); border-radius:12px; padding:20px; background:#fff}
+  .order-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--line)}
+  .order-id{font-size:12px; color:var(--muted); font-family:monospace}
+  .order-status{padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600}
+  .status-nuevo{background:#fef3c7; color:#b45309}
+  .status-en_preparacion{background:#dbeafe; color:#1e40af}
+  .status-pago_fallido{background:#fee2e2; color:#991b1b}
+  .order-details{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-top:12px}
+  .detail-group{display:flex; flex-direction:column; gap:4px}
+  .detail-label{font-size:12px; color:var(--muted); font-weight:600}
+  .detail-value{font-size:14px; color:var(--text)}
+  
+  .products-in-order{margin-top:12px; padding-top:12px; border-top:1px solid var(--line)}
+  .products-in-order h4{font-size:14px; font-weight:600; margin-bottom:8px; color:var(--muted)}
+  .order-product-list{display:grid; gap:8px}
+  .order-product{font-size:13px; color:var(--text); padding:8px; background:var(--bg); border-radius:6px}
+  
+  .message{padding:12px; border-radius:8px; font-size:14px; margin-top:12px}
+  .message.success{background:#d1fae5; color:#065f46; border:1px solid #6ee7b7}
+  .message.error{background:#fee2e2; color:#991b1b; border:1px solid #fca5a5}
+  
+  .empty-state{text-align:center; padding:48px; color:var(--muted)}
+  .empty-state p{font-size:16px; margin-bottom:8px}
+  
+  @media (max-width:768px){
+    .form-grid{grid-template-columns:1fr}
+    .order-details{grid-template-columns:1fr}
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
   <header>
-    <nav class="row">
-      <a class="btn" href="index.html">← Tienda</a>
-      <a class="btn" href="carrito.html">Carrito</a>
-      <a class="btn" href="mispedidos.html">Mis pedidos</a>
-    </nav>
-    <div class="brand">Queso &amp; Sabor — Admin</div>
-    <div></div>
+    <div class="header-content">
+      <div class="brand">🧀 Admin Panel — Quesos Skoda</div>
+      <nav class="nav">
+        <a class="btn-link" href="index.html">← Tienda</a>
+        <a class="btn-link" href="carrito.html">Carrito</a>
+        <a class="btn-link" href="mispedidos.html">Mis Pedidos</a>
+      </nav>
+    </div>
   </header>
 
-  <!-- US-13: Crear producto -->
-  <section>
-    <h2>Crear producto</h2>
-    <div class="grid g-4">
-      <div><label>Nombre*</label><input id="c-nombre" placeholder="Ej. Gouda clásico"></div>
-      <div><label>Precio (CLP)*</label><input id="c-precio" type="number" min="0" step="1" placeholder="5990"></div>
-      <div><label>Stock*</label><input id="c-stock" type="number" min="0" step="1" placeholder="8"></div>
-      <div><label>Tipo de leche*</label>
-        <select id="c-leche">
-          <option value="">—</option><option value="vaca">Vaca</option><option value="cabra">Cabra</option><option value="oveja">Oveja</option>
-        </select>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" data-tab="productos">Gestión de Productos</button>
+      <button class="tab" data-tab="pedidos">Historial de Pedidos</button>
+    </div>
+
+    <!-- TAB: Gestión de Productos -->
+    <div id="tab-productos" class="tab-content active">
+      <!-- Crear Producto -->
+      <div class="section">
+        <h2>Crear Nuevo Producto</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombre del Producto *</label>
+            <input id="c-nombre" placeholder="Ej. Gouda Clásico">
+          </div>
+          <div class="form-group">
+            <label>Precio (CLP) *</label>
+            <input id="c-precio" type="number" min="0" step="1" placeholder="5990">
+          </div>
+          <div class="form-group">
+            <label>Stock Inicial *</label>
+            <input id="c-stock" type="number" min="0" step="1" placeholder="10">
+          </div>
+          <div class="form-group">
+            <label>Tipo de Leche *</label>
+            <select id="c-leche">
+              <option value="">Seleccionar...</option>
+              <option value="vaca">Vaca</option>
+              <option value="cabra">Cabra</option>
+              <option value="oveja">Oveja</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid" style="margin-top:12px">
+          <div class="form-group">
+            <label>Descripción</label>
+            <textarea id="c-desc" placeholder="Descripción del producto (opcional)"></textarea>
+          </div>
+          <div class="form-group">
+            <label>URL de Imagen</label>
+            <input id="c-img" placeholder="https://... (opcional)">
+          </div>
+        </div>
+        <div style="margin-top:16px; display:flex; gap:12px; align-items:center">
+          <button id="btn-create" class="btn">Crear Producto</button>
+          <span id="create-msg"></span>
+        </div>
+      </div>
+
+      <!-- Lista de Productos -->
+      <div class="section">
+        <h2>Productos Existentes</h2>
+        <div id="product-list" class="product-list"></div>
+        <div id="product-empty" class="empty-state" hidden>
+          <p>No hay productos en el sistema</p>
+        </div>
       </div>
     </div>
-    <div class="grid g-2" style="margin-top:8px">
-      <div><label>Descripción</label><textarea id="c-desc" placeholder="Opcional"></textarea></div>
-      <div><label>Imagen (URL)</label><input id="c-img" placeholder="https://… (opcional)"></div>
-    </div>
-    <div class="row" style="margin-top:8px">
-      <button id="btn-create" class="btn">Guardar</button>
-      <span id="c-msg" class="small"></span>
-    </div>
-  </section>
 
-  <!-- US-14/15: Editar precio/stock/foto/leche -->
-  <section>
-    <h2>Productos</h2>
-    <div id="list" class="list"></div>
-    <p id="empty" class="small muted" hidden>No hay productos.</p>
-  </section>
-</div>
+    <!-- TAB: Historial de Pedidos -->
+    <div id="tab-pedidos" class="tab-content">
+      <div class="section">
+        <h2>Historial Completo de Pedidos</h2>
+        <div id="order-list" class="order-list"></div>
+        <div id="order-empty" class="empty-state" hidden>
+          <p>No hay pedidos registrados</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <script>
-/* ===== Storage básico ===== */
-const PROD_KEY="qs_products";
-const load=()=>{try{return JSON.parse(localStorage.getItem(PROD_KEY))||[]}catch{return[]}};
-const save=(list)=>localStorage.setItem(PROD_KEY,JSON.stringify(list));
-const uid=()=> "p_"+Math.random().toString(36).slice(2,10);
+const API_URL = "http://localhost:8000";
+const token = localStorage.getItem("qs_token");
 
-/* ===== Crear ===== */
-const $n=document.getElementById("c-nombre");
-const $p=document.getElementById("c-precio");
-const $s=document.getElementById("c-stock");
-const $l=document.getElementById("c-leche");
-const $d=document.getElementById("c-desc");
-const $i=document.getElementById("c-img");
-const $cmsg=document.getElementById("c-msg");
+if (!token) {
+  alert("Debes estar logueado como administrador para acceder a esta página.");
+  window.location.href = "login.html";
+}
 
-document.getElementById("btn-create").addEventListener("click",()=>{
-  const nombre=$n.value.trim(), precio=Number($p.value), stock=Number($s.value), leche=$l.value;
-  if(!nombre || !(precio>=0) || !Number.isInteger(stock)||stock<0 || !leche){
-    $cmsg.className="small err"; $cmsg.textContent="Completa nombre, precio, stock y leche."; return;
-  }
-  const now=Date.now();
-  const prod={id:uid(),nombre,precio,stock,leche,descripcion:$d.value.trim(),imagen:$i.value.trim(),createdAt:now,updatedAt:now,activo:true};
-  const list=load(); list.push(prod); save(list);
-  [$n,$p,$s,$l,$d,$i].forEach(el=>el.value=""); 
-  $cmsg.className="small ok"; $cmsg.textContent="Producto creado."; render(); setTimeout(()=>($cmsg.textContent=""),1200);
+// === TABS ===
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    const tabName = tab.dataset.tab;
+    
+    // Update active tab
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    
+    // Update active content
+    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+    document.getElementById(`tab-${tabName}`).classList.add("active");
+    
+    // Load data for the tab
+    if (tabName === "pedidos") {
+      loadOrders();
+    } else if (tabName === "productos") {
+      loadProducts();
+    }
+  });
 });
 
-/* ===== Lista + edición simple ===== */
-const $list=document.getElementById("list"), $empty=document.getElementById("empty");
+// === PRODUCTOS ===
+let productos = [];
 
-function card(p){return `
-  <div class="item" data-id="${p.id}">
-    <div class="head">
-      <img class="thumb" src="${p.imagen||''}" alt="" onerror="this.style.display='none'">
-      <div>
-        <div class="title">${p.nombre}</div>
-        <div class="small">Precio: $${Number(p.precio||0).toLocaleString('es-CL')} · Stock: ${p.stock} · Leche: ${p.leche||'—'}</div>
+async function loadProducts() {
+  try {
+    const res = await fetch(`${API_URL}/productos/`);
+    if (!res.ok) throw new Error("Error al cargar productos");
+    productos = await res.json();
+    renderProducts();
+  } catch (err) {
+    console.error("Error cargando productos:", err);
+    productos = [];
+    renderProducts();
+  }
+}
+
+function renderProducts() {
+  const $list = document.getElementById("product-list");
+  const $empty = document.getElementById("product-empty");
+  
+  $empty.hidden = productos.length > 0;
+  
+  if (productos.length === 0) {
+    $list.innerHTML = "";
+    return;
+  }
+  
+  $list.innerHTML = productos.map(p => {
+    const id = p._id || p.id;
+    return `
+      <div class="product-item" data-id="${id}">
+        <div class="product-header">
+          <img class="product-thumb" src="${p.imagen || ''}" alt="${p.nombre}" onerror="this.style.display='none'">
+          <div class="product-info">
+            <div class="product-name">${p.nombre}</div>
+            <div class="product-meta">
+              Precio: $${Number(p.precio || 0).toLocaleString('es-CL')} · 
+              Stock: ${p.stock} unidades · 
+              Ventas: ${p.ventas || 0} · 
+              Leche: ${p.leche || '—'}
+            </div>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Precio (CLP)</label>
+            <input class="e-precio" type="number" min="0" step="1" value="${p.precio}">
+          </div>
+          <div class="form-group">
+            <label>Stock</label>
+            <input class="e-stock" type="number" min="0" step="1" value="${p.stock}">
+          </div>
+          <div class="form-group">
+            <label>Tipo de Leche</label>
+            <select class="e-leche">
+              <option value="vaca" ${p.leche === 'vaca' ? 'selected' : ''}>Vaca</option>
+              <option value="cabra" ${p.leche === 'cabra' ? 'selected' : ''}>Cabra</option>
+              <option value="oveja" ${p.leche === 'oveja' ? 'selected' : ''}>Oveja</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>URL de Imagen</label>
+            <input class="e-img" value="${p.imagen || ''}" placeholder="https://...">
+          </div>
+        </div>
+        <div style="margin-top:12px; display:flex; gap:12px; align-items:center">
+          <button class="btn btn-save">Guardar Cambios</button>
+          <span class="product-msg"></span>
+        </div>
       </div>
-    </div>
-    <div class="grid g-4">
-      <div><label>Precio</label><input class="e-precio" type="number" min="0" step="1" value="${p.precio}"></div>
-      <div><label>Stock</label><input class="e-stock" type="number" min="0" step="1" value="${p.stock}"></div>
-      <div><label>Leche</label>
-        <select class="e-leche">
-          <option value="vaca">Vaca</option><option value="cabra">Cabra</option><option value="oveja">Oveja</option>
-        </select>
-      </div>
-      <div><label>Imagen (URL)</label><input class="e-img" value="${p.imagen||''}" placeholder="https://…"></div>
-    </div>
-    <div class="row">
-      <button class="btn e-save">Guardar</button>
-      <span class="small muted">id: ${p.id}</span>
-      <span class="small" data-msg></span>
-    </div>
-  </div>`;}
-
-function wire(cardEl,p){
-  const id=p.id;
-  const $precio=cardEl.querySelector(".e-precio");
-  const $stock =cardEl.querySelector(".e-stock");
-  const $leche =cardEl.querySelector(".e-leche");
-  const $img   =cardEl.querySelector(".e-img");
-  const $msg   =cardEl.querySelector("[data-msg]");
-  $leche.value=p.leche||"";
-
-  cardEl.querySelector(".e-save").addEventListener("click",()=>{
-    const precio=Number($precio.value), stock=Number($stock.value);
-    if(!(precio>=0)){ $msg.className="small err"; $msg.textContent="Precio inválido"; return; }
-    if(!Number.isInteger(stock)||stock<0){ $msg.className="small err"; $msg.textContent="Stock inválido"; return; }
-    const list=load(); const i=list.findIndex(x=>x.id===id); if(i<0) return;
-    list[i].precio=precio; list[i].stock=stock; list[i].leche=$leche.value||list[i].leche; list[i].imagen=$img.value.trim(); list[i].updatedAt=Date.now();
-    save(list); $msg.className="small ok"; $msg.textContent="Guardado"; render();
+    `;
+  }).join("");
+  
+  // Wire events
+  document.querySelectorAll(".product-item").forEach((el, idx) => {
+    const p = productos[idx];
+    const id = p._id || p.id;
+    const $precio = el.querySelector(".e-precio");
+    const $stock = el.querySelector(".e-stock");
+    const $leche = el.querySelector(".e-leche");
+    const $img = el.querySelector(".e-img");
+    const $msg = el.querySelector(".product-msg");
+    
+    el.querySelector(".btn-save").addEventListener("click", async () => {
+      const precio = Number($precio.value);
+      const stock = Math.floor(Number($stock.value));
+      
+      if (!(precio > 0) || stock < 0) {
+        $msg.className = "message error";
+        $msg.textContent = "Valores inválidos";
+        return;
+      }
+      
+      const updates = {
+        precio,
+        stock,
+        leche: $leche.value,
+        imagen: $img.value.trim()
+      };
+      
+      try {
+        const res = await fetch(`${API_URL}/productos/${id}`, {
+          method: "PUT",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(updates)
+        });
+        
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Error al actualizar");
+        }
+        
+        $msg.className = "message success";
+        $msg.textContent = "✓ Guardado correctamente";
+        setTimeout(() => {
+          $msg.textContent = "";
+          loadProducts();
+        }, 1500);
+      } catch (err) {
+        $msg.className = "message error";
+        $msg.textContent = err.message;
+      }
+    });
   });
 }
 
-function render(){
-  const list=load();
-  $empty.hidden=list.length>0;
-  $list.innerHTML=list.map(card).join("");
-  [...$list.children].forEach((el,idx)=>wire(el,list[idx]));
+// Crear producto
+const $createMsg = document.getElementById("create-msg");
+document.getElementById("btn-create").addEventListener("click", async () => {
+  const nombre = document.getElementById("c-nombre").value.trim();
+  const precio = Number(document.getElementById("c-precio").value);
+  const stock = Math.floor(Number(document.getElementById("c-stock").value));
+  const leche = document.getElementById("c-leche").value;
+  const desc = document.getElementById("c-desc").value.trim();
+  const img = document.getElementById("c-img").value.trim();
+  
+  if (!nombre || !(precio > 0) || stock < 0 || !leche) {
+    $createMsg.className = "message error";
+    $createMsg.textContent = "Completa todos los campos obligatorios (*)";
+    return;
+  }
+  
+  const producto = {
+    nombre,
+    precio,
+    stock,
+    leche,
+    descripcion: desc,
+    imagen: img,
+    activo: true,
+    ventas: 0
+  };
+  
+  try {
+    const res = await fetch(`${API_URL}/productos/`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(producto)
+    });
+    
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Error al crear");
+    }
+    
+    // Clear form
+    document.getElementById("c-nombre").value = "";
+    document.getElementById("c-precio").value = "";
+    document.getElementById("c-stock").value = "";
+    document.getElementById("c-leche").value = "";
+    document.getElementById("c-desc").value = "";
+    document.getElementById("c-img").value = "";
+    
+    $createMsg.className = "message success";
+    $createMsg.textContent = "✓ Producto creado exitosamente";
+    
+    setTimeout(() => {
+      $createMsg.textContent = "";
+      loadProducts();
+    }, 1500);
+  } catch (err) {
+    $createMsg.className = "message error";
+    $createMsg.textContent = err.message;
+  }
+});
+
+// === PEDIDOS ===
+let pedidos = [];
+
+async function loadOrders() {
+  try {
+    const res = await fetch(`${API_URL}/pedidos/admin/todos`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    
+    if (!res.ok) {
+      if (res.status === 403 || res.status === 401) {
+        throw new Error("No tienes permisos de administrador");
+      }
+      throw new Error("Error al cargar pedidos");
+    }
+    
+    pedidos = await res.json();
+    renderOrders();
+  } catch (err) {
+    console.error("Error cargando pedidos:", err);
+    alert(err.message);
+    pedidos = [];
+    renderOrders();
+  }
 }
 
-render();
+function renderOrders() {
+  const $list = document.getElementById("order-list");
+  const $empty = document.getElementById("order-empty");
+  
+  $empty.hidden = pedidos.length > 0;
+  
+  if (pedidos.length === 0) {
+    $list.innerHTML = "";
+    return;
+  }
+  
+  $list.innerHTML = pedidos.map(order => {
+    const orderId = order._id || order.id;
+    const fecha = new Date(order.createdAt).toLocaleString('es-CL');
+    const status = order.status || "nuevo";
+    const statusClass = `status-${status}`;
+    const statusText = {
+      "nuevo": "Nuevo",
+      "en_preparacion": "En Preparación",
+      "pago_fallido": "Pago Fallido"
+    }[status] || status;
+    
+    const total = order.total || 0;
+    const subtotal = order.subtotal || 0;
+    const envio = order.shipping || 0;
+    const metodo = order.shippingMethod === "despacho" ? "Despacho" : "Retiro en tienda";
+    
+    // Products
+    const items = order.items || {};
+    const productList = Object.entries(items).map(([id, data]) => {
+      return `<div class="order-product">
+        ${data.nombre} × ${data.qty} = $${(data.precio * data.qty).toLocaleString('es-CL')}
+      </div>`;
+    }).join("");
+    
+    return `
+      <div class="order-item">
+        <div class="order-header">
+          <div class="order-id">ID: ${orderId}</div>
+          <div class="order-status ${statusClass}">${statusText}</div>
+        </div>
+        <div class="order-details">
+          <div class="detail-group">
+            <div class="detail-label">Fecha</div>
+            <div class="detail-value">${fecha}</div>
+          </div>
+          <div class="detail-group">
+            <div class="detail-label">Cliente</div>
+            <div class="detail-value">${order.buyer?.nombre || "—"}</div>
+          </div>
+          <div class="detail-group">
+            <div class="detail-label">Email</div>
+            <div class="detail-value">${order.buyer?.email || "—"}</div>
+          </div>
+          <div class="detail-group">
+            <div class="detail-label">Método de Envío</div>
+            <div class="detail-value">${metodo}</div>
+          </div>
+          <div class="detail-group">
+            <div class="detail-label">Subtotal</div>
+            <div class="detail-value">$${subtotal.toLocaleString('es-CL')}</div>
+          </div>
+          <div class="detail-group">
+            <div class="detail-label">Envío</div>
+            <div class="detail-value">$${envio.toLocaleString('es-CL')}</div>
+          </div>
+          <div class="detail-group">
+            <div class="detail-label">Total</div>
+            <div class="detail-value" style="font-weight:700; font-size:16px">$${total.toLocaleString('es-CL')}</div>
+          </div>
+        </div>
+        ${productList ? `
+          <div class="products-in-order">
+            <h4>Productos del Pedido</h4>
+            <div class="order-product-list">${productList}</div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join("");
+}
+
+// Initial load
+loadProducts();
 </script>
 </body>
 </html>

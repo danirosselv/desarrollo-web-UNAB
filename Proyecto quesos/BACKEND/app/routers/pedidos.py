@@ -1,10 +1,11 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List, Dict
 from bson import ObjectId
+from datetime import datetime
 
 from ..models import PedidoCreate, PedidoInDB, UsuarioInDB
-from ..database import get_order_collection
-from ..services import get_current_active_user
+from ..database import get_order_collection, get_product_collection
+from ..services import get_current_active_user, get_current_admin_user
 
 router = APIRouter(
     prefix="/pedidos",
@@ -12,13 +13,12 @@ router = APIRouter(
 )
 
 @router.post("/",
-    response_model=PedidoInDB,
     status_code=status.HTTP_201_CREATED,
     summary="Crear un nuevo pedido (Checkout)"
 )
 async def create_order(
     pedido_in: PedidoCreate,
-    current_user: UsuarioInDB = Depends(get_current_active_user) # Opcional si permites invitados
+    current_user: UsuarioInDB = Depends(get_current_active_user)
 ):
     """
     Recibe el carrito finalizado y crea la orden en estado 'nuevo' (US-06).
@@ -26,16 +26,21 @@ async def create_order(
     """
     collection = get_order_collection()
     
-    pedido_db = PedidoInDB(
-        **pedido_in.dict(),
-        userId=current_user.id # Asocia el pedido al usuario logueado
-    )
+    # Crear pedido con userId como ObjectId
+    pedido_data = pedido_in.dict()
+    pedido_data["userId"] = ObjectId(str(current_user.id))
+    pedido_data["createdAt"] = datetime.utcnow()
+    pedido_data["status"] = "nuevo"
     
-    result = await collection.insert_one(pedido_db.dict(by_alias=True))
+    # Insertar directamente sin pasar por el modelo primero
+    result = await collection.insert_one(pedido_data)
     
     if result.inserted_id:
-        # Devolvemos el pedido completo con su nuevo ID
-        return pedido_db
+        # Recuperar el pedido insertado
+        inserted = await collection.find_one({"_id": result.inserted_id})
+        pedido = PedidoInDB(**inserted)
+        # Devolver el pedido serializado con by_alias=False para que 'id' esté disponible
+        return pedido.model_dump(by_alias=False)
         
     raise HTTPException(status_code=500, detail="Error al crear el pedido.")
 
@@ -53,9 +58,13 @@ async def get_my_orders(
     collection = get_order_collection()
     orders = []
     
-    cursor = collection.find({"userId": current_user.id}).sort("createdAt", -1)
+    # Buscar usando ObjectId para consistencia
+    cursor = collection.find({"userId": ObjectId(str(current_user.id))}).sort("createdAt", -1)
     
     async for order in cursor:
+        # Asegurar que tenga createdAt
+        if order.get("createdAt") is None:
+            order["createdAt"] = datetime.utcnow()
         orders.append(PedidoInDB(**order))
         
     return orders
@@ -93,7 +102,21 @@ async def simulate_payment_confirmation(
     if status_pago == "ok":
         # (US-08)
         new_status = "en_preparacion"
-        # Aquí también deberías descontar el stock de los productos (lógica futura)
+        
+        # Incrementar contador de ventas y decrementar stock de cada producto
+        products_collection = get_product_collection()
+        for item_id, item_data in order.get("items", {}).items():
+            if ObjectId.is_valid(item_id):
+                qty = item_data.get("qty", 0)
+                await products_collection.update_one(
+                    {"_id": ObjectId(item_id)},
+                    {
+                        "$inc": {
+                            "ventas": qty,
+                            "stock": -qty
+                        }
+                    }
+                )
     else:
         # (US-09)
         new_status = "pago_fallido"
@@ -104,3 +127,28 @@ async def simulate_payment_confirmation(
     )
     
     return {"orderId": orderId, "nuevo_status": new_status}
+
+
+@router.get("/admin/todos",
+    response_model=List[PedidoInDB],
+    summary="Obtener todos los pedidos (Admin)"
+)
+async def get_all_orders(
+    current_admin: UsuarioInDB = Depends(get_current_admin_user)
+):
+    """
+    Obtiene todos los pedidos del sistema para el panel de admin.
+    *Protegido: Solo Admin.*
+    """
+    collection = get_order_collection()
+    orders = []
+    
+    cursor = collection.find({}).sort("createdAt", -1)
+    
+    async for order in cursor:
+        # Asegurar que tenga createdAt
+        if order.get("createdAt") is None:
+            order["createdAt"] = datetime.utcnow()
+        orders.append(PedidoInDB(**order))
+        
+    return orders

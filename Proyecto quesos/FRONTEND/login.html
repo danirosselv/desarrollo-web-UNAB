@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Iniciar sesión — Queso & Sabor</title>
+<title>Iniciar sesión — Quesos Skoda</title>
 <style>
   body{margin:0;font-family:system-ui;background:#f6f7f9;color:#1f2937}
   .wrap{max-width:960px;margin:auto;padding:10px}
@@ -20,7 +20,7 @@
 <div class="wrap">
   <header>
     <a class="btn" href="index.html">← Tienda</a>
-    <div>Queso & Sabor</div>
+    <div>Quesos Skoda</div>
     <a class="btn" href="registro.html">Crear cuenta</a>
   </header>
 
@@ -39,32 +39,50 @@
 </div>
 
 <script>
-const $form = document.getElementById("form")
-const $msg = document.getElementById("msg")
+const API_URL = "http://localhost:8000";
+const $form = document.getElementById("form");
+const $msg = document.getElementById("msg");
 
-$form.addEventListener("submit", e => {
-  e.preventDefault()
-  const email = document.getElementById("email").value.trim()
-  const pass = document.getElementById("pass").value.trim()
+$form.addEventListener("submit", async e => {
+  e.preventDefault();
+  const email = document.getElementById("email").value.trim();
+  const pass = document.getElementById("pass").value.trim();
   
-  if(!email || !pass){ 
-    $msg.textContent = "Ingresa correo y contraseña"
-    return 
+  if (!email || !pass) { 
+    $msg.textContent = "Ingresa correo y contraseña";
+    return;
   }
 
-  const users = JSON.parse(localStorage.getItem("qs_users") || "[]")
-  const user = users.find(u => u.email === email && u.pass === pass)
-  
-  if(user){
+  try {
+    const formData = new URLSearchParams();
+    formData.append("username", email);
+    formData.append("password", pass);
+
+    const res = await fetch(`${API_URL}/auth/token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Credenciales incorrectas");
+    }
+
+    const data = await res.json();
+    
+    localStorage.setItem("qs_token", data.access_token);
     localStorage.setItem("qs_session", JSON.stringify({
-      email: user.email,
-      nombre: user.nombre
-    }))
-    location.href = "index.html"
-  }else{
-    $msg.textContent = "Credenciales incorrectas"
+      email: email,
+      nombre: data.nombre || email,
+      rol: data.rol || "USER"
+    }));
+
+    location.href = "index.html";
+  } catch (err) {
+    $msg.textContent = err.message;
   }
-})
+});
 </script>
 </body>
 </html>

@@ -93,6 +93,7 @@ class ProductoBase(BaseModel):
     descripcion: Optional[str] = ""
     imagen: Optional[str] = ""
     activo: bool = True
+    ventas: int = Field(default=0, ge=0)
     
 class ProductoCreate(ProductoBase):
     createdAt: datetime = Field(default_factory=datetime.utcnow)
@@ -104,7 +105,8 @@ class ProductoInDB(ProductoCreate):
     model_config = ConfigDict(
         json_encoders={ObjectId: str},
         arbitrary_types_allowed=True,
-        use_enum_values=True 
+        use_enum_values=True,
+        populate_by_name=True
     )
 
 class ProductoUpdate(BaseModel):
@@ -152,5 +154,6 @@ class PedidoInDB(PedidoCreate):
     
     model_config = ConfigDict(
         json_encoders={ObjectId: str},
-        arbitrary_types_allowed=True
+        arbitrary_types_allowed=True,
+        populate_by_name=True
     )

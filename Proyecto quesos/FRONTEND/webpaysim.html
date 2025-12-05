@@ -3,45 +3,70 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>WebPay Sim — Queso & Sabor</title>
+<title>WebPay Sim — Quesos Skoda</title>
 <style>
-  body{margin:0; font-family:system-ui; background:#f6f7f9; color:#1f2937; line-height:1.45}
-  .container{max-width:960px; margin:auto; padding:10px}
-  header{background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between}
-  .btn{border:1px solid #e5e7eb; border-radius:8px; padding:8px 12px; text-decoration:none; color:#1f2937}
-  section{background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:16px; margin-top:12px}
-  form{display:grid; gap:10px; max-width:420px; margin-top:12px}
-  input{padding:10px 12px; border:1px solid #e5e7eb; border-radius:8px}
-  .actions{display:flex; gap:10px; margin-top:10px}
-  button{padding:10px 14px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; cursor:pointer}
-  .msg{margin:8px 0 0; padding:10px; border-radius:8px; background:#fee2e2; color:#b91c1c; display:none}
+  :root{
+    --primary:#d97706; --primary-dark:#b45309; --primary-light:#fef3c7;
+    --bg:#fafaf9; --card:#fff; --text:#1c1917; --muted:#78716c;
+    --line:#e7e5e4; --shadow:0 1px 3px rgba(0,0,0,0.1); --shadow-lg:0 10px 25px rgba(0,0,0,0.15);
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color:var(--text); background:var(--bg); line-height:1.6}
+  
+  header{background:linear-gradient(135deg, #ffffff 0%, #fef3c7 100%); border-bottom:1px solid var(--line); box-shadow:var(--shadow); position:sticky; top:0; z-index:100}
+  .header-content{width:min(1200px,94vw); margin:0 auto; padding:16px 20px; display:flex; align-items:center; justify-content:space-between}
+  .brand{font-size:24px; font-weight:700; color:var(--primary-dark); letter-spacing:-0.5px}
+  nav{display:flex; gap:12px}
+  a.btn{color:var(--text); text-decoration:none; border:1px solid var(--line); border-radius:8px; padding:10px 16px; background:#fff; font-size:14px; font-weight:500; transition:all 0.2s}
+  a.btn:hover{background:var(--primary-light); border-color:var(--primary); transform:translateY(-1px); box-shadow:var(--shadow)}
+  
+  .container{width:min(600px,94vw); margin:40px auto; padding:0 20px}
+  
+  section{background:#fff; border:1px solid var(--line); border-radius:12px; padding:40px; box-shadow:var(--shadow-lg)}
+  h2{margin:0 0 8px; font-size:28px; font-weight:700; color:var(--text)}
+  section > p{margin:12px 0; color:var(--muted); font-size:15px}
+  section > p strong{color:var(--text); font-size:20px}
+  
+  form{display:grid; gap:16px; margin-top:24px}
+  input{padding:14px 16px; border:1px solid var(--line); border-radius:8px; font:inherit; font-size:15px; transition:all 0.2s; background:#fff}
+  input:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-light)}
+  input::placeholder{color:var(--muted)}
+  
+  .actions{display:flex; gap:12px; margin-top:8px}
+  button{background:var(--primary); color:#fff; border:none; border-radius:8px; padding:14px 28px; cursor:pointer; font:inherit; font-weight:600; font-size:15px; transition:all 0.2s}
+  button:hover:not(:disabled){background:var(--primary-dark); transform:translateY(-2px); box-shadow:var(--shadow-lg)}
+  button:disabled{opacity:.5; cursor:not-allowed}
+  
+  .msg{margin:16px 0; padding:14px 18px; border-radius:8px; background:#fee2e2; color:#b91c1c; display:none; font-size:14px; border:1px solid #fca5a5}
+  
+  .rules{background:var(--primary-light); padding:14px 18px; border-radius:8px; border:1px solid #fde68a; font-size:14px; margin-top:16px}
+  .rules b{color:var(--primary-dark)}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <div>WebPay Sim</div>
-    <nav style="display:flex; gap:8px">
+<header>
+  <div class="header-content">
+    <div class="brand">WebPay Sim</div>
+    <nav>
       <a class="btn" href="carrito.html">← Carrito</a>
       <a class="btn" href="index.html">Tienda</a>
     </nav>
-  </header>
+  </div>
+</header>
 
+<div class="container">
   <section>
     <h2>Pagar</h2>
     <p><strong>Total: <span id="monto">$0</span></strong></p>
-    <p style="color:#6b7280; margin-top:8px">
-      Reglas: <b>0000</b> = Error • <b>1111</b> = Rechazado • Otro = Aprobado
-    </p>
 
     <div id="msg" class="msg"></div>
 
     <form id="payform">
-      <input id="card-name" placeholder="Nombre">
-      <input id="card-number" placeholder="Número tarjeta" inputmode="numeric">
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
-        <input id="card-exp" placeholder="MM/AA">
-        <input id="card-cvv" placeholder="CVV" inputmode="numeric">
+      <input id="card-name" placeholder="Nombre del titular" required autocomplete="cc-name">
+      <input id="card-number" placeholder="Número de tarjeta" inputmode="numeric" required autocomplete="cc-number" maxlength="19">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px">
+        <input id="card-exp" placeholder="MM/AA" inputmode="numeric" required autocomplete="cc-exp" maxlength="5">
+        <input id="card-cvv" placeholder="CVV" inputmode="numeric" required autocomplete="cc-csc" maxlength="3">
       </div>
 
       <div class="actions">
@@ -53,46 +78,134 @@
 </div>
 
 <script>
-const qs = new URLSearchParams(location.search)
-const pending = JSON.parse(localStorage.getItem("qs_pending_order") || "null")
-const amount = pending?.total || Number(qs.get("amount") || 0)
+const API_URL = "http://localhost:8000";
+const token = localStorage.getItem("qs_token");
+const qs = new URLSearchParams(location.search);
+const pending = JSON.parse(localStorage.getItem("qs_pending_order") || "null");
+const amount = pending?.total || Number(qs.get("amount") || 0);
 
-document.getElementById("monto").textContent = `$${amount.toLocaleString()}`
+document.getElementById("monto").textContent = `$${amount.toLocaleString()}`;
 
-if(!pending){
-  document.getElementById("msg").style.display = "block"
-  document.getElementById("msg").textContent = "No hay orden pendiente"
-  document.querySelector("button").disabled = true
+if (!pending) {
+  document.getElementById("msg").style.display = "block";
+  document.getElementById("msg").textContent = "No hay orden pendiente";
+  document.querySelector("button").disabled = true;
 }
 
-document.getElementById("payform").addEventListener("submit", e=>{
-  e.preventDefault()
-  if(!pending) return
+const $cardNumber = document.getElementById("card-number");
+const $cardExp = document.getElementById("card-exp");
+const $cardCvv = document.getElementById("card-cvv");
 
-  const num = (document.getElementById("card-number").value||"").replace(/\D+/g,"")
-  const last4 = num.slice(-4)
-  const name = document.getElementById("card-name").value.trim()
-  const exp = document.getElementById("card-exp").value.trim()
-  const cvv = document.getElementById("card-cvv").value.trim()
+// Formatear número de tarjeta: espacios cada 4 dígitos
+$cardNumber.addEventListener("input", e => {
+  let value = e.target.value.replace(/\D/g, "");
+  if (value.length > 16) value = value.slice(0, 16);
+  const formatted = value.match(/.{1,4}/g)?.join(" ") || value;
+  e.target.value = formatted;
+});
 
-  let status = "ok"
-  if(last4 === "0000") status = "error"
-  else if(!name || !num || !exp || !cvv || last4 === "1111") status = "rechazo"
+// Formatear fecha MM/AA automáticamente
+$cardExp.addEventListener("input", e => {
+  let value = e.target.value.replace(/\D/g, "");
+  if (value.length > 4) value = value.slice(0, 4);
+  if (value.length >= 2) {
+    value = value.slice(0, 2) + "/" + value.slice(2);
+  }
+  e.target.value = value;
+});
 
-  if(status === "ok"){
-    const orders = JSON.parse(localStorage.getItem("qs_orders") || "[]")
-    orders.push({
-      ...pending,
-      createdAt: Date.now(),
-      status: { current: "nuevo" }
-    })
-    localStorage.setItem("qs_orders", JSON.stringify(orders))
-    localStorage.removeItem("qs_pending_order")
-    localStorage.removeItem("qs_cart_v1")
+// Limitar CVV a 3 dígitos
+$cardCvv.addEventListener("input", e => {
+  let value = e.target.value.replace(/\D/g, "");
+  if (value.length > 3) value = value.slice(0, 3);
+  e.target.value = value;
+});
+
+document.getElementById("payform").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!pending) return;
+
+  const num = ($cardNumber.value || "").replace(/\s+/g, "");
+  const name = document.getElementById("card-name").value.trim();
+  const exp = $cardExp.value.trim();
+  const cvv = $cardCvv.value.trim();
+
+  // Validar campos básicos
+  if (!name || num.length !== 16 || !exp.match(/^\d{2}\/\d{2}$/) || cvv.length !== 3) {
+    document.getElementById("msg").style.display = "block";
+    document.getElementById("msg").textContent = "Por favor completa todos los campos correctamente";
+    return;
   }
 
-  location.href = `pagoresultado.html?status=${status}&orderId=${pending.id}`
-})
+  // Solo falla si es 0000 0000 0000 0000
+  let status = "ok";
+  if (num === "0000000000000000") {
+    status = "error";
+  }
+
+  if (status === "ok") {
+    try {
+      // El backend espera el formato completo de PedidoCreate
+      const pedido = {
+        buyer: pending.buyer,
+        items: pending.items,
+        subtotal: pending.subtotal,
+        shipping: pending.shipping,
+        total: pending.total,
+        shippingMethod: pending.shippingMethod,
+        shippingDetail: pending.shippingDetail || {}
+      };
+
+      const res = await fetch(`${API_URL}/pedidos/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(pedido)
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Error al crear pedido");
+      }
+
+      const createdOrder = await res.json();
+      const orderId = createdOrder.id;
+      
+      console.log("Pedido creado:", createdOrder);
+      console.log("Order ID para confirmar pago:", orderId);
+
+      // Confirmar pago y decrementar stock
+      const paymentRes = await fetch(`${API_URL}/pedidos/simular_pago?orderId=${orderId}&status_pago=ok`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      console.log("Respuesta de pago:", paymentRes.status);
+
+      if (!paymentRes.ok) {
+        const errorData = await paymentRes.text();
+        console.error("Error al confirmar pago:", errorData);
+      } else {
+        const paymentData = await paymentRes.json();
+        console.log("Pago confirmado:", paymentData);
+      }
+
+      localStorage.removeItem("qs_pending_order");
+      localStorage.removeItem("qs_cart_v1");
+    } catch (err) {
+      console.error(err);
+      document.getElementById("msg").style.display = "block";
+      document.getElementById("msg").textContent = "Error al procesar el pedido. Intenta nuevamente.";
+      return;
+    }
+  }
+
+  location.href = `pagoresultado.html?status=${status}&orderId=${pending.id}`;
+});
 </script>
 </body>
 </html>

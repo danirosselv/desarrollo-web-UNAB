@@ -37,7 +37,6 @@ async def create_product(
     raise HTTPException(status_code=400, detail="No se pudo crear el producto.")
 
 @router.get("/", 
-    response_model=List[ProductoInDB],
     summary="Listar todos los productos"
 )
 async def get_all_products():
@@ -50,12 +49,30 @@ async def get_all_products():
     cursor = collection.find({"activo": True})
     
     async for prod in cursor:
-        products.append(ProductoInDB(**prod))
+        product = ProductoInDB(**prod)
+        products.append(product.model_dump(by_alias=False))
+        
+    return products
+
+@router.get("/mas-vendidos", 
+    summary="Obtener productos más vendidos"
+)
+async def get_best_sellers(limit: int = 3):
+    """
+    Obtiene los productos más vendidos ordenados por cantidad de ventas.
+    *Abierto al público.*
+    """
+    collection = get_product_collection()
+    products = []
+    cursor = collection.find({"activo": True}).sort("ventas", -1).limit(limit)
+    
+    async for prod in cursor:
+        product = ProductoInDB(**prod)
+        products.append(product.model_dump(by_alias=False))
         
     return products
 
 @router.get("/{id}", 
-    response_model=ProductoInDB,
     summary="Obtener un producto por ID"
 )
 async def get_product_by_id(id: str):
@@ -70,7 +87,8 @@ async def get_product_by_id(id: str):
     product = await collection.find_one({"_id": ObjectId(id)})
     
     if product:
-        return ProductoInDB(**product)
+        producto = ProductoInDB(**product)
+        return producto.model_dump(by_alias=False)
         
     raise HTTPException(status_code=404, detail=f"Producto con id {id} no encontrado")
 

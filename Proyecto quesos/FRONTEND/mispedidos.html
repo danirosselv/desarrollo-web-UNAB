@@ -3,89 +3,142 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mis pedidos — Queso & Sabor</title>
+<title>Mis pedidos — Quesos Skoda</title>
 <style>
-  body{margin:0; font-family:system-ui; background:#f6f7f9; line-height:1.45}
-  .container{max-width:960px; margin:auto; padding:10px}
-  header{background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between}
-  .btn{border:1px solid #e5e7eb; border-radius:8px; padding:8px 12px; text-decoration:none; color:#1f2937}
-  section{background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:16px}
-  .empty{border:2px dashed #e5e7eb; border-radius:12px; padding:24px; text-align:center; color:#6b7280}
-  ul{padding:0; list-style:none; margin:12px 0 0}
-  .order{border:1px solid #e5e7eb; border-radius:10px; padding:12px; margin-bottom:10px}
-  .row{display:flex; justify-content:space-between; flex-wrap:wrap}
-  .chip{padding:4px 8px; border-radius:999px; border:1px solid #e5e7eb; background:#fafafa; font-size:12px; margin-right:6px}
-  .items li{display:flex; justify-content:space-between; border:1px solid #e5e7eb; border-radius:8px; padding:8px; margin-top:6px}
+  :root{
+    --primary:#d97706; --primary-dark:#b45309; --primary-light:#fef3c7;
+    --bg:#fafaf9; --card:#fff; --text:#1c1917; --muted:#78716c;
+    --line:#e7e5e4; --shadow:0 1px 3px rgba(0,0,0,0.1); --shadow-lg:0 10px 25px rgba(0,0,0,0.15);
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color:var(--text); background:var(--bg); line-height:1.6}
+  
+  header{background:linear-gradient(135deg, #ffffff 0%, #fef3c7 100%); border-bottom:1px solid var(--line); box-shadow:var(--shadow); position:sticky; top:0; z-index:100}
+  .header-content{width:min(1200px,94vw); margin:0 auto; padding:16px 20px; display:flex; align-items:center; justify-content:space-between}
+  .brand{font-size:24px; font-weight:700; color:var(--primary-dark); letter-spacing:-0.5px}
+  .brand span{color:var(--primary)}
+  nav{display:flex; gap:12px}
+  a.btn{color:var(--text); text-decoration:none; border:1px solid var(--line); border-radius:8px; padding:10px 16px; background:#fff; font-size:14px; font-weight:500; transition:all 0.2s}
+  a.btn:hover{background:var(--primary-light); border-color:var(--primary); transform:translateY(-1px); box-shadow:var(--shadow)}
+  
+  .container{width:min(1000px,94vw); margin:32px auto; padding:0 20px}
+  
+  section{background:#fff; border:1px solid var(--line); border-radius:12px; padding:32px; box-shadow:var(--shadow-lg)}
+  h2{margin:0 0 24px; font-size:28px; font-weight:700; color:var(--text)}
+  
+  .empty{border:2px dashed var(--line); border-radius:12px; padding:48px 24px; text-align:center; color:var(--muted); font-size:16px}
+  
+  ul{padding:0; list-style:none; margin:0}
+  .order{border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:16px; background:#fff; transition:all 0.2s}
+  .order:hover{box-shadow:var(--shadow); transform:translateY(-1px)}
+  .row{display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:12px}
+  .order strong{font-size:16px; font-weight:700; color:var(--text); display:block; margin-bottom:6px}
+  .order > div > div{color:var(--muted); font-size:14px}
+  
+  details{margin-top:16px; border-top:1px dashed var(--line); padding-top:16px}
+  summary{cursor:pointer; font-weight:600; color:var(--primary-dark); padding:8px 0; user-select:none}
+  summary:hover{color:var(--primary)}
+  
+  .items{margin-top:12px}
+  .items li{display:flex; justify-content:space-between; align-items:center; border:1px solid var(--line); border-radius:8px; padding:12px 16px; margin-top:8px; background:#fafaf9}
+  .items li span:first-child{font-weight:500}
+  .items li span:last-child{font-weight:700; color:var(--primary-dark)}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
+<header>
+  <div class="header-content">
     <nav>
       <a class="btn" href="index.html">← Tienda</a>
       <a class="btn" href="carrito.html">Carrito</a>
     </nav>
-    <div>Queso & Sabor</div>
-  </header>
+    <div class="brand">Quesos Skoda</div>
+    <div style="width:140px"></div>
+  </div>
+</header>
 
+<div class="container">
   <section>
-    <h2>Mis pedidos</h2>
+    <h2>Mis Pedidos</h2>
     <div id="empty" class="empty" hidden>No tienes pedidos.</div>
     <ul id="orders"></ul>
   </section>
 </div>
 
 <script>
-function loadOrders(){ 
-  return JSON.parse(localStorage.getItem("qs_orders")||"[]") 
+const API_URL = "http://localhost:8000";
+const token = localStorage.getItem("qs_token");
+const session = JSON.parse(localStorage.getItem("qs_session") || "null");
+
+async function loadOrders() {
+  if (!token) return [];
+  
+  try {
+    const res = await fetch(`${API_URL}/pedidos/mis-pedidos`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    
+    if (!res.ok) throw new Error("Error al cargar pedidos");
+    return await res.json();
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
 }
 
-function render(){
-  const orders = loadOrders()
-  const $list = document.getElementById("orders")
-  const $empty = document.getElementById("empty")
+async function render() {
+  const orders = await loadOrders();
+  const $list = document.getElementById("orders");
+  const $empty = document.getElementById("empty");
   
-  if(!orders.length){
-    $list.innerHTML = ""
-    $empty.hidden = false
-    return
+  if (!orders.length) {
+    $list.innerHTML = "";
+    $empty.hidden = false;
+    return;
   }
   
-  $empty.hidden = true
-  orders.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0))
+  $empty.hidden = true;
+  orders.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   
-  $list.innerHTML = orders.map(o=>{
-    const items = Object.values(o.items||{}).map(it=>
-      `<li><span>${it.nombre} x${it.qty}</span><span>$${(it.qty*it.precio).toLocaleString()}</span></li>`
-    ).join("")
+  $list.innerHTML = orders.map(o => {
+    // items es un objeto con id como key
+    const itemsArray = Object.values(o.items || {});
+    const items = itemsArray.map(it =>
+      `<li><span>${it.nombre} x${it.qty}</span><span>$${(it.qty * it.precio).toLocaleString()}</span></li>`
+    ).join("");
+    
+    const fecha = o.createdAt ? new Date(o.createdAt).toLocaleDateString('es-CL') : '';
     
     return `
       <li class="order">
         <div class="row">
           <div>
-            <strong>Pedido ${o.id}</strong>
-            <div>${o.status?.current||'Nuevo'} • $${o.total?.toLocaleString()||'0'}</div>
+            <strong>Pedido #${(o._id || '').slice(-6)}</strong>
+            <div>${fecha} • ${o.status || 'Nuevo'} • $${o.total?.toLocaleString() || '0'}</div>
           </div>
         </div>
         <details style="margin-top:8px">
-          <summary>Detalles</summary>
+          <summary>Ver items (${itemsArray.length})</summary>
           <ul class="items">${items}</ul>
+          <div style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--line)">
+            <div style="color:var(--muted); font-size:14px">
+              <div><strong>Método:</strong> ${o.shippingMethod === 'retiro' ? 'Retiro en tienda' : 'Despacho'}</div>
+              ${o.shippingDetail?.comuna ? `<div><strong>Comuna:</strong> ${o.shippingDetail.comuna}</div>` : ''}
+              ${o.shippingDetail?.sucursal ? `<div><strong>Sucursal:</strong> ${o.shippingDetail.sucursal}</div>` : ''}
+            </div>
+          </div>
         </details>
-      </li>`
-  }).join("")
+      </li>`;
+  }).join("");
 }
 
-// Migrar pedido antiguo si existe
-const old = JSON.parse(localStorage.getItem("qs_last_order")||"null")
-if(old){
-  const orders = loadOrders()
-  if(!orders.some(o=>o.id===old.id)){
-    orders.push(old)
-    localStorage.setItem("qs_orders",JSON.stringify(orders))
-  }
+// Verificar login
+if (!token || !session) {
+  document.getElementById("empty").hidden = false;
+  document.getElementById("empty").textContent = "Inicia sesión para ver tus pedidos.";
+} else {
+  render();
 }
-
-render()
 </script>
 </body>
 </html>
