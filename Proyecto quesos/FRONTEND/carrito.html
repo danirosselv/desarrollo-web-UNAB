@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Carrito — Quesos Skoda</title>
+<title>Carrito — Quesos SK</title>
 
 <style>
   :root{
@@ -80,6 +80,25 @@
   
   .error{color:#b91c1c; font-size:14px; margin-top:8px; padding:12px; background:#fee2e2; border-radius:8px; border:1px solid #fca5a5}
   
+  .direccion-selector{position:relative}
+  .direccion-current{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:pointer; transition:all 0.2s}
+  .direccion-current:hover{border-color:var(--primary); background:var(--primary-light)}
+  .direccion-current span{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .direccion-dropdown{position:absolute; top:calc(100% + 4px); left:0; right:0; background:#fff; border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow-lg); z-index:50; max-height:250px; overflow-y:auto}
+  .direccion-option{padding:12px 16px; cursor:pointer; border-bottom:1px solid var(--line); transition:background 0.15s}
+  .direccion-option:last-child{border-bottom:none}
+  .direccion-option:hover{background:var(--primary-light)}
+  .direccion-option.selected{background:var(--primary-light); font-weight:600; color:var(--primary-dark)}
+  .direccion-option .comuna{font-size:12px; color:var(--muted); margin-top:2px}
+  .direccion-option.direccion-nueva{color:var(--primary-dark); font-weight:600; border-top:1px solid var(--line)}
+  
+  .pago-nuevo-form{margin-top:8px}
+  .pago-form-grid{display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px}
+  .pago-form-grid input, .pago-form-grid select{padding:10px 12px; border:1px solid var(--line); border-radius:8px; font-size:14px}
+  .pago-form-grid input:focus, .pago-form-grid select:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 2px var(--primary-light)}
+  
+  @media (max-width:600px){.pago-form-grid{grid-template-columns:1fr 1fr}}
+  
   @media (max-width:1024px){
     .container{grid-template-columns:1fr; gap:24px}
     .summary{position:static}
@@ -96,7 +115,7 @@
 <header>
   <div class="header-content">
     <a class="link" href="index.html">← Volver a la tienda</a>
-    <div class="brand">Quesos Skoda</div>
+    <div class="brand">Quesos SK</div>
     <div style="width:140px"></div>
   </div>
 </header>
@@ -149,9 +168,52 @@
       <div class="buyer-grid">
         <input id="b-nombre" placeholder="Nombre completo" autocomplete="name" required>
         <input id="b-email" type="email" placeholder="Correo electrónico" autocomplete="email" required>
-        <input id="b-dire" placeholder="Dirección (solo para despacho)">
+        <div id="direccion-container">
+          <div id="direccion-display" class="direccion-selector" style="display:none;">
+            <div class="direccion-current">
+              <span id="direccion-text">Seleccionar direccion...</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+            <div id="direccion-dropdown" class="direccion-dropdown" hidden>
+              <div id="direcciones-list"></div>
+              <div class="direccion-option direccion-nueva" id="btn-direccion-nueva">
+                + Escribir direccion nueva
+              </div>
+            </div>
+          </div>
+          <input id="b-dire" placeholder="Direccion de envio" style="display:none;">
+        </div>
       </div>
       <p id="buyer-error" class="error" hidden>Por favor completa todos los campos requeridos.</p>
+    </div>
+
+    <div class="buyer-section">
+      <h4>Metodo de Pago</h4>
+      <div id="pago-container">
+        <div id="pago-display" class="direccion-selector" style="display:none;">
+          <div class="direccion-current" id="pago-current">
+            <span id="pago-text">Seleccionar metodo de pago...</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div id="pago-dropdown" class="direccion-dropdown" hidden>
+            <div id="pagos-list"></div>
+            <div class="direccion-option direccion-nueva" id="btn-pago-nuevo">
+              + Ingresar tarjeta nueva
+            </div>
+          </div>
+        </div>
+        <div id="pago-form" class="pago-nuevo-form">
+          <div class="pago-form-grid">
+            <select id="pago-tipo">
+              <option value="credito">Credito</option>
+              <option value="debito">Debito</option>
+            </select>
+            <input id="pago-numero" placeholder="Ultimos 4 digitos" maxlength="4">
+            <input id="pago-titular" placeholder="Titular de la tarjeta">
+            <input id="pago-venc" placeholder="MM/YY" maxlength="5">
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="actions">
@@ -165,6 +227,14 @@
   const API_URL = "http://localhost:8000";
   const token = localStorage.getItem("qs_token");
   const session = JSON.parse(localStorage.getItem("qs_session") || "null");
+
+  let userDirecciones = [];
+  let selectedDireccion = null;
+  let usingCustomDireccion = false;
+  
+  let userMetodosPago = [];
+  let selectedMetodoPago = null;
+  let usingCustomPago = false;
 
   const CART_KEY = "qs_cart_v1";
   const Cart = {
@@ -256,6 +326,219 @@
     const isDespacho = getShipMethod()==="despacho";
     $rowComuna.hidden = !isDespacho;
     $rowSucursal.hidden = isDespacho;
+    
+    const $direccionDisplay = document.getElementById("direccion-display");
+    const $direccionInput = document.getElementById("b-dire");
+    
+    if (isDespacho) {
+      if (userDirecciones.length > 0 && !usingCustomDireccion) {
+        $direccionDisplay.style.display = "block";
+        $direccionInput.style.display = "none";
+        
+        if (!selectedDireccion) {
+          const principal = userDirecciones.find(d => d.principal) || userDirecciones[0];
+          selectDireccion(principal);
+        }
+      } else {
+        $direccionDisplay.style.display = "none";
+        $direccionInput.style.display = "block";
+      }
+    } else {
+      $direccionDisplay.style.display = "none";
+      $direccionInput.style.display = "none";
+    }
+  }
+  
+  async function loadUserDirecciones() {
+    if (!token) return;
+    
+    try {
+      const res = await fetch(`${API_URL}/users/me`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      
+      if (!res.ok) throw new Error("Error al cargar usuario");
+      
+      const user = await res.json();
+      userDirecciones = user.direcciones || [];
+      
+      renderDireccionesDropdown();
+      
+      if (userDirecciones.length > 0) {
+        const principal = userDirecciones.find(d => d.principal) || userDirecciones[0];
+        selectDireccion(principal);
+      }
+    } catch (err) {
+      console.error("Error cargando direcciones:", err);
+      userDirecciones = [];
+    }
+  }
+  
+  function renderDireccionesDropdown() {
+    const $list = document.getElementById("direcciones-list");
+    
+    if (userDirecciones.length === 0) {
+      $list.innerHTML = '<div class="direccion-option" style="color:var(--muted)">No tienes direcciones guardadas</div>';
+      return;
+    }
+    
+    $list.innerHTML = userDirecciones.map((d, idx) => `
+      <div class="direccion-option" data-idx="${idx}">
+        <div>${d.texto}</div>
+        <div class="comuna">${d.comuna}${d.principal ? ' (Principal)' : ''}</div>
+      </div>
+    `).join("");
+    
+    $list.querySelectorAll(".direccion-option").forEach(opt => {
+      opt.addEventListener("click", () => {
+        const idx = parseInt(opt.dataset.idx);
+        selectDireccion(userDirecciones[idx]);
+        closeDropdown();
+      });
+    });
+  }
+  
+  function selectDireccion(direccion) {
+    selectedDireccion = direccion;
+    usingCustomDireccion = false;
+    
+    const $text = document.getElementById("direccion-text");
+    const $input = document.getElementById("b-dire");
+    const $direccionDisplay = document.getElementById("direccion-display");
+    
+    $text.textContent = `${direccion.texto}, ${direccion.comuna}`;
+    $input.value = `${direccion.texto}, ${direccion.comuna}`;
+    $direccionDisplay.style.display = "block";
+    $input.style.display = "none";
+    
+    document.querySelectorAll("#direcciones-list .direccion-option").forEach((opt, idx) => {
+      opt.classList.toggle("selected", userDirecciones[idx] === direccion);
+    });
+    
+    syncPayBtn();
+  }
+  
+  function showCustomInput() {
+    usingCustomDireccion = true;
+    selectedDireccion = null;
+    
+    const $direccionDisplay = document.getElementById("direccion-display");
+    const $input = document.getElementById("b-dire");
+    
+    $direccionDisplay.style.display = "none";
+    $input.style.display = "block";
+    $input.value = "";
+    $input.focus();
+    
+    closeDropdown();
+  }
+  
+  function toggleDropdown() {
+    const $dropdown = document.getElementById("direccion-dropdown");
+    $dropdown.hidden = !$dropdown.hidden;
+  }
+  
+  function closeDropdown() {
+    const $dropdown = document.getElementById("direccion-dropdown");
+    $dropdown.hidden = true;
+  }
+  
+  // === MÉTODOS DE PAGO ===
+  async function loadUserMetodosPago() {
+    if (!token) return;
+    
+    try {
+      const res = await fetch(`${API_URL}/users/me`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      
+      if (!res.ok) throw new Error("Error al cargar usuario");
+      
+      const user = await res.json();
+      userMetodosPago = user.metodos_pago || [];
+      
+      renderMetodosPagoDropdown();
+      
+      if (userMetodosPago.length > 0) {
+        const principal = userMetodosPago.find(m => m.principal) || userMetodosPago[0];
+        selectMetodoPago(principal);
+      }
+    } catch (err) {
+      console.error("Error cargando metodos de pago:", err);
+      userMetodosPago = [];
+    }
+  }
+  
+  function renderMetodosPagoDropdown() {
+    const $list = document.getElementById("pagos-list");
+    const $pagoDisplay = document.getElementById("pago-display");
+    const $pagoForm = document.getElementById("pago-form");
+    
+    if (userMetodosPago.length === 0) {
+      $list.innerHTML = '<div class="direccion-option" style="color:var(--muted)">No tienes metodos guardados</div>';
+      $pagoDisplay.style.display = "none";
+      $pagoForm.style.display = "block";
+      return;
+    }
+    
+    $list.innerHTML = userMetodosPago.map((m, idx) => `
+      <div class="direccion-option" data-idx="${idx}">
+        <div>**** **** **** ${m.numero}</div>
+        <div class="comuna">${m.tipo} - ${m.titular}${m.principal ? ' (Principal)' : ''}</div>
+      </div>
+    `).join("");
+    
+    $list.querySelectorAll(".direccion-option").forEach(opt => {
+      opt.addEventListener("click", () => {
+        const idx = parseInt(opt.dataset.idx);
+        if (!isNaN(idx)) {
+          selectMetodoPago(userMetodosPago[idx]);
+          closePagoDropdown();
+        }
+      });
+    });
+  }
+  
+  function selectMetodoPago(metodo) {
+    selectedMetodoPago = metodo;
+    usingCustomPago = false;
+    
+    const $text = document.getElementById("pago-text");
+    const $pagoDisplay = document.getElementById("pago-display");
+    const $pagoForm = document.getElementById("pago-form");
+    
+    $text.textContent = `**** **** **** ${metodo.numero} (${metodo.tipo})`;
+    $pagoDisplay.style.display = "block";
+    $pagoForm.style.display = "none";
+    
+    syncPayBtn();
+  }
+  
+  function showCustomPagoInput() {
+    usingCustomPago = true;
+    selectedMetodoPago = null;
+    
+    const $pagoDisplay = document.getElementById("pago-display");
+    const $pagoForm = document.getElementById("pago-form");
+    
+    $pagoDisplay.style.display = "none";
+    $pagoForm.style.display = "block";
+    document.getElementById("pago-numero").value = "";
+    document.getElementById("pago-titular").value = "";
+    document.getElementById("pago-venc").value = "";
+    document.getElementById("pago-numero").focus();
+    
+    closePagoDropdown();
+  }
+  
+  function togglePagoDropdown() {
+    const $dropdown = document.getElementById("pago-dropdown");
+    $dropdown.hidden = !$dropdown.hidden;
+  }
+  
+  function closePagoDropdown() {
+    const $dropdown = document.getElementById("pago-dropdown");
+    $dropdown.hidden = true;
   }
 
   function calcTotals(){
@@ -342,6 +625,8 @@
   async function init() {
     Cart.load();
     await loadProducts();
+    await loadUserDirecciones();
+    await loadUserMetodosPago();
     initShippingUI();
     render();
     syncPayBtn();
@@ -352,6 +637,40 @@
       $be.value = session.email || "";
       syncPayBtn();
     }
+    
+    // Event listeners para el dropdown de direcciones
+    const $direccionCurrent = document.querySelector("#direccion-display .direccion-current");
+    if ($direccionCurrent) {
+      $direccionCurrent.addEventListener("click", toggleDropdown);
+    }
+    
+    const $btnNueva = document.getElementById("btn-direccion-nueva");
+    if ($btnNueva) {
+      $btnNueva.addEventListener("click", showCustomInput);
+    }
+    
+    // Event listeners para el dropdown de pagos
+    const $pagoCurrent = document.getElementById("pago-current");
+    if ($pagoCurrent) {
+      $pagoCurrent.addEventListener("click", togglePagoDropdown);
+    }
+    
+    const $btnPagoNuevo = document.getElementById("btn-pago-nuevo");
+    if ($btnPagoNuevo) {
+      $btnPagoNuevo.addEventListener("click", showCustomPagoInput);
+    }
+    
+    // Cerrar dropdowns al hacer clic fuera
+    document.addEventListener("click", (e) => {
+      const $selector = document.getElementById("direccion-display");
+      if ($selector && !$selector.contains(e.target)) {
+        closeDropdown();
+      }
+      const $pagoSelector = document.getElementById("pago-display");
+      if ($pagoSelector && !$pagoSelector.contains(e.target)) {
+        closePagoDropdown();
+      }
+    });
   }
 
   [$bn,$be,$bd].forEach($i => $i && $i.addEventListener("input", syncPayBtn));
@@ -360,10 +679,10 @@
     if(confirm("¿Vaciar todo el carrito?")){ Cart.clear(); render(); }
   });
 
-  document.getElementById("btn-checkout").addEventListener("click", () => {
+  document.getElementById("btn-checkout").addEventListener("click", async () => {
     // Verificar login
     if (!token || !session) {
-      alert("Debes iniciar sesión para continuar con el pago.");
+      alert("Debes iniciar sesion para continuar con el pago.");
       window.location.href = "login.html";
       return;
     }
@@ -394,13 +713,86 @@
     };
     order.total = order.subtotal + order.shipping;
 
-    localStorage.setItem("qs_pending_order", JSON.stringify(order));
+    // Si tiene método de pago guardado seleccionado, crear pedido directo
+    if (selectedMetodoPago && !usingCustomPago) {
+      try {
+        $btnPay.disabled = true;
+        $btnPay.textContent = "Procesando...";
+        
+        const res = await fetch(`${API_URL}/pedidos/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(order)
+        });
 
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Error al procesar el pedido");
+        }
+
+        const pedido = await res.json();
+        Cart.clear();
+        localStorage.removeItem("qs_pending_order");
+        
+        // Redirigir a página de éxito
+        localStorage.setItem("qs_last_order", JSON.stringify({
+          id: pedido._id || pedido.id,
+          total: order.total,
+          metodo: `**** ${selectedMetodoPago.numero}`
+        }));
+        window.location.href = "exito.html";
+      } catch (err) {
+        alert(err.message || "Error al procesar el pago");
+        $btnPay.disabled = false;
+        $btnPay.textContent = "Continuar con el pago";
+      }
+      return;
+    }
+
+    // Si usa tarjeta nueva, ir a webpaysim
+    localStorage.setItem("qs_pending_order", JSON.stringify(order));
     const params = new URLSearchParams({ orderId: order.id, amount: order.total });
     window.location.href = `webpaysim.html?${params.toString()}`;
   });
 
   init();
 </script>
+
+<footer class="site-footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <h4>Quesos SK</h4>
+      <p class="footer-tagline">Tradicion Artesanal desde 1622</p>
+      <p>Seleccionamos los mejores quesos artesanales de productores locales.</p>
+    </div>
+    <div class="footer-section">
+      <h4>Contacto</h4>
+      <p><strong>Email:</strong> contacto@quesos-sk.cl</p>
+      <p><strong>Telefono:</strong> +56 2 2345 6789</p>
+    </div>
+    <div class="footer-section">
+      <h4>Ubicacion</h4>
+      <p>Av. Providencia 1234</p>
+      <p>Santiago, Chile</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 Quesos SK Inc. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer{background:linear-gradient(135deg,#1c1917 0%,#292524 100%);color:#e7e5e4;margin-top:60px;border-top:3px solid var(--primary)}
+  .footer-content{width:min(1200px,94vw);margin:0 auto;padding:40px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:28px}
+  .footer-section h4{color:var(--primary);font-size:15px;font-weight:700;margin-bottom:14px;text-transform:uppercase;letter-spacing:1px;font-family:Georgia,serif}
+  .footer-section p{font-size:13px;line-height:1.7;color:#a8a29e;margin-bottom:5px}
+  .footer-tagline{font-style:italic;color:#d6d3d1!important}
+  .footer-section strong{color:#d6d3d1}
+  .footer-bottom{background:rgba(0,0,0,0.3);text-align:center;padding:16px;border-top:1px solid rgba(255,255,255,0.1)}
+  .footer-bottom p{font-size:12px;color:#78716c;margin:0}
+</style>
 </body>
 </html>

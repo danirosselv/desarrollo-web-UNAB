@@ -50,10 +50,19 @@ class Direccion(BaseModel):
     comuna: str
     principal: bool = False
 
+class MetodoPago(BaseModel):
+    id: str = Field(default_factory=lambda: str(datetime.now().timestamp()))
+    tipo: str  # "credito", "debito"
+    numero: str  # últimos 4 dígitos
+    titular: str
+    vencimiento: str  # MM/YY
+    principal: bool = False
+
 class UsuarioBase(BaseModel):
     email: EmailStr
     nombre: str
     direcciones: List[Direccion] = []
+    metodos_pago: List[MetodoPago] = []
     rol: str = "CLIENTE"
 
 class UsuarioCreate(BaseModel):
@@ -67,7 +76,8 @@ class UsuarioInDB(UsuarioBase):
 
     model_config = ConfigDict(
         json_encoders={ObjectId: str},
-        arbitrary_types_allowed=True
+        arbitrary_types_allowed=True,
+        populate_by_name=True
     )
         
 class Token(BaseModel):

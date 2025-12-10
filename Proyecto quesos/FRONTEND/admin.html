@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Admin — Quesos Skoda</title>
+<title>Admin — Quesos SK</title>
 <style>
   :root{
     --primary:#d97706; --primary-dark:#b45309; --primary-light:#fef3c7;
@@ -63,7 +63,15 @@
   .order-status{padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600}
   .status-nuevo{background:#fef3c7; color:#b45309}
   .status-en_preparacion{background:#dbeafe; color:#1e40af}
+  .status-enviado{background:#d1fae5; color:#065f46}
+  .status-entregado{background:#c7d2fe; color:#3730a3}
+  .status-cancelado{background:#fecaca; color:#7f1d1d}
   .status-pago_fallido{background:#fee2e2; color:#991b1b}
+  
+  .status-selector{display:flex; align-items:center; gap:8px}
+  .status-selector select{padding:6px 10px; border:1px solid var(--line); border-radius:6px; font-size:12px; background:#fff; cursor:pointer}
+  .status-selector select:focus{outline:none; border-color:var(--primary)}
+  .btn-update-status{padding:6px 12px; font-size:12px}
   .order-details{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-top:12px}
   .detail-group{display:flex; flex-direction:column; gap:4px}
   .detail-label{font-size:12px; color:var(--muted); font-weight:600}
@@ -90,7 +98,7 @@
 <body>
   <header>
     <div class="header-content">
-      <div class="brand">🧀 Admin Panel — Quesos Skoda</div>
+      <div class="brand">Admin Panel — Quesos SK</div>
       <nav class="nav">
         <a class="btn-link" href="index.html">← Tienda</a>
         <a class="btn-link" href="carrito.html">Carrito</a>
@@ -247,6 +255,10 @@ function renderProducts() {
         </div>
         <div class="form-grid">
           <div class="form-group">
+            <label>Nombre</label>
+            <input class="e-nombre" value="${p.nombre}">
+          </div>
+          <div class="form-group">
             <label>Precio (CLP)</label>
             <input class="e-precio" type="number" min="0" step="1" value="${p.precio}">
           </div>
@@ -261,6 +273,12 @@ function renderProducts() {
               <option value="cabra" ${p.leche === 'cabra' ? 'selected' : ''}>Cabra</option>
               <option value="oveja" ${p.leche === 'oveja' ? 'selected' : ''}>Oveja</option>
             </select>
+          </div>
+        </div>
+        <div class="form-grid" style="margin-top:8px">
+          <div class="form-group">
+            <label>Descripción</label>
+            <textarea class="e-desc" placeholder="Descripción del producto...">${p.descripcion || ''}</textarea>
           </div>
           <div class="form-group">
             <label>URL de Imagen</label>
@@ -279,26 +297,31 @@ function renderProducts() {
   document.querySelectorAll(".product-item").forEach((el, idx) => {
     const p = productos[idx];
     const id = p._id || p.id;
+    const $nombre = el.querySelector(".e-nombre");
     const $precio = el.querySelector(".e-precio");
     const $stock = el.querySelector(".e-stock");
     const $leche = el.querySelector(".e-leche");
+    const $desc = el.querySelector(".e-desc");
     const $img = el.querySelector(".e-img");
     const $msg = el.querySelector(".product-msg");
     
     el.querySelector(".btn-save").addEventListener("click", async () => {
+      const nombre = $nombre.value.trim();
       const precio = Number($precio.value);
       const stock = Math.floor(Number($stock.value));
       
-      if (!(precio > 0) || stock < 0) {
+      if (!nombre || !(precio > 0) || stock < 0) {
         $msg.className = "message error";
-        $msg.textContent = "Valores inválidos";
+        $msg.textContent = "Nombre y valores son obligatorios";
         return;
       }
       
       const updates = {
+        nombre,
         precio,
         stock,
         leche: $leche.value,
+        descripcion: $desc.value.trim(),
         imagen: $img.value.trim()
       };
       
@@ -420,6 +443,15 @@ async function loadOrders() {
   }
 }
 
+const ESTADOS = {
+  "nuevo": "Nuevo",
+  "en_preparacion": "En Preparacion",
+  "enviado": "Enviado",
+  "entregado": "Entregado",
+  "cancelado": "Cancelado",
+  "pago_fallido": "Pago Fallido"
+};
+
 function renderOrders() {
   const $list = document.getElementById("order-list");
   const $empty = document.getElementById("order-empty");
@@ -436,30 +468,36 @@ function renderOrders() {
     const fecha = new Date(order.createdAt).toLocaleString('es-CL');
     const status = order.status || "nuevo";
     const statusClass = `status-${status}`;
-    const statusText = {
-      "nuevo": "Nuevo",
-      "en_preparacion": "En Preparación",
-      "pago_fallido": "Pago Fallido"
-    }[status] || status;
+    const statusText = ESTADOS[status] || status;
     
     const total = order.total || 0;
     const subtotal = order.subtotal || 0;
     const envio = order.shipping || 0;
     const metodo = order.shippingMethod === "despacho" ? "Despacho" : "Retiro en tienda";
     
+    // Selector de estado
+    const estadoOptions = Object.entries(ESTADOS).map(([val, label]) => 
+      `<option value="${val}" ${val === status ? 'selected' : ''}>${label}</option>`
+    ).join("");
+    
     // Products
     const items = order.items || {};
     const productList = Object.entries(items).map(([id, data]) => {
       return `<div class="order-product">
-        ${data.nombre} × ${data.qty} = $${(data.precio * data.qty).toLocaleString('es-CL')}
+        ${data.nombre} x ${data.qty} = $${(data.precio * data.qty).toLocaleString('es-CL')}
       </div>`;
     }).join("");
     
     return `
-      <div class="order-item">
+      <div class="order-item" data-order-id="${orderId}">
         <div class="order-header">
           <div class="order-id">ID: ${orderId}</div>
-          <div class="order-status ${statusClass}">${statusText}</div>
+          <div class="status-selector">
+            <select class="select-estado" data-order-id="${orderId}">
+              ${estadoOptions}
+            </select>
+            <button class="btn btn-update-status" onclick="updateOrderStatus('${orderId}')">Actualizar</button>
+          </div>
         </div>
         <div class="order-details">
           <div class="detail-group">
@@ -475,7 +513,7 @@ function renderOrders() {
             <div class="detail-value">${order.buyer?.email || "—"}</div>
           </div>
           <div class="detail-group">
-            <div class="detail-label">Método de Envío</div>
+            <div class="detail-label">Metodo de Envio</div>
             <div class="detail-value">${metodo}</div>
           </div>
           <div class="detail-group">
@@ -483,7 +521,7 @@ function renderOrders() {
             <div class="detail-value">$${subtotal.toLocaleString('es-CL')}</div>
           </div>
           <div class="detail-group">
-            <div class="detail-label">Envío</div>
+            <div class="detail-label">Envio</div>
             <div class="detail-value">$${envio.toLocaleString('es-CL')}</div>
           </div>
           <div class="detail-group">
@@ -500,6 +538,30 @@ function renderOrders() {
       </div>
     `;
   }).join("");
+}
+
+async function updateOrderStatus(orderId) {
+  const $select = document.querySelector(`.select-estado[data-order-id="${orderId}"]`);
+  const nuevoEstado = $select.value;
+  
+  try {
+    const res = await fetch(`${API_URL}/pedidos/admin/${orderId}/estado?nuevo_estado=${nuevoEstado}`, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Error al actualizar estado");
+    }
+    
+    alert("Estado actualizado correctamente");
+    loadOrders();
+  } catch (err) {
+    alert(err.message);
+  }
 }
 
 // Initial load

@@ -27,7 +27,7 @@ async def create_product(
     collection = get_product_collection()
     
     # Insertar en la base de datos
-    result = await collection.insert_one(producto.dict())
+    result = await collection.insert_one(producto.model_dump())
     
     # Recuperar el producto insertado para devolverlo
     new_product = await collection.find_one({"_id": result.inserted_id})
@@ -111,7 +111,7 @@ async def update_product(
     collection = get_product_collection()
     
     # Construir el objeto de actualización, quitando valores nulos
-    update_dict = update_data.dict(exclude_unset=True)
+    update_dict = update_data.model_dump(exclude_unset=True)
     
     if not update_dict:
         raise HTTPException(status_code=400, detail="No hay datos para actualizar")

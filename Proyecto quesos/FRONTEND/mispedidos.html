@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mis pedidos — Quesos Skoda</title>
+<title>Mis pedidos — Quesos SK</title>
 <style>
   :root{
     --primary:#d97706; --primary-dark:#b45309; --primary-light:#fef3c7;
@@ -52,7 +52,7 @@
       <a class="btn" href="index.html">← Tienda</a>
       <a class="btn" href="carrito.html">Carrito</a>
     </nav>
-    <div class="brand">Quesos Skoda</div>
+    <div class="brand">Quesos SK</div>
     <div style="width:140px"></div>
   </div>
 </header>
@@ -140,5 +140,39 @@ if (!token || !session) {
   render();
 }
 </script>
+
+<footer class="site-footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <h4>Quesos SK</h4>
+      <p class="footer-tagline">Tradicion Artesanal desde 1622</p>
+      <p>Seleccionamos los mejores quesos artesanales de productores locales.</p>
+    </div>
+    <div class="footer-section">
+      <h4>Contacto</h4>
+      <p><strong>Email:</strong> contacto@quesos-sk.cl</p>
+      <p><strong>Telefono:</strong> +56 2 2345 6789</p>
+    </div>
+    <div class="footer-section">
+      <h4>Ubicacion</h4>
+      <p>Av. Providencia 1234</p>
+      <p>Santiago, Chile</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 Quesos SK Inc. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer{background:linear-gradient(135deg,#1c1917 0%,#292524 100%);color:#e7e5e4;margin-top:60px;border-top:3px solid var(--primary)}
+  .footer-content{width:min(1000px,94vw);margin:0 auto;padding:40px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:28px}
+  .footer-section h4{color:var(--primary);font-size:15px;font-weight:700;margin-bottom:14px;text-transform:uppercase;letter-spacing:1px;font-family:Georgia,serif}
+  .footer-section p{font-size:13px;line-height:1.7;color:#a8a29e;margin-bottom:5px}
+  .footer-tagline{font-style:italic;color:#d6d3d1!important}
+  .footer-section strong{color:#d6d3d1}
+  .footer-bottom{background:rgba(0,0,0,0.3);text-align:center;padding:16px;border-top:1px solid rgba(255,255,255,0.1)}
+  .footer-bottom p{font-size:12px;color:#78716c;margin:0}
+</style>
 </body>
 </html>

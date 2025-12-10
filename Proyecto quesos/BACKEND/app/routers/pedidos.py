@@ -27,7 +27,7 @@ async def create_order(
     collection = get_order_collection()
     
     # Crear pedido con userId como ObjectId
-    pedido_data = pedido_in.dict()
+    pedido_data = pedido_in.model_dump()
     pedido_data["userId"] = ObjectId(str(current_user.id))
     pedido_data["createdAt"] = datetime.utcnow()
     pedido_data["status"] = "nuevo"
@@ -152,3 +152,40 @@ async def get_all_orders(
         orders.append(PedidoInDB(**order))
         
     return orders
+
+
+@router.put("/admin/{pedido_id}/estado",
+    summary="Actualizar estado de un pedido (Admin)"
+)
+async def update_order_status(
+    pedido_id: str,
+    nuevo_estado: str,
+    current_admin: UsuarioInDB = Depends(get_current_admin_user)
+):
+    """
+    Permite al admin cambiar el estado de un pedido.
+    Estados validos: nuevo, en_preparacion, enviado, entregado, cancelado
+    *Protegido: Solo Admin.*
+    """
+    estados_validos = ["nuevo", "en_preparacion", "enviado", "entregado", "cancelado"]
+    
+    if nuevo_estado not in estados_validos:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Estado invalido. Estados validos: {', '.join(estados_validos)}"
+        )
+    
+    if not ObjectId.is_valid(pedido_id):
+        raise HTTPException(status_code=400, detail="ID de pedido invalido")
+    
+    collection = get_order_collection()
+    
+    result = await collection.update_one(
+        {"_id": ObjectId(pedido_id)},
+        {"$set": {"status": nuevo_estado}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Pedido no encontrado")
+    
+    return {"pedido_id": pedido_id, "nuevo_estado": nuevo_estado}

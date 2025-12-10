@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pago Exitoso — Quesos SK</title>
+<style>
+  :root{
+    --primary:#d97706; --primary-dark:#b45309; --primary-light:#fef3c7;
+    --bg:#fafaf9; --card:#fff; --text:#1c1917; --muted:#78716c;
+    --line:#e7e5e4; --shadow:0 1px 3px rgba(0,0,0,0.1); --shadow-lg:0 10px 25px rgba(0,0,0,0.15);
+    --success:#059669; --success-light:#d1fae5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color:var(--text); background:var(--bg); line-height:1.6; min-height:100vh; display:flex; flex-direction:column}
+  
+  header{background:#fff; border-bottom:1px solid var(--line); box-shadow:var(--shadow)}
+  .header-content{width:min(1200px,94vw); margin:0 auto; padding:16px 20px; display:flex; align-items:center; justify-content:space-between}
+  .brand{display:flex; align-items:center; gap:12px; text-decoration:none}
+  .brand img{height:48px}
+  .brand span{font-size:18px; font-weight:700; color:var(--primary-dark)}
+  nav{display:flex; gap:12px}
+  a.btn{color:var(--text); text-decoration:none; border:1px solid var(--line); border-radius:8px; padding:10px 16px; background:#fff; font-size:14px; font-weight:500; transition:all 0.2s}
+  a.btn:hover{background:var(--primary-light); border-color:var(--primary)}
+  
+  .container{flex:1; display:flex; align-items:center; justify-content:center; padding:40px 20px}
+  
+  .success-card{background:#fff; border:1px solid var(--line); border-radius:16px; padding:48px; max-width:500px; text-align:center; box-shadow:var(--shadow-lg)}
+  
+  .success-icon{width:80px; height:80px; background:var(--success-light); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 24px}
+  .success-icon svg{width:40px; height:40px; color:var(--success)}
+  
+  h1{font-family:Georgia, 'Times New Roman', serif; font-size:28px; color:var(--text); margin-bottom:12px}
+  .subtitle{color:var(--muted); font-size:16px; margin-bottom:32px}
+  
+  .order-details{background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:24px; text-align:left}
+  .detail-row{display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--line)}
+  .detail-row:last-child{border-bottom:none}
+  .detail-label{color:var(--muted); font-size:14px}
+  .detail-value{font-weight:600; font-size:14px}
+  .total-row{padding-top:12px; margin-top:8px; border-top:2px solid var(--line)}
+  .total-row .detail-value{font-size:18px; color:var(--primary-dark)}
+  
+  .actions{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+  .btn-primary{background:linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color:#fff; border:none; border-radius:10px; padding:14px 28px; font-size:15px; font-weight:600; text-decoration:none; transition:all 0.2s}
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 4px 12px rgba(217, 119, 6, 0.4)}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-content">
+    <a href="index.html" class="brand">
+      <img src="img/logo.png" alt="Quesos SK" onerror="this.style.display='none'">
+      <span>Quesos SK</span>
+    </a>
+    <nav>
+      <a class="btn" href="index.html">Tienda</a>
+      <a class="btn" href="mispedidos.html">Mis Pedidos</a>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+  <div class="success-card">
+    <div class="success-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+    </div>
+    
+    <h1>Pago Exitoso</h1>
+    <p class="subtitle">Tu pedido ha sido procesado correctamente</p>
+    
+    <div class="order-details">
+      <div class="detail-row">
+        <span class="detail-label">Numero de Pedido</span>
+        <span class="detail-value" id="order-id">—</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Metodo de Pago</span>
+        <span class="detail-value" id="order-metodo">—</span>
+      </div>
+      <div class="detail-row total-row">
+        <span class="detail-label">Total Pagado</span>
+        <span class="detail-value" id="order-total">$0</span>
+      </div>
+    </div>
+    
+    <div class="actions">
+      <a href="mispedidos.html" class="btn-primary">Ver Mis Pedidos</a>
+      <a href="index.html" class="btn">Seguir Comprando</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const lastOrder = JSON.parse(localStorage.getItem("qs_last_order") || "null");
+
+if (lastOrder) {
+  document.getElementById("order-id").textContent = lastOrder.id || "—";
+  document.getElementById("order-metodo").textContent = lastOrder.metodo || "Tarjeta";
+  document.getElementById("order-total").textContent = `$${(lastOrder.total || 0).toLocaleString("es-CL")}`;
+  
+  localStorage.removeItem("qs_last_order");
+}
+</script>
+</body>
+</html>
